@@ -1,0 +1,5 @@
+*.o
+*.so
+.project
+test_msg_dumper
+

@@ -3,7 +3,7 @@ CC := g++
 CXXFLAGS := -g -Wall -fPIC
 #INCLUDE_PATH := ../include
 
-SOURCES := msg_dumper.cpp msg_dumper_mgr.cpp
+SOURCES := msg_dumper.cpp msg_dumper_mgr.cpp msg_dumper_log.cpp msg_dumper_com.cpp
 OBJS := $(SOURCES:.cpp=.o)
 
 OUTPUT := libmsg_dumper.so
@@ -12,7 +12,7 @@ build: $(OUTPUT)
 	cp $(OUTPUT) ./test/
 
 $(OUTPUT): $(OBJS)
-	$(CC) $(CXXFLAGS) -shared -o $@ $^
+	$(CC) $(CXXFLAGS) -shared -o $@ $^ -lpthread
 
 %.o: %.cpp
 	$(CC) $(CXXFLAGS) -c -o $@ $<

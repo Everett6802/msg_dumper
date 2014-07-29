@@ -8,6 +8,8 @@ private:
 	unsigned short dumper_severity;
 	unsigned short dumper_facility;
 
+
+
 public:
 	MsgDumperMgr();
 

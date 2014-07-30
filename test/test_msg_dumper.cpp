@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,6 +45,8 @@ int main()
 		fprintf(stderr, "fp_msg_dumper_initialize() fails, due to %d\n", ret);
 		goto EXIT1;
 	}
+
+	sleep(5);
 
 EXIT1:
 	fp_msg_dumper_deinitialize();

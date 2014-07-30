@@ -13,6 +13,12 @@ MsgDumperMgr::MsgDumperMgr() :
 
 unsigned short MsgDumperMgr::initialize()
 {
+	if (!is_init)
+	{
+		WRITE_ERR_SYSLOG("Library has been initialized");
+		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
+	}
+
 	is_init = true;
 	return MSG_DUMPER_SUCCESS;
 }

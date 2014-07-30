@@ -4,6 +4,7 @@
 class MsgDumperBase
 {
 public:
+	MsgDumperBase();
 	virtual ~MsgDumperBase();
 
 	virtual unsigned short initialize(void* config)=0;

@@ -1,6 +1,11 @@
 #include "msg_dumper_com.h"
 #include "msg_dumper.h"
 
+MsgDumperCom::MsgDumperCom()
+{
+
+}
+
 unsigned short MsgDumperCom::initialize(void* config)
 {
 	return MSG_DUMPER_SUCCESS;

@@ -19,4 +19,4 @@ $(OUTPUT): $(OBJS) $(LIBS)
 clean:
 	rm -f $(OBJS)
 	rm $(OUTPUT)
-	rm ./test/$(OUTPUT)
+

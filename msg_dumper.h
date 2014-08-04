@@ -27,6 +27,7 @@ static const unsigned short MSG_DUMPER_FAILURE_INCORRECT_OPERATION = 8;
 #define MSG_DUMPER_FACILITY_LOG 			0x1
 #define MSG_DUMPER_FACILITY_COM				0x1 << 1
 #define MSG_DUMPER_FACILITY_ALL				(MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM)
+enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SIZE};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // APIs

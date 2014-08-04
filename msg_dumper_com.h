@@ -12,7 +12,7 @@ private:
 	MsgDumperCom();
 
 public:
-	virtual unsigned short initialize(void* config);
+	virtual unsigned short initialize(void* config=NULL);
 	virtual unsigned short write_msg(const char* msg);
 	virtual unsigned short deinitialize();
 };

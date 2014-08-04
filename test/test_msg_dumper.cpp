@@ -19,6 +19,7 @@ bool export_api(void* handle);
 
 int main()
 {
+// Load library
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	void* handle = NULL;
 	handle = dlopen("libmsg_dumper.so", RTLD_NOW);
@@ -28,6 +29,10 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
+	unsigned short severity = MSG_DUMPER_SEVIRITY_DEBUG;
+	unsigned short facility = MSG_DUMPER_FACILITY_LOG;
+
+// Export the APIs
 	if (!export_api(handle))
 	{
 		fprintf(stderr, "Fail to export the APIs\n");
@@ -39,6 +44,23 @@ int main()
 //	fp_msg_dumper_get_version(major_version, minor_version);
 //	printf("API version: %d, %d\n", major_version, minor_version);
 
+//// Set severity
+//	ret = fp_msg_dumper_set_severity(severity);
+//	if (CHECK_MSG_DUMPER_FAILURE(ret))
+//	{
+//		fprintf(stderr, "fp_msg_dumper_set_severity() fails, due to %d\n", ret);
+//		goto EXIT;
+//	}
+//
+//// Set facility
+//	ret = fp_msg_dumper_set_facility(facility);
+//	if (CHECK_MSG_DUMPER_FAILURE(ret))
+//	{
+//		fprintf(stderr, "fp_msg_dumper_set_facility() fails, due to %d\n", ret);
+//		goto EXIT;
+//	}
+
+// Initialize the library
 	ret = fp_msg_dumper_initialize();
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
@@ -46,12 +68,30 @@ int main()
 		goto EXIT1;
 	}
 
+// Write the message
+	ret = fp_msg_dumper_write_msg(severity, "This is a test");
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
+		goto EXIT1;
+	}
+
+// Write the message
+	ret = fp_msg_dumper_write_msg(severity, "This is another test");
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
+		goto EXIT1;
+	}
+
 	sleep(5);
 
 EXIT1:
+// De-initialize the library
 	fp_msg_dumper_deinitialize();
 
 EXIT:
+// Close the handle
 	if (handle != NULL)
 	{
 		dlclose(handle);

@@ -2,4 +2,5 @@
 *.so
 .project
 test_msg_dumper
+log/
 

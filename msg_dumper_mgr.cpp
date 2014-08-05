@@ -7,7 +7,7 @@
 
 MsgDumperMgr::MsgDumperMgr() :
 	is_init(false),
-	dumper_severity(MSG_DUMPER_SEVIRITY_DEBUG),
+	dumper_severity(MSG_DUMPER_SEVIRITY_ERROR),
 	dumper_facility(MSG_DUMPER_FACILITY_LOG)
 {
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
@@ -75,7 +75,6 @@ unsigned short MsgDumperMgr::set_severity(unsigned short severity)
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
 	dumper_severity = severity;
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity: %s", dumper_severity);
 
 	return MSG_DUMPER_SUCCESS;
 }
@@ -88,7 +87,6 @@ unsigned short MsgDumperMgr::set_facility(unsigned short facility)
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
 	dumper_facility = facility;
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the facility: %s", dumper_facility);
 
 	return MSG_DUMPER_SUCCESS;
 }

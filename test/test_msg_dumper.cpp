@@ -44,21 +44,21 @@ int main()
 //	fp_msg_dumper_get_version(major_version, minor_version);
 //	printf("API version: %d, %d\n", major_version, minor_version);
 
-//// Set severity
-//	ret = fp_msg_dumper_set_severity(severity);
-//	if (CHECK_MSG_DUMPER_FAILURE(ret))
-//	{
-//		fprintf(stderr, "fp_msg_dumper_set_severity() fails, due to %d\n", ret);
-//		goto EXIT;
-//	}
-//
-//// Set facility
-//	ret = fp_msg_dumper_set_facility(facility);
-//	if (CHECK_MSG_DUMPER_FAILURE(ret))
-//	{
-//		fprintf(stderr, "fp_msg_dumper_set_facility() fails, due to %d\n", ret);
-//		goto EXIT;
-//	}
+// Set severity
+	ret = fp_msg_dumper_set_severity(severity);
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_set_severity() fails, due to %d\n", ret);
+		goto EXIT;
+	}
+
+// Set facility
+	ret = fp_msg_dumper_set_facility(facility);
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_set_facility() fails, due to %d\n", ret);
+		goto EXIT;
+	}
 
 // Initialize the library
 	ret = fp_msg_dumper_initialize();

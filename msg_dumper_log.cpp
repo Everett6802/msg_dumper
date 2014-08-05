@@ -35,15 +35,19 @@ void* MsgDumperLog::msg_dumper_log_handler(void* void_ptr)
 
 unsigned short MsgDumperLog::msg_dumper_log_handler_internal()
 {
+	unsigned short ret = MSG_DUMPER_SUCCESS;
 	WRITE_DEBUG_SYSLOG("The worker thread of writing message is running");
 	while (!exit)
 	{
-		WRITE_DEBUG_SYSLOG("Run!");
-		sleep(1);
+		ret = write_logfile();
+		if (CHECK_MSG_DUMPER_FAILURE(ret))
+			break;
+//		WRITE_DEBUG_SYSLOG("Run!");
+//		sleep(1);
 	}
 
 	WRITE_DEBUG_SYSLOG("The worker thread of writing message is going to die");
-	return MSG_DUMPER_SUCCESS;
+	return ret;
 }
 
 unsigned short MsgDumperLog::create_logfile()
@@ -57,17 +61,17 @@ unsigned short MsgDumperLog::create_logfile()
 	time_t timep;
 	time(&timep);
 	struct tm* p = localtime(&timep);
-	log_filename = new char[32];
-	log_filepath = new char[32];
+	log_filename = new char[MSG_DUMPER_SHORT_STRING_SIZE];
+	log_filepath = new char[MSG_DUMPER_SHORT_STRING_SIZE];
 	if (log_filename == NULL || log_filepath == NULL)
 	{
 		WRITE_DEBUG_SYSLOG("Fail to allocate the memory: log_filename/log_filepath");
 		return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
 	}
-	memset(log_filename, 0x0, sizeof(char) * 32);
-	snprintf(log_filename, 32, "%02d%02d%02d%02d%02d.log", (p->tm_year + 1900) % 2000, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min);
-	memset(log_filepath, 0x0, sizeof(char) * 32);
-	snprintf(log_filepath, 32, "%s/%s", LOG_FOLDER, log_filename);
+	memset(log_filename, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
+	snprintf(log_filename, MSG_DUMPER_SHORT_STRING_SIZE, "%02d%02d%02d%02d%02d.log", (p->tm_year + 1900) % 2000, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min);
+	memset(log_filepath, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
+	snprintf(log_filepath, MSG_DUMPER_SHORT_STRING_SIZE, "%s/%s", LOG_FOLDER, log_filename);
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log file path: %s", log_filepath);
 
 	return MSG_DUMPER_SUCCESS;
@@ -84,7 +88,20 @@ unsigned short MsgDumperLog::write_logfile()
 		return MSG_DUMPER_FAILURE_OPEN_FILE;
 	}
 
-	fclose(fp);
+// Write the message into the log file
+	for (int i = 0 ; i < write_vector.size() ; i++)
+	{
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to file [%s]", write_vector[i], log_filename);
+		fputs(write_vector[i], fp);
+// Release the resource
+		delete[] write_vector[i];
+		write_vector[i] = NULL;
+	}
+	write_vector.clear();
+
+// Close the file
+	if (fp != NULL)
+		fclose(fp);
 
 	return MSG_DUMPER_SUCCESS;
 }
@@ -96,9 +113,11 @@ unsigned short MsgDumperLog::create_logfolder()
 	char folder_path[MSG_DUMPER_STRING_SIZE];
 	snprintf(folder_path, MSG_DUMPER_SHORT_STRING_SIZE, "./%s", LOG_FOLDER);
 
+// Check if the log folder exists or not
 	if (stat(folder_path, &st) == -1)
 	{
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Try to create a log folder: %s", folder_path);
+// If not, create a new folder
 	    if (mkdir(folder_path, 0744) != 0)
 	    {
 	    	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to create a log folder[%s], due to %s", folder_path, strerror(errno));
@@ -159,16 +178,7 @@ unsigned short MsgDumperLog::write_msg(const char* msg)
 	memset(new_msg, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
 	snprintf(new_msg, MSG_DUMPER_LONG_STRING_SIZE, "[%s] %s\n", time_string, msg);
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "New message: %s", new_msg);
-
-	FILE* fp = fopen(log_filepath, "a");
-	if (fp == NULL)
-	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_SHORT_STRING_SIZE, "Fail to open the file: %s", log_filepath);
-		return MSG_DUMPER_FAILURE_OPEN_FILE;
-	}
-	fputs(new_msg, fp);
-	if (fp != NULL)
-		fclose(fp);
+	buffer_vector.push_back(new_msg);
 
 	return MSG_DUMPER_SUCCESS;
 }

@@ -19,14 +19,14 @@ static const unsigned short MSG_DUMPER_FAILURE_INCORRECT_OPERATION = 8;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constants
 
-#define MSG_DUMPER_SEVIRITY_ERROR 			0
-#define MSG_DUMPER_SEVIRITY_WARN			1
-#define MSG_DUMPER_SEVIRITY_INFO			2
-#define MSG_DUMPER_SEVIRITY_DEBUG			3
+static const unsigned short MSG_DUMPER_SEVIRITY_ERROR = 0;
+static const unsigned short MSG_DUMPER_SEVIRITY_WARN = 1;
+static const unsigned short MSG_DUMPER_SEVIRITY_INFO = 2;
+static const unsigned short MSG_DUMPER_SEVIRITY_DEBUG = 3;
 
-#define MSG_DUMPER_FACILITY_LOG 			0x1
-#define MSG_DUMPER_FACILITY_COM				0x1 << 1
-#define MSG_DUMPER_FACILITY_ALL				(MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM)
+static const unsigned short MSG_DUMPER_FACILITY_LOG = 0x1;
+static const unsigned short MSG_DUMPER_FACILITY_COM = 0x1 << 1;
+static const unsigned short MSG_DUMPER_FACILITY_ALL = (MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM);
 enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SIZE};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

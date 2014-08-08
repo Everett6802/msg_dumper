@@ -19,13 +19,16 @@ private:
 
 	pthread_t pid;
 	int exit;
+	pthread_mutex_t mut;
+	pthread_cond_t cond;
+
 	char* log_filename;
 	char* log_filepath;
 	vector<char*> buffer_vector;
 	vector<char*> write_vector;
 
-
 	MsgDumperLog();
+	~MsgDumperLog();
 
 	static void* msg_dumper_log_handler(void* void_ptr);
 	unsigned short msg_dumper_log_handler_internal();

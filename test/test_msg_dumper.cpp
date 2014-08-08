@@ -45,6 +45,7 @@ int main()
 //	printf("API version: %d, %d\n", major_version, minor_version);
 
 // Set severity
+	printf("Set severity to :%d\n", severity);
 	ret = fp_msg_dumper_set_severity(severity);
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
@@ -53,6 +54,7 @@ int main()
 	}
 
 // Set facility
+	printf("Set facility to :%d\n", facility);
 	ret = fp_msg_dumper_set_facility(facility);
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
@@ -61,6 +63,7 @@ int main()
 	}
 
 // Initialize the library
+	printf("Initialize the library\n");
 	ret = fp_msg_dumper_initialize();
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
@@ -69,6 +72,7 @@ int main()
 	}
 
 // Write the message
+	printf("Write the message\n");
 	ret = fp_msg_dumper_write_msg(severity, "This is a test");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
@@ -77,6 +81,7 @@ int main()
 	}
 
 // Write the message
+	printf("Write the message\n");
 	ret = fp_msg_dumper_write_msg(severity, "This is another test");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
@@ -88,6 +93,7 @@ int main()
 
 EXIT1:
 // De-initialize the library
+	printf("Close the library\n");
 	fp_msg_dumper_deinitialize();
 
 EXIT:

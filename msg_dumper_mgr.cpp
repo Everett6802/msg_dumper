@@ -5,6 +5,8 @@
 #include "msg_dumper_com.h"
 
 
+char* MsgDumperMgr::dev_name[] = {"Log", "Com"};
+
 MsgDumperMgr::MsgDumperMgr() :
 	is_init(false),
 	dumper_severity(MSG_DUMPER_SEVIRITY_ERROR),
@@ -74,6 +76,7 @@ unsigned short MsgDumperMgr::set_severity(unsigned short severity)
 		WRITE_ERR_SYSLOG("Library has been initialized");
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity to %d", severity);
 	dumper_severity = severity;
 
 	return MSG_DUMPER_SUCCESS;
@@ -86,6 +89,7 @@ unsigned short MsgDumperMgr::set_facility(unsigned short facility)
 		WRITE_ERR_SYSLOG("Library has been initialized");
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the facility to %d", facility);
 	dumper_facility = facility;
 
 	return MSG_DUMPER_SUCCESS;
@@ -93,13 +97,17 @@ unsigned short MsgDumperMgr::set_facility(unsigned short facility)
 
 unsigned short MsgDumperMgr::write_msg(unsigned short severity, const char* msg)
 {
+	if (!is_init)
+	{
+		WRITE_ERR_SYSLOG("Library is Not initialized");
+		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
+	}
+
 	if (msg == NULL)
 	{
 		WRITE_ERR_SYSLOG("Invalid pointer: msg");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
-
-	static char* dev_name[] = {"Log", "Com"};
 
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	if (severity <= dumper_severity)
@@ -121,11 +129,18 @@ unsigned short MsgDumperMgr::write_msg(unsigned short severity, const char* msg)
 
 unsigned short MsgDumperMgr::deinitialize()
 {
+	if (!is_init)
+	{
+		WRITE_ERR_SYSLOG("Library is Not initialized");
+		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
+	}
+
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	for (int i = 0 ; i < sizeof(msg_dumper) / sizeof(msg_dumper[0]) ; i++)
 	{
 		if (msg_dumper[i] != NULL)
 		{
+			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Release the Object: %s", dev_name[i]);
 			ret = msg_dumper[i]->deinitialize();
 			if (CHECK_MSG_DUMPER_FAILURE(ret))
 				return ret;

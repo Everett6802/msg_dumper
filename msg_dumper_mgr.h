@@ -7,6 +7,8 @@
 class MsgDumperMgr
 {
 private:
+	static char* dev_name[];
+
 	bool is_init;
 	unsigned short dumper_severity;
 	unsigned short dumper_facility;

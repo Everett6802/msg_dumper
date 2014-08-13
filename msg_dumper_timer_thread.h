@@ -21,8 +21,6 @@ private:
 	pthread_mutex_t mut;
 	pthread_cond_t cond;
 
-	bool device_handle_exist;
-
 	static void* msg_dumper_thread_handler(void* void_ptr);
 	unsigned short msg_dumper_thread_handler_internal();
 

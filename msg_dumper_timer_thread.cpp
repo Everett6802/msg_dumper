@@ -11,8 +11,7 @@
 
 MsgDumperTimerThread::MsgDumperTimerThread() :
 	pid(0),
-	exit(0),
-	device_handle_exist(false)
+	exit(0)
 {
 }
 
@@ -156,6 +155,8 @@ unsigned short MsgDumperTimerThread::deinitialize()
 
     pthread_cond_destroy(&cond);
     pthread_mutex_destroy(&mut);
+
+    device_handle_exist = false;
 
 	return MSG_DUMPER_SUCCESS;
 }

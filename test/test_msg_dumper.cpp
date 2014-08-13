@@ -30,7 +30,7 @@ int main()
 	}
 
 	unsigned short severity = MSG_DUMPER_SEVIRITY_DEBUG;
-	unsigned short facility = MSG_DUMPER_FACILITY_LOG;
+	unsigned short facility = MSG_DUMPER_FACILITY_ALL;
 
 // Export the APIs
 	if (!export_api(handle))
@@ -39,10 +39,10 @@ int main()
 		goto EXIT;
 	}
 
-//	unsigned char major_version;
-//	unsigned char minor_version;
-//	fp_msg_dumper_get_version(major_version, minor_version);
-//	printf("API version: %d, %d\n", major_version, minor_version);
+	unsigned char major_version;
+	unsigned char minor_version;
+	fp_msg_dumper_get_version(major_version, minor_version);
+	printf("API version: (%d.%d)\n", major_version, minor_version);
 
 // Set severity
 	printf("Set severity to :%d\n", severity);
@@ -109,19 +109,19 @@ EXIT:
 
 bool export_api(void* handle)
 {
+	fp_msg_dumper_get_version = (FP_msg_dumper_get_version)dlsym(handle, "msg_dumper_get_version");
+	if (fp_msg_dumper_get_version == NULL)
+	{
+		fprintf(stderr, "dlsym() fails when exporting msg_dumper_get_version() due to %s\n", dlerror());
+		return false;
+	}
+
 	fp_msg_dumper_initialize = (FP_msg_dumper_initialize)dlsym(handle, "msg_dumper_initialize");
 	if (fp_msg_dumper_initialize == NULL)
 	{
 		fprintf(stderr, "dlsym() fails when exporting msg_dumper_initialize() due to %s\n", dlerror());
 		return false;
 	}
-
-//	fp_msg_dumper_get_version = (FP_msg_dumper_get_version)dlsym(handle, "msg_dumper_get_version");
-//	if (fp_msg_dumper_get_version == NULL)
-//	{
-//		fprintf(stderr, "dlsym() fails when exporting msg_dumper_get_version() due to %s\n", dlerror());
-//		return false;
-//	}
 
 	fp_msg_dumper_set_severity = (FP_msg_dumper_set_severity)dlsym(handle, "msg_dumper_set_severity");
 	if (fp_msg_dumper_set_severity == NULL)

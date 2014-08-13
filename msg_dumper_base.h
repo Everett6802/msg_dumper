@@ -7,6 +7,9 @@
 
 class MsgDumperBase
 {
+protected:
+	bool device_handle_exist;
+
 public:
 	MsgDumperBase();
 	virtual ~MsgDumperBase(){}

@@ -29,7 +29,7 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	unsigned short severity = MSG_DUMPER_SEVIRITY_DEBUG;
+	unsigned short severity = MSG_DUMPER_SEVIRITY_WARN;
 	unsigned short facility = MSG_DUMPER_FACILITY_ALL;
 
 // Export the APIs
@@ -72,8 +72,8 @@ int main()
 	}
 
 // Write the message
-	printf("Write the message\n");
-	ret = fp_msg_dumper_write_msg(severity, "This is a test");
+	printf("Write the ERROR message\n");
+	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_ERROR, "This is a test: Error");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
@@ -81,13 +81,33 @@ int main()
 	}
 
 // Write the message
-	printf("Write the message\n");
-	ret = fp_msg_dumper_write_msg(severity, "This is another test");
+	printf("Write the WARN message\n");
+	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_WARN, "This is a test: Warn");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
 		goto EXIT1;
 	}
+
+// Write the message
+	printf("Write the INFO message\n");
+	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_INFO, "This is a test: Info");
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
+		goto EXIT1;
+	}
+
+
+// Write the message
+	printf("Write the DEBUG message\n");
+	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_DEBUG, "This is a test: Debug");
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
+		goto EXIT1;
+	}
+
 
 	sleep(5);
 

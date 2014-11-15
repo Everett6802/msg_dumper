@@ -67,6 +67,7 @@ EXIT:
 		{
 			if (msg_dumper[i] != NULL)
 			{
+				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Deinitialize the MsgDumper%s object due to the failure of initialization of some objects", dev_name[i]);
 				msg_dumper[i]->deinitialize();
 				delete msg_dumper[i];
 				msg_dumper[i] = NULL;

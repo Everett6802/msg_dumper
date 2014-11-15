@@ -29,7 +29,7 @@ int main()
 	}
 
 	unsigned short severity = MSG_DUMPER_SEVIRITY_WARN;
-	unsigned short facility = MSG_DUMPER_FACILITY_ALL;
+	unsigned short facility = MSG_DUMPER_FACILITY_COM;
 
 // Export the APIs
 	if (!export_api(handle))

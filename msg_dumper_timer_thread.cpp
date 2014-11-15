@@ -4,14 +4,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include "msg_dumper_timer_thread.h"
 #include "msg_dumper.h"
 #include "common.h"
+#include "msg_dumper_timer_thread.h"
 
 
 MsgDumperTimerThread::MsgDumperTimerThread() :
 	pid(0),
-	exit(0)
+	exit(0),
+	thread_is_running(false)
 {
 }
 
@@ -75,6 +76,10 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 unsigned short MsgDumperTimerThread::initialize(void* config)
 {
 	int api_ret;
+// Initialize the synchronization object
+	mut = PTHREAD_MUTEX_INITIALIZER;
+	cond = PTHREAD_COND_INITIALIZER;
+
 	WRITE_DEBUG_SYSLOG("Create a worker thread......");
 // Create the worker thread
 	api_ret = pthread_create(&pid, NULL, msg_dumper_thread_handler, this);
@@ -83,11 +88,10 @@ unsigned short MsgDumperTimerThread::initialize(void* config)
 		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "pthread_create() failed, due to: %d", api_ret);
 		return MSG_DUMPER_FAILURE_UNKNOWN;
 	}
+	else
+		thread_is_running = true;
 
 	exit = 0;
-// Initialize the synchronization object
-	mut = PTHREAD_MUTEX_INITIALIZER;
-	cond = PTHREAD_COND_INITIALIZER;
 
 	return MSG_DUMPER_SUCCESS;
 }
@@ -133,25 +137,36 @@ unsigned short MsgDumperTimerThread::write_msg(const char* msg)
 
 unsigned short MsgDumperTimerThread::deinitialize()
 {
-	if (exit == 0)
+	// Before killing this thread, check if the thread is STILL alive
+	if (thread_is_running)
 	{
-		WRITE_DEBUG_SYSLOG("Try to kill the worker thread...");
-		__sync_lock_test_and_set(&exit, 1);
-
-// Notify the worker thread to exit
-		pthread_mutex_lock(&mut);
-		pthread_cond_signal(&cond);
-		pthread_mutex_unlock(&mut);
-
-		int api_ret;
-		char api_ret_desc[256];
-		api_ret = pthread_join(pid, (void**)&api_ret_desc);
-		if (api_ret != 0)
+		int kill_ret = pthread_kill(pid, 0);
+		if(kill_ret == ESRCH)
+			WRITE_ERR_SYSLOG("The worker thread in the PacketReceiver object did NOT exist......");
+		else if(kill_ret == EINVAL)
+			WRITE_ERR_SYSLOG("The signal in the PacketReceiver object is invalid");
+		else
 		{
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "pthread_join() failed, due to: %s", api_ret_desc);
-			return MSG_DUMPER_FAILURE_UNKNOWN;
+			WRITE_DEBUG_SYSLOG("The worker thread in the PacketReceiver object is STILL alive");
+			__sync_lock_test_and_set(&exit, 1);
+
+	// Notify the worker thread to exit
+			pthread_mutex_lock(&mut);
+			pthread_cond_signal(&cond);
+			pthread_mutex_unlock(&mut);
+
+			int api_ret;
+			char api_ret_desc[256];
+			api_ret = pthread_join(pid, (void**)&api_ret_desc);
+			if (api_ret != 0)
+			{
+				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "pthread_join() failed, due to: %s", api_ret_desc);
+				return MSG_DUMPER_FAILURE_UNKNOWN;
+			}
+			pid = 0;
+			WRITE_DEBUG_SYSLOG("The worker thread in the PacketReceiver object is dead");
 		}
-		pid = 0;
+		thread_is_running = false;
 	}
 
     pthread_cond_destroy(&cond);

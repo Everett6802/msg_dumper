@@ -4,14 +4,15 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 #include <errno.h>
 #include <iostream>
 #include <vector>
 #include "msg_dumper_base.h"
 #include "msg_dumper_mgr.h"
 
-using namespace std;
 
+using namespace std;
 
 class MsgDumperTimerThread : public MsgDumperBase
 {
@@ -22,6 +23,7 @@ private:
 	int exit;
 	pthread_mutex_t mut;
 	pthread_cond_t cond;
+	bool thread_is_running;
 
 	static void* msg_dumper_thread_handler(void* void_ptr);
 	unsigned short msg_dumper_thread_handler_internal();

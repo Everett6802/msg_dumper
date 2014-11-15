@@ -4,7 +4,7 @@
 #include "msg_dumper_com.h"
 
 
-char* MsgDumperCom::COM_PORT_NAME = "/dev/ttyUSB0";
+char* MsgDumperCom::COM_PORT_NAME = "/dev/ttyUSB1";
 speed_t MsgDumperCom::COM_PORT_SPEED = B115200;
 
 MsgDumperCom::MsgDumperCom()

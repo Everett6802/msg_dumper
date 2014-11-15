@@ -27,8 +27,9 @@ static const unsigned short MSG_DUMPER_SEVIRITY_DEBUG = 3;
 
 static const unsigned short MSG_DUMPER_FACILITY_LOG = 0x1;
 static const unsigned short MSG_DUMPER_FACILITY_COM = 0x1 << 1;
-static const unsigned short MSG_DUMPER_FACILITY_ALL = (MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM);
-enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SIZE};
+static const unsigned short MSG_DUMPER_FACILITY_SQL = 0x1 << 2;
+static const unsigned short MSG_DUMPER_FACILITY_ALL = (MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM | MSG_DUMPER_FACILITY_SQL);
+enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_SIZE};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // APIs

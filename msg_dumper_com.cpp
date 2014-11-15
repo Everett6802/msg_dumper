@@ -1,9 +1,8 @@
-#include <string.h>
-#include <errno.h>
 #include <fcntl.h>
-#include "msg_dumper_com.h"
 #include "msg_dumper.h"
 #include "common.h"
+#include "msg_dumper_com.h"
+
 
 char* MsgDumperCom::COM_PORT_NAME = "/dev/ttyUSB0";
 speed_t MsgDumperCom::COM_PORT_SPEED = B115200;
@@ -100,6 +99,7 @@ unsigned short MsgDumperCom::write_device_file()
 
 unsigned short MsgDumperCom::initialize(void* config)
 {
+	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperCom object......");
 // Create the log folder
 	unsigned short ret = create_device_file();
 	if (CHECK_MSG_DUMPER_FAILURE(ret))

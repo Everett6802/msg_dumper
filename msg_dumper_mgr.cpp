@@ -3,9 +3,11 @@
 #include "msg_dumper_mgr.h"
 #include "msg_dumper_log.h"
 #include "msg_dumper_com.h"
+#include "msg_dumper_sql.h"
 
 
-char* MsgDumperMgr::dev_name[] = {"Log", "Com"};
+char* MsgDumperMgr::dev_name[] = {"Log", "Com", "Sql"};
+short MsgDumperMgr::dev_flag[] = {MSG_DUMPER_FACILITY_LOG, MSG_DUMPER_FACILITY_COM, MSG_DUMPER_FACILITY_SQL};
 
 MsgDumperMgr::MsgDumperMgr() :
 	is_init(false),
@@ -24,48 +26,53 @@ unsigned short MsgDumperMgr::initialize()
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
 
+// Register the class to the simple factory
+	REGISTER_CLASS(MsgDumperLog);
+	REGISTER_CLASS(MsgDumperCom);
+	REGISTER_CLASS(MsgDumperSql);
+
 	unsigned short ret = MSG_DUMPER_SUCCESS;
-// Allocate and initialize the MsgDumplerLog object
-	if (dumper_facility & MSG_DUMPER_FACILITY_LOG)
+	char dev_class_name[32];
+// Initialize the device
+	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 	{
-		WRITE_DEBUG_SYSLOG("Allocate the MsgDumperLog object");
-		msg_dumper[FACILITY_LOG] = new MsgDumperLog();
-		if (msg_dumper[FACILITY_LOG] == NULL)
+		snprintf(dev_class_name, 32, "MsgDumper%s", dev_name[i]);
+// Allocate and initialize the object derived from the MsgDumplerBase class
+		if (dumper_facility & dev_flag[i])
 		{
-			WRITE_ERR_SYSLOG("Fail to allocate the MsgDumperLog object");
-			return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
-		}
+			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Allocate the %s object", dev_class_name);
+			msg_dumper[i] = device_factory.construct(dev_class_name);
+			if (msg_dumper[i] == NULL)
+			{
+				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to allocate the %s object", dev_class_name);
+				return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
+			}
 
-		WRITE_DEBUG_SYSLOG("Initialize the MsgDumperLog object");
-		ret = msg_dumper[FACILITY_LOG]->initialize();
-		if (CHECK_MSG_DUMPER_FAILURE(ret))
-		{
-			WRITE_ERR_SYSLOG("Fail to initialize the MsgDumperLog object");
-			goto EXIT;
-		}
-	}
-// Allocate and initialize the MsgDumplerCom object
-	if (dumper_facility & MSG_DUMPER_FACILITY_COM)
-	{
-		WRITE_DEBUG_SYSLOG("Allocate the MsgDumperCom object");
-		msg_dumper[FACILITY_COM] = new MsgDumperCom();
-		if (msg_dumper[FACILITY_COM] == NULL)
-		{
-			WRITE_ERR_SYSLOG("Fail to allocate the MsgDumperCom object");
-			return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
-		}
-
-		WRITE_DEBUG_SYSLOG("Initialize the MsgDumperCom object");
-		ret = msg_dumper[FACILITY_COM]->initialize();
-		if (CHECK_MSG_DUMPER_FAILURE(ret))
-		{
-			WRITE_ERR_SYSLOG("Fail to initialize the MsgDumperCom object");
-			goto EXIT;
+			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Initialize the %s object", dev_class_name);
+			ret = msg_dumper[i]->initialize();
+			if (CHECK_MSG_DUMPER_FAILURE(ret))
+			{
+				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to initialize the %s object", dev_class_name);
+				goto EXIT;
+			}
 		}
 	}
 
 	is_init = true;
+
 EXIT:
+	if (!is_init)
+	{
+		for (int i = 0 ; i < FACILITY_SIZE ; i++)
+		{
+			if (msg_dumper[i] != NULL)
+			{
+				msg_dumper[i]->deinitialize();
+				delete msg_dumper[i];
+				msg_dumper[i] = NULL;
+			}
+		}
+	}
 	return ret;
 }
 

@@ -75,6 +75,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 unsigned short MsgDumperTimerThread::initialize(void* config)
 {
 	int api_ret;
+	WRITE_DEBUG_SYSLOG("Create a worker thread......");
 // Create the worker thread
 	api_ret = pthread_create(&pid, NULL, msg_dumper_thread_handler, this);
 	if (api_ret != 0)

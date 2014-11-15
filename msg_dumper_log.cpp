@@ -1,12 +1,10 @@
 #include <unistd.h>
 #include <time.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <errno.h>
-#include "msg_dumper_log.h"
 #include "msg_dumper.h"
 #include "common.h"
+#include "msg_dumper_log.h"
 
 
 char* MsgDumperLog::LOG_FOLDER = "log";
@@ -120,6 +118,7 @@ unsigned short MsgDumperLog::create_log_folder()
 
 unsigned short MsgDumperLog::initialize(void* config)
 {
+	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperLog object......");
 // Create the log folder
 	unsigned short ret = create_log_folder();
 	if (CHECK_MSG_DUMPER_FAILURE(ret))

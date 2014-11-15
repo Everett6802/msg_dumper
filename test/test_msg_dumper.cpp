@@ -14,7 +14,6 @@ FP_msg_dumper_set_facility fp_msg_dumper_set_facility;
 FP_msg_dumper_write_msg fp_msg_dumper_write_msg;
 FP_msg_dumper_deinitialize fp_msg_dumper_deinitialize;
 
-
 bool export_api(void* handle);
 
 int main()
@@ -98,7 +97,6 @@ int main()
 		goto EXIT1;
 	}
 
-
 // Write the message
 	printf("Write the DEBUG message\n");
 	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_DEBUG, "This is a test: Debug");
@@ -108,8 +106,8 @@ int main()
 		goto EXIT1;
 	}
 
-
-	sleep(5);
+	printf("Press any keyword to terminate the process...");
+	getchar();
 
 EXIT1:
 // De-initialize the library

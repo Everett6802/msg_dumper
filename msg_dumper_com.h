@@ -3,12 +3,8 @@
 
 #include <termios.h>
 #include <unistd.h>
-//#include <iostream>
-//#include <vector>
 #include "msg_dumper_timer_thread.h"
 #include "msg_dumper_mgr.h"
-
-//using namespace std;
 
 
 class MsgDumperCom : public MsgDumperTimerThread
@@ -18,9 +14,6 @@ private:
 	static char* COM_PORT_NAME;
 	static speed_t COM_PORT_SPEED;
 
-	MsgDumperCom();
-	~MsgDumperCom();
-
 	unsigned short try_open_comport(int& fd_com)const;
 
 protected:
@@ -28,6 +21,9 @@ protected:
 	virtual unsigned short write_device_file();
 
 public:
+	MsgDumperCom();
+	~MsgDumperCom();
+
 	virtual unsigned short initialize(void* config=NULL);
 };
 

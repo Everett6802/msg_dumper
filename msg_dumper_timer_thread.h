@@ -3,6 +3,8 @@
 
 #include <pthread.h>
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <iostream>
 #include <vector>
 #include "msg_dumper_base.h"

@@ -1,7 +1,7 @@
 #ifndef MSG_DUMPER_SQL_H
 #define MSG_DUMPER_SQL_H
 
-//#include <mysql/mysql.h>
+#include <mysql/mysql.h>
 #include "msg_dumper_timer_thread.h"
 #include "msg_dumper_mgr.h"
 

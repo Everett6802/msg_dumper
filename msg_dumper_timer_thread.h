@@ -18,7 +18,6 @@ class MsgDumperTimerThread : public MsgDumperBase
 {
 	friend class MsgDumperMgr;
 private:
-
 	pthread_t pid;
 	int exit;
 	pthread_mutex_t mut;
@@ -29,11 +28,15 @@ private:
 	unsigned short msg_dumper_thread_handler_internal();
 
 protected:
+	static const int CURRENT_TIME_STRING_LENGTH;
+
 	vector<char*> buffer_vector;
 	vector<char*> write_vector;
 
 	MsgDumperTimerThread();
 	virtual ~MsgDumperTimerThread();
+
+	unsigned short generate_current_time_string(char* current_time_string);
 
 	virtual unsigned short create_device_file()=0;
 	virtual unsigned short write_device_file()=0;

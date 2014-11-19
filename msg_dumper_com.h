@@ -22,7 +22,7 @@ protected:
 
 public:
 	MsgDumperCom();
-	~MsgDumperCom();
+	virtual ~MsgDumperCom();
 
 	virtual unsigned short initialize(void* config=NULL);
 };

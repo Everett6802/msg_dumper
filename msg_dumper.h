@@ -14,6 +14,7 @@ static const unsigned short MSG_DUMPER_FAILURE_NOT_FOUND = 6;
 static const unsigned short MSG_DUMPER_FAILURE_INCORRECT_CONFIG = 7;
 static const unsigned short MSG_DUMPER_FAILURE_INCORRECT_OPERATION = 8;
 static const unsigned short MSG_DUMPER_FAILURE_COM_PORT = 9;
+static const unsigned short MSG_DUMPER_FAILURE_MYSQL = 10;
 
 #define CHECK_MSG_DUMPER_FAILURE(x) (x != MSG_DUMPER_SUCCESS ? true : false)
 

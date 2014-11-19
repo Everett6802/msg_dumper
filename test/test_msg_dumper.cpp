@@ -28,8 +28,8 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	unsigned short severity = MSG_DUMPER_SEVIRITY_WARN;
-	unsigned short facility = MSG_DUMPER_FACILITY_COM;
+	unsigned short severity = MSG_DUMPER_SEVIRITY_DEBUG;
+	unsigned short facility = MSG_DUMPER_FACILITY_SQL;
 
 // Export the APIs
 	if (!export_api(handle))

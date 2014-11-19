@@ -12,7 +12,7 @@ build: $(OUTPUT)
 	cp $(OUTPUT) ./test/
 
 $(OUTPUT): $(OBJS)
-	$(CC) $(CXXFLAGS) -shared -o $@ $^ -lpthread
+	$(CC) $(CXXFLAGS) -shared -o $@ $^ -lpthread -L/usr/lib64 -lmysqlclient
 
 %.o: %.cpp
 	$(CC) $(CXXFLAGS) -c -o $@ $<

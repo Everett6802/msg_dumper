@@ -9,6 +9,8 @@
 #include "msg_dumper_timer_thread.h"
 
 
+const int MsgDumperTimerThread::CURRENT_TIME_STRING_LENGTH = 11;
+
 MsgDumperTimerThread::MsgDumperTimerThread() :
 	pid(0),
 	exit(0),
@@ -91,8 +93,6 @@ unsigned short MsgDumperTimerThread::initialize(void* config)
 	else
 		thread_is_running = true;
 
-	exit = 0;
-
 	return MSG_DUMPER_SUCCESS;
 }
 
@@ -140,14 +140,15 @@ unsigned short MsgDumperTimerThread::deinitialize()
 	// Before killing this thread, check if the thread is STILL alive
 	if (thread_is_running)
 	{
+// You should make sure the thread(pid) is created correctly before executing the pthread_kill() function. Otherwise, there are some errors dumped from the kernel
 		int kill_ret = pthread_kill(pid, 0);
 		if(kill_ret == ESRCH)
-			WRITE_ERR_SYSLOG("The worker thread in the PacketReceiver object did NOT exist......");
+			WRITE_ERR_SYSLOG("The worker thread in the MsgDumperTimerThread object did NOT exist......");
 		else if(kill_ret == EINVAL)
-			WRITE_ERR_SYSLOG("The signal in the PacketReceiver object is invalid");
+			WRITE_ERR_SYSLOG("The signal in the MsgDumperTimerThread object is invalid");
 		else
 		{
-			WRITE_DEBUG_SYSLOG("The worker thread in the PacketReceiver object is STILL alive");
+			WRITE_DEBUG_SYSLOG("The worker thread in the MsgDumperTimerThread object is STILL alive");
 			__sync_lock_test_and_set(&exit, 1);
 
 	// Notify the worker thread to exit
@@ -164,7 +165,7 @@ unsigned short MsgDumperTimerThread::deinitialize()
 				return MSG_DUMPER_FAILURE_UNKNOWN;
 			}
 			pid = 0;
-			WRITE_DEBUG_SYSLOG("The worker thread in the PacketReceiver object is dead");
+			WRITE_DEBUG_SYSLOG("The worker thread in the MsgDumperTimerThread object is dead");
 		}
 		thread_is_running = false;
 	}
@@ -173,6 +174,23 @@ unsigned short MsgDumperTimerThread::deinitialize()
     pthread_mutex_destroy(&mut);
 
     device_handle_exist = false;
+
+	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperTimerThread::generate_current_time_string(char* current_time_string)
+{
+	if (current_time_string ==  NULL)
+	{
+		WRITE_ERR_SYSLOG("Invalid argument: current_time_string");
+		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+	}
+	time_t timep;
+	time(&timep);
+	struct tm* p = localtime(&timep);
+
+	memset(current_time_string, 0x0, sizeof(char) * CURRENT_TIME_STRING_LENGTH);
+	snprintf(current_time_string, CURRENT_TIME_STRING_LENGTH, "%02d%02d%02d%02d%02d", (p->tm_year + 1900) % 2000, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min);
 
 	return MSG_DUMPER_SUCCESS;
 }

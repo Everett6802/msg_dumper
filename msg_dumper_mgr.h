@@ -44,7 +44,6 @@ private:
 
 	MsgDumperBase* msg_dumper[FACILITY_SIZE];
 
-
 public:
 	MsgDumperMgr();
 

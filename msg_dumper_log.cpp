@@ -1,5 +1,4 @@
 #include <unistd.h>
-#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "msg_dumper.h"
@@ -39,10 +38,11 @@ unsigned short MsgDumperLog::create_device_file()
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log file[%s] has already been created", log_filename);
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
+
+	char current_time_string[CURRENT_TIME_STRING_LENGTH];
+	generate_current_time_string(current_time_string);
+
 // Create the log file
-	time_t timep;
-	time(&timep);
-	struct tm* p = localtime(&timep);
 	log_filename = new char[MSG_DUMPER_SHORT_STRING_SIZE];
 	log_filepath = new char[MSG_DUMPER_SHORT_STRING_SIZE];
 	if (log_filename == NULL || log_filepath == NULL)
@@ -50,8 +50,9 @@ unsigned short MsgDumperLog::create_device_file()
 		WRITE_DEBUG_SYSLOG("Fail to allocate the memory: log_filename/log_filepath");
 		return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
 	}
+
 	memset(log_filename, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
-	snprintf(log_filename, MSG_DUMPER_SHORT_STRING_SIZE, "%02d%02d%02d%02d%02d.log", (p->tm_year + 1900) % 2000, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min);
+	snprintf(log_filename, MSG_DUMPER_SHORT_STRING_SIZE, "%s.log", current_time_string);
 	memset(log_filepath, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
 	snprintf(log_filepath, MSG_DUMPER_SHORT_STRING_SIZE, "%s/%s", LOG_FOLDER, log_filename);
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log file path: %s", log_filepath);

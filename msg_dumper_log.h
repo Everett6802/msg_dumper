@@ -23,7 +23,7 @@ protected:
 
 public:
 	MsgDumperLog();
-	~MsgDumperLog();
+	virtual ~MsgDumperLog();
 
 	virtual unsigned short initialize(void* config=NULL);
 };

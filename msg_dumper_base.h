@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 
 class MsgDumperBase
@@ -15,8 +16,8 @@ public:
 	virtual ~MsgDumperBase(){}
 
 	virtual unsigned short initialize(void* config=NULL)=0;
-	virtual unsigned short write_msg(const char* msg)=0;
 	virtual unsigned short deinitialize()=0;
+	virtual unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg)=0;
 };
 
 #endif

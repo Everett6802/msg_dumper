@@ -25,6 +25,7 @@ static const unsigned short MSG_DUMPER_SEVIRITY_ERROR = 0;
 static const unsigned short MSG_DUMPER_SEVIRITY_WARN = 1;
 static const unsigned short MSG_DUMPER_SEVIRITY_INFO = 2;
 static const unsigned short MSG_DUMPER_SEVIRITY_DEBUG = 3;
+static char* MSG_DUMPER_SEVERITY_DESC[] = {"Error", "Warn", "Info", "Debug"};
 
 static const unsigned short MSG_DUMPER_FACILITY_LOG = 0x1;
 static const unsigned short MSG_DUMPER_FACILITY_COM = 0x1 << 1;

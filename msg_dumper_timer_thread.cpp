@@ -1,5 +1,4 @@
 #include <unistd.h>
-#include <time.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -8,8 +7,6 @@
 #include "common.h"
 #include "msg_dumper_timer_thread.h"
 
-
-const int MsgDumperTimerThread::CURRENT_TIME_STRING_LENGTH = 11;
 
 MsgDumperTimerThread::MsgDumperTimerThread() :
 	pid(0),
@@ -43,7 +40,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 	WRITE_DEBUG_SYSLOG("The worker thread of writing message is running");
 	while (!exit)
 	{
-		pthread_mutex_lock (&mut);
+		pthread_mutex_lock(&mut);
 //wait for the signal with cond as condition variable
 		pthread_cond_wait(&cond, &mut);
 
@@ -53,15 +50,15 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 		{
 			for (int i = 0 ; i < buffer_vector_size ; i++)
 			{
-				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Move the message[%s] to another buffer", buffer_vector[i]);
-				char* elem =  buffer_vector[i];
+				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Move the message[%s] to another buffer", buffer_vector[i]->data);
+				PMSG_CFG elem =  buffer_vector[i];
 				buffer_vector[i] = NULL;
 				write_vector.push_back(elem);
 			}
 // Clean-up the container
 			buffer_vector.clear();
 		}
-		pthread_mutex_unlock (&mut);
+		pthread_mutex_unlock(&mut);
 
 		if (write_vector.size() > 0)
 		{
@@ -96,7 +93,7 @@ unsigned short MsgDumperTimerThread::initialize(void* config)
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperTimerThread::write_msg(const char* msg)
+unsigned short MsgDumperTimerThread::write_msg(const time_t& timep, unsigned short severity, const char* msg)
 {
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	if (!device_handle_exist)
@@ -108,23 +105,25 @@ unsigned short MsgDumperTimerThread::write_msg(const char* msg)
 		device_handle_exist = true;
 	}
 
-// Get the time that the message is generated
-	time_t timep;
-	time(&timep);
-	struct tm *p = localtime(&timep);
-	char time_string[MSG_DUMPER_SHORT_STRING_SIZE];
-	snprintf(time_string, MSG_DUMPER_SHORT_STRING_SIZE, "%02d/%02d/%02d %02d:%02d:%02d", (1900 + p->tm_year) % 2000, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
-
-// Add the message into the list
-	char *new_msg = new char[MSG_DUMPER_LONG_STRING_SIZE];
-	if (new_msg == NULL)
-	{
-		WRITE_ERR_SYSLOG("Fail to allocate the memory: new_msg");
-		return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
-	}
-	memset(new_msg, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
-	snprintf(new_msg, MSG_DUMPER_LONG_STRING_SIZE, "[%s] %s\n", time_string, msg);
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "New message: %s", new_msg);
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [severity: %d, message: %s]", severity, msg);
+	PMSG_CFG new_msg = new MsgCfg(timep, severity, msg);
+//// Get the time that the message is generated
+//	time_t timep;
+//	time(&timep);
+//	struct tm *p = localtime(&timep);
+//	char time_string[MSG_DUMPER_SHORT_STRING_SIZE];
+//	snprintf(time_string, MSG_DUMPER_SHORT_STRING_SIZE, "%02d/%02d/%02d %02d:%02d:%02d", (1900 + p->tm_year) % 2000, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
+//
+//// Add the message into the list
+//	char *new_msg = new char[MSG_DUMPER_LONG_STRING_SIZE];
+//	if (new_msg == NULL)
+//	{
+//		WRITE_ERR_SYSLOG("Fail to allocate the memory: new_msg");
+//		return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
+//	}
+//	memset(new_msg, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
+//	snprintf(new_msg, MSG_DUMPER_LONG_STRING_SIZE, "[%s] %s\n", time_string, msg);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "New message: %s", new_msg);
 
 	pthread_mutex_lock(&mut);
 	buffer_vector.push_back(new_msg);

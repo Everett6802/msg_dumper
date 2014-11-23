@@ -6,8 +6,6 @@
 #include "msg_dumper_mgr.h"
 
 
-#define FORMAT_CMD_BUF_SIZE 64
-
 class MsgDumperSql : public MsgDumperTimerThread
 {
 	friend class MsgDumperMgr;
@@ -19,9 +17,13 @@ private:
 
 	static char* format_cmd_create_database;
 	static char* format_cmd_create_table;
+	static char* format_cmd_insert_into_table;
 
 	MYSQL* connection;
-	char cmd_buf[FORMAT_CMD_BUF_SIZE];
+	char cmd_buf[MSG_DUMPER_LONG_STRING_SIZE];
+	char current_time_string[CURRENT_TIME_STRING_LENGTH];
+	bool table_created;
+
 	unsigned short try_connect_mysql();
 
 protected:

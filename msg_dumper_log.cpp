@@ -74,8 +74,9 @@ unsigned short MsgDumperLog::write_device_file()
 // Write the message into the log file
 	for (int i = 0 ; i < write_vector.size() ; i++)
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to file [%s]", write_vector[i], log_filename);
-		fputs(write_vector[i], fp);
+		write_vector[i]->create_format_message(format_message, MSG_DUMPER_LONG_STRING_SIZE);
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to file [%s]", format_message, log_filename);
+		fputs(format_message, fp);
 // Release the resource
 		delete[] write_vector[i];
 		write_vector[i] = NULL;

@@ -41,8 +41,7 @@ unsigned short MsgDumperMgr::initialize()
 		if (dumper_facility & dev_flag[i])
 		{
 			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Allocate the %s object", dev_class_name);
-//			msg_dumper[i] = device_factory.construct(dev_class_name);
-			msg_dumper[i] = new MsgDumperSql();
+			msg_dumper[i] = device_factory.construct(dev_class_name);
 			if (msg_dumper[i] == NULL)
 			{
 				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to allocate the %s object", dev_class_name);
@@ -50,7 +49,7 @@ unsigned short MsgDumperMgr::initialize()
 			}
 
 			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Initialize the %s object", dev_class_name);
-//			ret = msg_dumper[i]->initialize();
+			ret = msg_dumper[i]->initialize();
 			if (CHECK_MSG_DUMPER_FAILURE(ret))
 			{
 				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to initialize the %s object", dev_class_name);
@@ -121,12 +120,16 @@ unsigned short MsgDumperMgr::write_msg(unsigned short severity, const char* msg)
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	if (severity <= dumper_severity)
 	{
+// Mark the time that the message is generated
+		time_t timep;
+		time(&timep);
+
 		for (int i = 0 ; i < FACILITY_SIZE ; i++)
 		{
 			if (msg_dumper[i])
 			{
 				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [%s] to %s", msg, dev_name[i]);
-				ret = msg_dumper[i]->write_msg(msg);
+				ret = msg_dumper[i]->write_msg(timep, severity, msg);
 				if (CHECK_MSG_DUMPER_FAILURE(ret))
 					return ret;
 			}

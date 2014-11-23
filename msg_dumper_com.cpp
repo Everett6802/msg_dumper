@@ -82,8 +82,9 @@ unsigned short MsgDumperCom::write_device_file()
 // Write the message into the log file
 	for (int i = 0 ; i < write_vector.size() ; i++)
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to COM port", write_vector[i]);
-		write(fd_com, write_vector[i], strlen(write_vector[i]));
+		write_vector[i]->create_format_message(format_message, MSG_DUMPER_LONG_STRING_SIZE);
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to COM port", format_message);
+		write(fd_com, format_message, strlen(format_message));
 // Release the resource
 		delete[] write_vector[i];
 		write_vector[i] = NULL;

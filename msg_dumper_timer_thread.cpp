@@ -11,7 +11,8 @@
 MsgDumperTimerThread::MsgDumperTimerThread() :
 	pid(0),
 	exit(0),
-	thread_is_running(false)
+	thread_is_running(false),
+	new_data_trigger(false)
 {
 }
 
@@ -37,20 +38,23 @@ void* MsgDumperTimerThread::msg_dumper_thread_handler(void* void_ptr)
 unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 {
 	unsigned short ret = MSG_DUMPER_SUCCESS;
-	WRITE_DEBUG_SYSLOG("The worker thread of writing message is running");
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The worker thread is running", get_thread_name());
 	while (!exit)
 	{
 		pthread_mutex_lock(&mut);
 //wait for the signal with cond as condition variable
-		pthread_cond_wait(&cond, &mut);
+		if (!new_data_trigger)
+			pthread_cond_wait(&cond, &mut);
+//		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The worker thread to write the data......", get_thread_name());
 
 // Move the message
 		int buffer_vector_size = buffer_vector.size();
+//		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> There are totally %d data in the queue", get_thread_name(), buffer_vector_size);
 		if (buffer_vector_size > 0)
 		{
 			for (int i = 0 ; i < buffer_vector_size ; i++)
 			{
-				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Move the message[%s] to another buffer", buffer_vector[i]->data);
+				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Move the message[%s] to another buffer", get_thread_name(), buffer_vector[i]->data);
 				PMSG_CFG elem =  buffer_vector[i];
 				buffer_vector[i] = NULL;
 				write_vector.push_back(elem);
@@ -58,6 +62,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 // Clean-up the container
 			buffer_vector.clear();
 		}
+		new_data_trigger = 0;
 		pthread_mutex_unlock(&mut);
 
 		if (write_vector.size() > 0)
@@ -68,7 +73,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 		}
 	}
 
-	WRITE_DEBUG_SYSLOG("The worker thread of writing message is going to die");
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The worker thread of writing message is going to die", get_thread_name());
 	return ret;
 }
 
@@ -88,7 +93,9 @@ unsigned short MsgDumperTimerThread::initialize(void* config)
 		return MSG_DUMPER_FAILURE_UNKNOWN;
 	}
 	else
+	{
 		thread_is_running = true;
+	}
 
 	return MSG_DUMPER_SUCCESS;
 }
@@ -107,28 +114,13 @@ unsigned short MsgDumperTimerThread::write_msg(const time_t& timep, unsigned sho
 
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [severity: %d, message: %s]", severity, msg);
 	PMSG_CFG new_msg = new MsgCfg(timep, severity, msg);
-//// Get the time that the message is generated
-//	time_t timep;
-//	time(&timep);
-//	struct tm *p = localtime(&timep);
-//	char time_string[MSG_DUMPER_SHORT_STRING_SIZE];
-//	snprintf(time_string, MSG_DUMPER_SHORT_STRING_SIZE, "%02d/%02d/%02d %02d:%02d:%02d", (1900 + p->tm_year) % 2000, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
-//
-//// Add the message into the list
-//	char *new_msg = new char[MSG_DUMPER_LONG_STRING_SIZE];
-//	if (new_msg == NULL)
-//	{
-//		WRITE_ERR_SYSLOG("Fail to allocate the memory: new_msg");
-//		return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
-//	}
-//	memset(new_msg, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
-//	snprintf(new_msg, MSG_DUMPER_LONG_STRING_SIZE, "[%s] %s\n", time_string, msg);
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "New message: %s", new_msg);
 
 	pthread_mutex_lock(&mut);
 	buffer_vector.push_back(new_msg);
 // Wake up waiting thread with condition variable, if it is called before this function
-	pthread_cond_signal(&cond);
+	if (!new_data_trigger)
+		pthread_cond_signal(&cond);
+	new_data_trigger = true;
 	pthread_mutex_unlock(&mut);
 
 	return MSG_DUMPER_SUCCESS;
@@ -174,7 +166,22 @@ unsigned short MsgDumperTimerThread::deinitialize()
 
     device_handle_exist = false;
 
+// Check if there are some messages left in the Queue
+    if (buffer_vector.size() > 0)
+    {
+    	WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "#####   ERROR buffer vector is NOT empty: %d   #####", buffer_vector.size());
+    }
+    if (write_vector.size() > 0)
+    {
+    	WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "#####   ERROR write vector is NOT empty: %d   #####", write_vector.size());
+    }
+
 	return MSG_DUMPER_SUCCESS;
+}
+
+const char* MsgDumperTimerThread::get_thread_name()const
+{
+	return worker_thread_name;
 }
 
 unsigned short MsgDumperTimerThread::generate_current_time_string(char* current_time_string)

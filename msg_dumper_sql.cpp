@@ -21,7 +21,7 @@ MsgDumperSql::MsgDumperSql() :
 	connection(NULL),
 	table_created(false)
 {
-
+	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "SQL");
 }
 
 MsgDumperSql::~MsgDumperSql()
@@ -99,7 +99,7 @@ unsigned short MsgDumperSql::write_device_file()
 // Check if the connection is established
 	if (connection == NULL)
 	{
-		WRITE_ERR_SYSLOG("The connection is NOT established");
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT established", get_thread_name());
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 
@@ -107,11 +107,11 @@ unsigned short MsgDumperSql::write_device_file()
 // This function returns zero if the connection is alive and nonzero in the case of an error.
 	if (mysql_ping(connection))
 	{
-		WRITE_INFO_SYSLOG("The connection is NOT alive.Attempt to reconnect it......");
+		WRITE_INFO_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT alive.Attempt to reconnect it......", get_thread_name());
 // Select the database
 		if (mysql_select_db(connection, database))
 		{
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "mysql_select_db() fails, due to: %s", mysql_error(connection));
+			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_select_db() fails, due to: %s", get_thread_name(), mysql_error(connection));
 			return MSG_DUMPER_FAILURE_MYSQL;
 		}
 	}
@@ -120,17 +120,20 @@ unsigned short MsgDumperSql::write_device_file()
 	{
 // Get the current time
 		generate_current_time_string(current_time_string);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Current time string1: %s", current_time_string);
 
 // Create the table in the database...
 		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_create_table, current_time_string);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Current time string2: %s", current_time_string);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to create table[sql%s] by command: %s", current_time_string, cmd_buf);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Current time string3: %s", current_time_string);
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to create table[sql%s] by command: %s", get_thread_name(), current_time_string, cmd_buf);
 		if(mysql_query(connection, cmd_buf) != NULL)
 		{
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "mysql_query() fails, due to: %s", mysql_error(connection));
-			return MSG_DUMPER_FAILURE_MYSQL;
+			int error = mysql_errno(connection);
+			if (error != 1050)
+			{
+				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %d, %s", get_thread_name(), error, mysql_error(connection));
+				return MSG_DUMPER_FAILURE_MYSQL;
+			}
+			else
+				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The sql%s has already existed", get_thread_name(), current_time_string);
 		}
 		table_created = true;
 	}
@@ -138,17 +141,16 @@ unsigned short MsgDumperSql::write_device_file()
 // Write the message into the log file
 	for (int i = 0 ; i < write_vector.size() ; i++)
 	{
-		write_vector[i]->create_format_message(format_message, MSG_DUMPER_LONG_STRING_SIZE);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "CurTimeString: %s, Date: %s, Time: %s, Severity: %d, Data: %s", current_time_string, write_vector[i]->date_str, write_vector[i]->time_str, write_vector[i]->severity, write_vector[i]->data);
-		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_insert_into_table, current_time_string, write_vector[i]->date_str, write_vector[i]->time_str, write_vector[i]->severity, write_vector[i]->data);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to Write the message[%s] to MySQL by command: %s", format_message, cmd_buf);
+		PMSG_CFG msg_cfg = write_vector[i];
+		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_insert_into_table, current_time_string, msg_cfg->date_str, msg_cfg->time_str, msg_cfg->severity, msg_cfg->data);
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to Write the message[%s] to MySQL by command: %s", get_thread_name(), msg_cfg->to_string(), cmd_buf);
 		if(mysql_query(connection, cmd_buf) != NULL)
 		{
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "mysql_query() fails, due to: %s", mysql_error(connection));
+			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %s", get_thread_name(), mysql_error(connection));
 			return MSG_DUMPER_FAILURE_MYSQL;
 		}
 // Release the resource
-		delete[] write_vector[i];
+		delete[] msg_cfg;
 		write_vector[i] = NULL;
 	}
 // Clean-up the container

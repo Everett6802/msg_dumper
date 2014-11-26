@@ -9,7 +9,7 @@ speed_t MsgDumperCom::COM_PORT_SPEED = B115200;
 
 MsgDumperCom::MsgDumperCom()
 {
-
+	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "COM");
 }
 
 MsgDumperCom::~MsgDumperCom()
@@ -82,11 +82,11 @@ unsigned short MsgDumperCom::write_device_file()
 // Write the message into the log file
 	for (int i = 0 ; i < write_vector.size() ; i++)
 	{
-		write_vector[i]->create_format_message(format_message, MSG_DUMPER_LONG_STRING_SIZE);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to COM port", format_message);
-		write(fd_com, format_message, strlen(format_message));
+		PMSG_CFG msg_cfg = write_vector[i];
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to COM port", msg_cfg->to_string());
+		write(fd_com, msg_cfg->to_string(), strlen(msg_cfg->to_string()));
 // Release the resource
-		delete[] write_vector[i];
+		delete[] msg_cfg;
 		write_vector[i] = NULL;
 	}
 // Clean-up the container

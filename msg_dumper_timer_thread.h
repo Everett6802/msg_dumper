@@ -6,6 +6,7 @@
 #include <string.h>
 #include <signal.h>
 #include <errno.h>
+#include <assert.h>
 #include <iostream>
 #include <vector>
 #include "msg_dumper_base.h"
@@ -20,11 +21,15 @@ class MsgDumperTimerThread : public MsgDumperBase
 {
 	friend class MsgDumperMgr;
 
+protected:
 	class MsgCfg
 	{
-	public:
+	private:
 		time_t timep;
 		struct tm *p;
+		char* format_message;
+
+	public:
 		char date_str[MSG_DUMPER_SHORT_STRING_SIZE];
 		char time_str[MSG_DUMPER_SHORT_STRING_SIZE];
 		unsigned short severity;
@@ -40,21 +45,32 @@ class MsgDumperTimerThread : public MsgDumperBase
 			severity = new_severity;
 			memset(data, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
 			snprintf(data, MSG_DUMPER_LONG_STRING_SIZE, "%s", new_data);
+
+			format_message = NULL;
 		}
 
-		unsigned short create_format_message(char* format_message, int format_message_len)
+//		~MsgCfg()
+//		{
+//			if (format_message != NULL)
+//			{
+//				delete[] format_message;
+//				format_message = NULL;
+//			}
+//		}
+
+		const char* to_string()
 		{
-// Add the message into the list
 			if (format_message == NULL)
 			{
-				WRITE_ERR_SYSLOG("Invalid argument: format_message");
-				return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+				format_message = new char[MSG_DUMPER_LONG_STRING_SIZE];
+				if (format_message == NULL)
+				{
+					assert(0 && "Fail to allocate the format_message");
+					return NULL;
+				}
+				snprintf(format_message, MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %s] %s\n", date_str, time_str, MSG_DUMPER_SEVERITY_DESC[severity], data);
 			}
-
-			memset(format_message, 0x0, sizeof(char) * format_message_len);
-			snprintf(format_message, format_message_len, "[%s %s %s] %s\n", date_str, time_str, MSG_DUMPER_SEVERITY_DESC[severity], data);
-
-			return MSG_DUMPER_SUCCESS;
+			return format_message;
 		}
 	};
 	typedef MsgCfg* PMSG_CFG;
@@ -65,6 +81,7 @@ private:
 	pthread_mutex_t mut;
 	pthread_cond_t cond;
 	bool thread_is_running;
+	bool new_data_trigger;
 
 	static void* msg_dumper_thread_handler(void* void_ptr);
 	unsigned short msg_dumper_thread_handler_internal();
@@ -72,15 +89,17 @@ private:
 protected:
 	vector<PMSG_CFG> buffer_vector;
 	vector<PMSG_CFG> write_vector;
-	char format_message[MSG_DUMPER_LONG_STRING_SIZE];
+	char worker_thread_name[MSG_DUMPER_SHORT_STRING_SIZE];
 
 	MsgDumperTimerThread();
 	virtual ~MsgDumperTimerThread();
 
+	pthread_t get_pid()const{return pid;}
 	unsigned short generate_current_time_string(char* current_time_string);
 
 	virtual unsigned short create_device_file()=0;
 	virtual unsigned short write_device_file()=0;
+	virtual const char* get_thread_name()const;
 
 public:
 	virtual unsigned short initialize(void* config=NULL);

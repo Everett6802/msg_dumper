@@ -29,7 +29,7 @@ int main()
 	}
 
 	unsigned short severity = MSG_DUMPER_SEVIRITY_DEBUG;
-	unsigned short facility = MSG_DUMPER_FACILITY_SQL;
+	unsigned short facility = MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_SQL;
 
 // Export the APIs
 	if (!export_api(handle))
@@ -106,7 +106,7 @@ int main()
 		goto EXIT1;
 	}
 
-	printf("Press any keyword to terminate the process...");
+	printf("Press any keyword to terminate the process...\n");
 	getchar();
 
 EXIT1:

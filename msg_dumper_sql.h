@@ -2,6 +2,7 @@
 #define MSG_DUMPER_SQL_H
 
 #include <mysql/mysql.h>
+#include <mysql/mysqld_error.h>
 #include "msg_dumper_timer_thread.h"
 #include "msg_dumper_mgr.h"
 

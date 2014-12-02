@@ -30,8 +30,9 @@ static char* MSG_DUMPER_SEVERITY_DESC[] = {"Error", "Warn", "Info", "Debug"};
 static const unsigned short MSG_DUMPER_FACILITY_LOG = 0x1;
 static const unsigned short MSG_DUMPER_FACILITY_COM = 0x1 << 1;
 static const unsigned short MSG_DUMPER_FACILITY_SQL = 0x1 << 2;
-static const unsigned short MSG_DUMPER_FACILITY_ALL = (MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM | MSG_DUMPER_FACILITY_SQL);
-enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_SIZE};
+static const unsigned short MSG_DUMPER_FACILITY_REMOTE = 0x1 << 3;
+static const unsigned short MSG_DUMPER_FACILITY_ALL = (MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM | MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_REMOTE);
+enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_REMOTE, FACILITY_SIZE};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // APIs

@@ -98,11 +98,22 @@ unsigned short MsgDumperCom::write_device_file()
 	return MSG_DUMPER_SUCCESS;
 }
 
+unsigned short MsgDumperCom::parse_config_param(const char* param_title, const char* param_content)
+{
+	return MSG_DUMPER_SUCCESS;
+}
+
 unsigned short MsgDumperCom::initialize(void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperCom object......");
+
+// Parse the config file first
+	unsigned short ret = parse_config("com");
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+		return ret;
+
 // Create the log folder
-	unsigned short ret = create_device_file();
+	ret = create_device_file();
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 		return ret;
 	device_handle_exist = true;

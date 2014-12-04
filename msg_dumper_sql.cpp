@@ -9,10 +9,10 @@
  * http://docstore.mik.ua/orelly/linux/sql/ch19_01.htm
  */
 
-char* MsgDumperSql::server = "localhost";
-char* MsgDumperSql::username = "root";
-char* MsgDumperSql::password = "lab4man1";
-char* MsgDumperSql::database = "msg_dumper";
+char* MsgDumperSql::DEF_SERVER = "localhost";
+char* MsgDumperSql::DEF_USERNAME = "root";
+char* MsgDumperSql::DEF_PASSWORD = "lab4man1";
+char* MsgDumperSql::DEF_DATABASE = "msg_dumper";
 char* MsgDumperSql::format_cmd_create_database = "CREATE DATABASE %s";
 char* MsgDumperSql::format_cmd_create_table = "CREATE TABLE sql%s (date VARCHAR(16), time VARCHAR(16), severity INT, data VARCHAR(512))";
 char* MsgDumperSql::format_cmd_insert_into_table = "INSERT INTO sql%s VALUES(\"%s\", \"%s\", %d, \"%s\")";
@@ -22,6 +22,10 @@ MsgDumperSql::MsgDumperSql() :
 	table_created(false)
 {
 	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "SQL");
+	memcpy(server, DEF_SERVER, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(username, DEF_USERNAME, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(password, DEF_PASSWORD, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(database, DEF_DATABASE, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 }
 
 MsgDumperSql::~MsgDumperSql()
@@ -127,7 +131,7 @@ unsigned short MsgDumperSql::write_device_file()
 		if(mysql_query(connection, cmd_buf) != NULL)
 		{
 			int error = mysql_errno(connection);
-			if (error != ER_TABLE_EXISTS_ERROR)
+			if (error != 1050)
 			{
 				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %d, %s", get_thread_name(), error, mysql_error(connection));
 				return MSG_DUMPER_FAILURE_MYSQL;
@@ -162,12 +166,75 @@ unsigned short MsgDumperSql::write_device_file()
 	return MSG_DUMPER_SUCCESS;
 }
 
+unsigned short MsgDumperSql::parse_config_param(const char* param_title, const char* param_content)
+{
+	if (param_title == NULL || param_content == NULL)
+	{
+		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
+		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+	}
+	static char* title[] = {"server", "username", "password", "database"};
+	static int title_len = sizeof title / sizeof title[0];
+
+	unsigned short ret = MSG_DUMPER_SUCCESS;
+	bool found = false;
+	for (int index = 0 ; index < title_len ; index++)
+	{
+		if (strcmp(title[index], param_title) == 0)
+		{
+			int param_content_len = strlen(param_content);
+			char* param_member_variable = NULL;
+			switch(index)
+			{
+			case 0:
+				param_member_variable = server;
+				break;
+			case 1:
+				param_member_variable = username;
+				break;
+			case 2:
+				param_member_variable = password;
+				break;
+			case 3:
+				param_member_variable = database;
+				break;
+			}
+
+			if (param_member_variable != NULL)
+			{
+				memset(param_member_variable, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+				memcpy(param_member_variable, param_content, param_content_len);
+				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Update parameter: %s=%s", param_title, param_content);
+			}
+			else
+			{
+				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter: %s=%s", param_title, param_content);
+				ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+			}
+			break;
+		}
+	}
+// If the title is NOT found...
+	if (!found)
+	{
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
+		ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+	}
+
+	return ret;
+}
+
 unsigned short MsgDumperSql::initialize(void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperSql object......");
 
+// Parse the config file first
+	unsigned short ret = parse_config("sql");
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+		return ret;
+
 // Create the specific table
-	unsigned short ret = create_device_file();
+	ret = create_device_file();
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 		return ret;
 	device_handle_exist = true;

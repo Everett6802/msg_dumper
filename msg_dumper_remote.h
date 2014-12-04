@@ -13,6 +13,7 @@ class MsgDumperRemote : public MsgDumperTimerThread
 protected:
 	virtual unsigned short create_device_file();
 	virtual unsigned short write_device_file();
+	virtual unsigned short parse_config_param(const char* param_title, const char* param_content);
 
 public:
 	MsgDumperRemote();

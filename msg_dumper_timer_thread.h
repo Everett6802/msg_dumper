@@ -76,6 +76,7 @@ protected:
 	typedef MsgCfg* PMSG_CFG;
 
 private:
+	static const char* CONF_FOLDER_NAME;
 	pthread_t pid;
 	int exit;
 	pthread_mutex_t mut;
@@ -96,16 +97,18 @@ protected:
 
 	pthread_t get_pid()const{return pid;}
 	unsigned short generate_current_time_string(char* current_time_string);
+	unsigned short parse_config(const char* dev_name);
 
 	virtual unsigned short create_device_file()=0;
 	virtual unsigned short write_device_file()=0;
+	virtual unsigned short parse_config_param(const char* param_title, const char* param_content)=0;
+
 	virtual const char* get_thread_name()const;
 
 public:
 	virtual unsigned short initialize(void* config=NULL);
 	virtual unsigned short deinitialize();
-
-	unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg);
+	virtual unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg);
 };
 
 #endif

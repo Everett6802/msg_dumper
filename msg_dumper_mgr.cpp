@@ -4,6 +4,7 @@
 #include "msg_dumper_log.h"
 #include "msg_dumper_com.h"
 #include "msg_dumper_sql.h"
+#include "msg_dumper_remote.h"
 
 
 char* MsgDumperMgr::dev_name[] = {"Log", "Com", "Sql", "Remote"};

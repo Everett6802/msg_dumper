@@ -104,11 +104,11 @@ unsigned short MsgDumperLog::create_log_folder()
 	{
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Try to create a log folder: %s", folder_path);
 // If not, create a new folder
-	    if (mkdir(folder_path, 0744) != 0)
-	    {
-	    	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to create a log folder[%s], due to %s", folder_path, strerror(errno));
-	    	return MSG_DUMPER_FAILURE_UNKNOWN;
-	    }
+		if (mkdir(folder_path, 0744) != 0)
+		{
+			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to create a log folder[%s], due to %s", folder_path, strerror(errno));
+			return MSG_DUMPER_FAILURE_UNKNOWN;
+		}
 	}
 	else
 	{
@@ -118,11 +118,22 @@ unsigned short MsgDumperLog::create_log_folder()
 	return MSG_DUMPER_SUCCESS;
 }
 
+unsigned short MsgDumperLog::parse_config_param(const char* param_title, const char* param_content)
+{
+	return MSG_DUMPER_SUCCESS;
+}
+
 unsigned short MsgDumperLog::initialize(void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperLog object......");
+
+// Parse the config file first
+	unsigned short ret = parse_config("log");
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+		return ret;
+
 // Create the log folder
-	unsigned short ret = create_log_folder();
+	ret = create_log_folder();
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	return ret;
 

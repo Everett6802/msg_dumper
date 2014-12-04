@@ -3,10 +3,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <iostream>
+#include <string>
 #include "msg_dumper.h"
 #include "common.h"
 #include "msg_dumper_timer_thread.h"
 
+
+using namespace std;
+
+const char* MsgDumperTimerThread::CONF_FOLDER_NAME = "conf";
 
 MsgDumperTimerThread::MsgDumperTimerThread() :
 	pid(0),
@@ -199,4 +205,62 @@ unsigned short MsgDumperTimerThread::generate_current_time_string(char* current_
 	snprintf(current_time_string, CURRENT_TIME_STRING_LENGTH, "%02d%02d%02d%02d%02d", (p->tm_year + 1900) % 2000, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min);
 
 	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperTimerThread::parse_config(const char* dev_name)
+{
+	if (dev_name ==  NULL)
+	{
+		WRITE_ERR_SYSLOG("Invalid argument: dev_name");
+		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+	}
+// Open the file
+	char conf_filepath[MSG_DUMPER_SHORT_STRING_SIZE];
+	snprintf(conf_filepath, MSG_DUMPER_SHORT_STRING_SIZE, "%s/%s_param.conf", CONF_FOLDER_NAME,dev_name);
+	FILE* fp = fopen(conf_filepath, "r");
+	if (fp == NULL)
+	{
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to open the conf file: %s", conf_filepath);
+		return MSG_DUMPER_FAILURE_OPEN_FILE;
+	}
+
+// Parse the content of the config file
+	unsigned short ret = MSG_DUMPER_SUCCESS;
+	char buf[MSG_DUMPER_LONG_STRING_SIZE];
+	while (fgets(buf, MSG_DUMPER_LONG_STRING_SIZE, fp) != NULL)
+	{
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Param content: %s", buf);
+		bool new_line = false;
+		int split_pos = -1;
+// Get the config for each line
+		for (int i = 0 ; i < MSG_DUMPER_LONG_STRING_SIZE ; i++)
+		{
+			if (buf[i] == '\n')
+			{
+				buf[i] = '\0';
+				new_line = true;
+				break;
+			}
+			if (buf[i] == '=')
+				split_pos = i;
+		}
+// Incorrect config! Fail to find the 'new line' character in a specific line
+		if (!new_line || split_pos < 0)
+		{
+			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Incorrect config: %s", buf);
+			ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+			break;
+		}
+// Update the parameter value
+		string new_param(buf);
+		ret = parse_config_param(new_param.substr(0, split_pos - 1).c_str(), new_param.substr(split_pos + 1).c_str());
+		if (CHECK_MSG_DUMPER_FAILURE(ret))
+			break;
+	}
+
+// Close the file
+	fclose(fp);
+	fp = NULL;
+
+	return ret;
 }

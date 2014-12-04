@@ -29,9 +29,19 @@ unsigned short MsgDumperRemote::write_device_file()
 	return MSG_DUMPER_SUCCESS;
 }
 
+unsigned short MsgDumperRemote::parse_config_param(const char* param_title, const char* param_content)
+{
+	return MSG_DUMPER_SUCCESS;
+}
+
 unsigned short MsgDumperRemote::initialize(void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperRemote object......");
+
+// Parse the config file first
+	unsigned short ret = parse_config("remote");
+	if (CHECK_MSG_DUMPER_FAILURE(ret))
+		return ret;
 
 	return MsgDumperTimerThread::initialize(config);
 }

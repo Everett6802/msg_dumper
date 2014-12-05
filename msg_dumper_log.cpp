@@ -6,13 +6,14 @@
 #include "msg_dumper_log.h"
 
 
-char* MsgDumperLog::LOG_FOLDER = "log";
+char* MsgDumperLog::DEF_LOG_FOLDER = "log";
 
 MsgDumperLog::MsgDumperLog() :
 	log_filename(NULL),
 	log_filepath(NULL)
 {
 	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "LOG");
+	memcpy(log_folder, DEF_LOG_FOLDER, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 }
 
 MsgDumperLog::~MsgDumperLog()
@@ -54,7 +55,7 @@ unsigned short MsgDumperLog::create_device_file()
 	memset(log_filename, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
 	snprintf(log_filename, MSG_DUMPER_SHORT_STRING_SIZE, "%s.log", current_time_string);
 	memset(log_filepath, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
-	snprintf(log_filepath, MSG_DUMPER_SHORT_STRING_SIZE, "%s/%s", LOG_FOLDER, log_filename);
+	snprintf(log_filepath, MSG_DUMPER_SHORT_STRING_SIZE, "%s/%s", log_folder, log_filename);
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log file path: %s", log_filepath);
 
 	return MSG_DUMPER_SUCCESS;
@@ -97,7 +98,7 @@ unsigned short MsgDumperLog::create_log_folder()
 	struct stat st = {0};
 
 	char folder_path[MSG_DUMPER_STRING_SIZE];
-	snprintf(folder_path, MSG_DUMPER_SHORT_STRING_SIZE, "./%s", LOG_FOLDER);
+	snprintf(folder_path, MSG_DUMPER_SHORT_STRING_SIZE, "./%s", log_folder);
 
 // Check if the log folder exists or not
 	if (stat(folder_path, &st) == -1)
@@ -120,7 +121,53 @@ unsigned short MsgDumperLog::create_log_folder()
 
 unsigned short MsgDumperLog::parse_config_param(const char* param_title, const char* param_content)
 {
-	return MSG_DUMPER_SUCCESS;
+	if (param_title == NULL || param_content == NULL)
+	{
+		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
+		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+	}
+	static char* title[] = {"log_folder"};
+	static int title_len = sizeof title / sizeof title[0];
+
+	unsigned short ret = MSG_DUMPER_SUCCESS;
+	bool found = false;
+	for (int index = 0 ; index < title_len ; index++)
+	{
+		if (strcmp(title[index], param_title) == 0)
+		{
+			int param_content_len = strlen(param_content);
+			char* param_member_variable = NULL;
+			switch(index)
+			{
+			case 0:
+				param_member_variable = log_folder;
+				break;
+			}
+
+			if (param_member_variable != NULL)
+			{
+				memset(param_member_variable, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+				memcpy(param_member_variable, param_content, param_content_len);
+				found = true;
+				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Update parameter: %s=%s", param_title, param_content);
+			}
+			else
+			{
+				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter: %s=%s", param_title, param_content);
+				ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+			}
+			break;
+		}
+	}
+// If the title is NOT found...
+	if (!found)
+	{
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
+		ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+	}
+
+	return ret;
+
 }
 
 unsigned short MsgDumperLog::initialize(void* config)

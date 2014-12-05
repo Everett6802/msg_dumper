@@ -204,6 +204,7 @@ unsigned short MsgDumperSql::parse_config_param(const char* param_title, const c
 			{
 				memset(param_member_variable, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 				memcpy(param_member_variable, param_content, param_content_len);
+				found = true;
 				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Update parameter: %s=%s", param_title, param_content);
 			}
 			else

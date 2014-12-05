@@ -11,10 +11,14 @@ class MsgDumperCom : public MsgDumperTimerThread
 {
 	friend class MsgDumperMgr;
 private:
-	static char* COM_PORT_NAME;
-	static speed_t COM_PORT_SPEED;
+	static char* DEF_COM_PORT_NAME;
+	static char* DEF_COM_PORT_SPEED;
+
+	char port_name[MSG_DUMPER_STRING_SIZE];
+	char port_speed[MSG_DUMPER_STRING_SIZE];
 
 	unsigned short try_open_comport(int& fd_com)const;
+	unsigned short transform_com_port_speed(speed_t& com_port_speed)const;
 
 protected:
 	virtual unsigned short create_device_file();

@@ -10,7 +10,8 @@ class MsgDumperLog : public MsgDumperTimerThread
 {
 	friend class MsgDumperMgr;
 private:
-	static char* LOG_FOLDER;
+	static char* DEF_LOG_FOLDER;
+	char log_folder[MSG_DUMPER_STRING_SIZE];
 
 	char* log_filename;
 	char* log_filepath;

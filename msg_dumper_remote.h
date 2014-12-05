@@ -10,6 +10,9 @@ class MsgDumperRemote : public MsgDumperTimerThread
 {
 	friend class MsgDumperMgr;
 
+private:
+	char server_list[MSG_DUMPER_STRING_SIZE];
+
 protected:
 	virtual unsigned short create_device_file();
 	virtual unsigned short write_device_file();

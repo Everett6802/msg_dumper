@@ -230,7 +230,7 @@ unsigned short MsgDumperTimerThread::parse_config(const char* dev_name)
 	while (fgets(buf, MSG_DUMPER_LONG_STRING_SIZE, fp) != NULL)
 	{
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Param content: %s", buf);
-		bool new_line = false;
+		int new_line_pos = -1;
 		int split_pos = -1;
 // Get the config for each line
 		for (int i = 0 ; i < MSG_DUMPER_LONG_STRING_SIZE ; i++)
@@ -238,22 +238,24 @@ unsigned short MsgDumperTimerThread::parse_config(const char* dev_name)
 			if (buf[i] == '\n')
 			{
 				buf[i] = '\0';
-				new_line = true;
+				new_line_pos = i;
 				break;
 			}
 			if (buf[i] == '=')
 				split_pos = i;
 		}
-// Incorrect config! Fail to find the 'new line' character in a specific line
-		if (!new_line || split_pos < 0)
+		if (new_line_pos == 0)
+			break;
+		else if (new_line_pos < 0 || split_pos < 0)
 		{
+// Incorrect config! Fail to find the 'new line' character in a specific line
 			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Incorrect config: %s", buf);
 			ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 			break;
 		}
 // Update the parameter value
 		string new_param(buf);
-		ret = parse_config_param(new_param.substr(0, split_pos - 1).c_str(), new_param.substr(split_pos + 1).c_str());
+		ret = parse_config_param(new_param.substr(0, split_pos).c_str(), new_param.substr(split_pos + 1).c_str());
 		if (CHECK_MSG_DUMPER_FAILURE(ret))
 			break;
 	}

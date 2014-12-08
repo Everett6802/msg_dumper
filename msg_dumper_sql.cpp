@@ -131,7 +131,7 @@ unsigned short MsgDumperSql::write_device_file()
 		if(mysql_query(connection, cmd_buf) != NULL)
 		{
 			int error = mysql_errno(connection);
-			if (error != 1050)
+			if (error != ER_TABLE_EXISTS_ERROR)
 			{
 				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %d, %s", get_thread_name(), error, mysql_error(connection));
 				return MSG_DUMPER_FAILURE_MYSQL;

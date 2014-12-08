@@ -17,6 +17,9 @@ static const unsigned short MSG_DUMPER_STRING_SIZE = 64;
 static const unsigned short MSG_DUMPER_LONG_STRING_SIZE = 256;
 static const unsigned short MSG_DUMPER_EX_LONG_STRING_SIZE = MSG_DUMPER_LONG_STRING_SIZE * 2;
 
+static const unsigned short SERVER_PORT_NO = 6802;
+static const unsigned short MAX_CONNECTED_CLIENT = 5;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Macro
 

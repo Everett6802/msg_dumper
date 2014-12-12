@@ -10,7 +10,7 @@ OUTPUT := msg_dumper_daemon
 build: $(OUTPUT)
 
 $(OUTPUT): $(OBJS)
-	$(CC) $(CXXFLAGS) -o $@ $(OBJS)
+	$(CC) $(CXXFLAGS) -o $@ $(OBJS) -lpthread
 
 %.o: %.cpp
 	$(CC) $(CXXFLAGS) -c -o $@ $<

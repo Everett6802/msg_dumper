@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -26,7 +27,7 @@ int main()
 	server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_sockfd == -1)
 	{
-		WRITE_ERR_SYSLOG("Fail to create a server socket: server_sockfd");
+		WRITE_ERR_SYSLOG("socket() fail");
 		exit(EXIT_FAILURE);
 	}
 
@@ -36,15 +37,24 @@ int main()
 	memset(&server_address, 0x0, sizeof(struct sockaddr_in));
 	server_address.sin_family = AF_INET;
 	server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-	server_address.sin_port = SERVER_PORT_NO;
+	server_address.sin_port = htons(SERVER_PORT_NO);
 	server_len = sizeof(server_address);
-	bind(server_sockfd, (struct sockaddr*)&server_address, server_len);
+	if (bind(server_sockfd, (struct sockaddr*)&server_address, server_len) == -1)
+	{
+		WRITE_ERR_SYSLOG("bind() fail");
+		exit(EXIT_FAILURE);
+	}
 
 // Listen
 	int client_sockfd;
 	int client_len;
 	struct sockaddr_in client_address;
-	listen(server_sockfd, MAX_CONNECTED_CLIENT);
+	if (listen(server_sockfd, MAX_CONNECTED_CLIENT) == -1)
+	{
+		WRITE_ERR_SYSLOG("listen() fail");
+		exit(EXIT_FAILURE);
+	}
+
 
 	while (true)
 	{
@@ -52,6 +62,11 @@ int main()
 // Accept the request from the client
 		client_len = sizeof(client_address);
 		client_sockfd = accept(server_sockfd, (struct sockaddr*)&client_address, (socklen_t*)&client_len);
+		if (server_sockfd == -1)
+		{
+			WRITE_ERR_SYSLOG("accept() fail");
+			exit(EXIT_FAILURE);
+		}
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Got a connection request from %s......", inet_ntoa(client_address.sin_addr));
 
 //// Read the command from the client
@@ -70,7 +85,7 @@ int main()
 //		{
 //			WRITE_ERR_SYSLOG("Error occur while trying to start the action...");
 //		}
-//		close(client_sockfd);
+		close(client_sockfd);
 	}
 
 	exit(EXIT_SUCCESS);

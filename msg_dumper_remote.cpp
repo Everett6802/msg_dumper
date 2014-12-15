@@ -51,6 +51,7 @@ unsigned short MsgDumperRemote::create_device_file()
 			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to connect to server[%s]", pRemoteServerCfg->ip);
 			return MSG_DUMPER_FAILURE_SOCKET;
 		}
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Try to connect to the server: %s...... Successfully", pRemoteServerCfg->ip);
 
 		server_socket_list.push_back(pRemoteServerCfg);
 
@@ -120,16 +121,16 @@ unsigned short MsgDumperRemote::parse_config_param(const char* param_title, cons
 
 }
 
-unsigned short MsgDumperRemote::initialize(void* config)
+unsigned short MsgDumperRemote::initialize(const char* config_path, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperRemote object......");
 
 // Parse the config file first
-	unsigned short ret = parse_config("remote");
+	unsigned short ret = parse_config(config_path, "remote");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 		return ret;
 
-	return MsgDumperTimerThread::initialize(config);
+	return MsgDumperTimerThread::initialize(config_path, config);
 }
 
 unsigned short MsgDumperRemote::deinitialize()

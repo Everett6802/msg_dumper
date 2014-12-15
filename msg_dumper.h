@@ -42,7 +42,7 @@ extern "C"
 {
 
 unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned char& minor_version);
-unsigned short msg_dumper_initialize();
+unsigned short msg_dumper_initialize(const char* config_path);
 unsigned short msg_dumper_set_severity(unsigned short severity);
 unsigned short msg_dumper_set_facility(unsigned short facility);
 unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg);
@@ -51,7 +51,7 @@ unsigned short msg_dumper_deinitialize();
 }
 
 typedef unsigned short (*FP_msg_dumper_get_version)(unsigned char& major_version, unsigned char& minor_version);
-typedef unsigned short (*FP_msg_dumper_initialize)();
+typedef unsigned short (*FP_msg_dumper_initialize)(const char* config_path);
 typedef unsigned short (*FP_msg_dumper_set_severity)(unsigned short severity);
 typedef unsigned short (*FP_msg_dumper_set_facility)(unsigned short facility);
 typedef unsigned short (*FP_msg_dumper_write_msg)(unsigned short severity, const char* msg);

@@ -60,7 +60,7 @@ public:
 	MsgDumperRemote();
 	virtual ~MsgDumperRemote();
 
-	virtual unsigned short initialize(void* config=NULL);
+	virtual unsigned short initialize(const char* config_path, void* config=NULL);
 	virtual unsigned short deinitialize();
 };
 

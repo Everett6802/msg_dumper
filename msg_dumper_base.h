@@ -15,7 +15,7 @@ public:
 	MsgDumperBase();
 	virtual ~MsgDumperBase(){}
 
-	virtual unsigned short initialize(void* config=NULL)=0;
+	virtual unsigned short initialize(const char* config_path, void* config=NULL)=0;
 	virtual unsigned short deinitialize()=0;
 	virtual unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg)=0;
 };

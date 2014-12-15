@@ -225,12 +225,12 @@ unsigned short MsgDumperSql::parse_config_param(const char* param_title, const c
 	return ret;
 }
 
-unsigned short MsgDumperSql::initialize(void* config)
+unsigned short MsgDumperSql::initialize(const char* config_path, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperSql object......");
 
 // Parse the config file first
-	unsigned short ret = parse_config("sql");
+	unsigned short ret = parse_config(config_path, "sql");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 		return ret;
 
@@ -240,7 +240,7 @@ unsigned short MsgDumperSql::initialize(void* config)
 		return ret;
 	device_handle_exist = true;
 
-	return MsgDumperTimerThread::initialize(config);
+	return MsgDumperTimerThread::initialize(config_path, config);
 }
 
 unsigned short MsgDumperSql::deinitialize()

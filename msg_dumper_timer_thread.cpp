@@ -83,7 +83,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 	return ret;
 }
 
-unsigned short MsgDumperTimerThread::initialize(void* config)
+unsigned short MsgDumperTimerThread::initialize(const char* config_path, void* config)
 {
 	int api_ret;
 // Initialize the synchronization object
@@ -197,6 +197,7 @@ unsigned short MsgDumperTimerThread::generate_current_time_string(char* current_
 		WRITE_ERR_SYSLOG("Invalid argument: current_time_string");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
+
 	time_t timep;
 	time(&timep);
 	struct tm* p = localtime(&timep);
@@ -207,16 +208,17 @@ unsigned short MsgDumperTimerThread::generate_current_time_string(char* current_
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperTimerThread::parse_config(const char* dev_name)
+unsigned short MsgDumperTimerThread::parse_config(const char* conf_path, const char* dev_name)
 {
-	if (dev_name ==  NULL)
+	if (conf_path == NULL || dev_name == NULL)
 	{
-		WRITE_ERR_SYSLOG("Invalid argument: dev_name");
+		WRITE_ERR_SYSLOG("Invalid argument: conf_path/dev_name");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 // Open the file
-	char conf_filepath[MSG_DUMPER_SHORT_STRING_SIZE];
-	snprintf(conf_filepath, MSG_DUMPER_SHORT_STRING_SIZE, "%s/%s_param.conf", CONF_FOLDER_NAME,dev_name);
+	char conf_filepath[MSG_DUMPER_STRING_SIZE];
+	snprintf(conf_filepath, MSG_DUMPER_STRING_SIZE, "%s/%s/%s_param.conf", conf_path, CONF_FOLDER_NAME, dev_name);
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to parse the conf file: %s", conf_path);
 	FILE* fp = fopen(conf_filepath, "r");
 	if (fp == NULL)
 	{

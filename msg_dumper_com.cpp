@@ -178,12 +178,12 @@ unsigned short MsgDumperCom::parse_config_param(const char* param_title, const c
 
 }
 
-unsigned short MsgDumperCom::initialize(void* config)
+unsigned short MsgDumperCom::initialize(const char* config_path, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperCom object......");
 
 // Parse the config file first
-	unsigned short ret = parse_config("com");
+	unsigned short ret = parse_config(config_path, "com");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 		return ret;
 
@@ -193,5 +193,5 @@ unsigned short MsgDumperCom::initialize(void* config)
 		return ret;
 	device_handle_exist = true;
 
-	return MsgDumperTimerThread::initialize(config);
+	return MsgDumperTimerThread::initialize(config_path, config);
 }

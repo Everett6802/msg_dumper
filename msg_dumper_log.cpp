@@ -170,12 +170,12 @@ unsigned short MsgDumperLog::parse_config_param(const char* param_title, const c
 
 }
 
-unsigned short MsgDumperLog::initialize(void* config)
+unsigned short MsgDumperLog::initialize(const char* config_path, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperLog object......");
 
 // Parse the config file first
-	unsigned short ret = parse_config("log");
+	unsigned short ret = parse_config(config_path, "log");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 		return ret;
 
@@ -184,5 +184,5 @@ unsigned short MsgDumperLog::initialize(void* config)
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	return ret;
 
-	return MsgDumperTimerThread::initialize(config);
+	return MsgDumperTimerThread::initialize(config_path, config);
 }

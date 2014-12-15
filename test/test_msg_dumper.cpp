@@ -29,7 +29,7 @@ int main()
 	}
 
 	unsigned short severity = MSG_DUMPER_SEVIRITY_DEBUG;
-	unsigned short facility = MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_LOG;
+	unsigned short facility = MSG_DUMPER_FACILITY_REMOTE;
 
 // Export the APIs
 	if (!export_api(handle))
@@ -63,7 +63,7 @@ int main()
 
 // Initialize the library
 	printf("Initialize the library\n");
-	ret = fp_msg_dumper_initialize();
+	ret = fp_msg_dumper_initialize("..");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_initialize() fails, due to %d\n", ret);

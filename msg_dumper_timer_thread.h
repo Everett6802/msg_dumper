@@ -97,7 +97,7 @@ protected:
 
 	pthread_t get_pid()const{return pid;}
 	unsigned short generate_current_time_string(char* current_time_string);
-	unsigned short parse_config(const char* dev_name);
+	unsigned short parse_config(const char* conf_path, const char* dev_name);
 
 	virtual unsigned short create_device_file()=0;
 	virtual unsigned short write_device_file()=0;
@@ -106,7 +106,7 @@ protected:
 	virtual const char* get_thread_name()const;
 
 public:
-	virtual unsigned short initialize(void* config=NULL);
+	virtual unsigned short initialize(const char* conf_path, void* config=NULL);
 	virtual unsigned short deinitialize();
 	virtual unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg);
 };

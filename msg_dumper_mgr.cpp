@@ -19,13 +19,14 @@ MsgDumperMgr::MsgDumperMgr() :
 		msg_dumper[i] = NULL;
 }
 
-unsigned short MsgDumperMgr::initialize()
+unsigned short MsgDumperMgr::initialize(const char* config_path)
 {
 	if (is_init)
 	{
 		WRITE_ERR_SYSLOG("Library has been initialized");
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The config path: %s", config_path);
 
 // Register the class to the simple factory
 	REGISTER_CLASS(MsgDumperLog);
@@ -51,7 +52,7 @@ unsigned short MsgDumperMgr::initialize()
 			}
 
 			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Initialize the %s object", dev_class_name);
-			ret = msg_dumper[i]->initialize();
+			ret = msg_dumper[i]->initialize(config_path);
 			if (CHECK_MSG_DUMPER_FAILURE(ret))
 			{
 				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to initialize the %s object", dev_class_name);

@@ -49,7 +49,7 @@ private:
 
 	char server_list[MSG_DUMPER_STRING_SIZE];
 	char server_port[MSG_DUMPER_STRING_SIZE];
-	list<PREMOTESERVERCFG> server_socket_list;
+	vector<PREMOTESERVERCFG> server_socket_vector;
 
 protected:
 	virtual unsigned short create_device_file();

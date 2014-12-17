@@ -70,6 +70,8 @@ int main()
 		goto EXIT1;
 	}
 
+	sleep(3);
+
 // Write the message
 	printf("Write the ERROR message\n");
 	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_ERROR, "This is a test: Error");

@@ -53,7 +53,7 @@ unsigned short MsgDumperRemote::create_device_file()
 		}
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Try to connect to the server: %s...... Successfully", pRemoteServerCfg->ip);
 
-		server_socket_list.push_back(pRemoteServerCfg);
+		server_socket_vector.push_back(pRemoteServerCfg);
 
 		tok = strtok(NULL, ",");
 	}
@@ -63,6 +63,49 @@ unsigned short MsgDumperRemote::create_device_file()
 
 unsigned short MsgDumperRemote::write_device_file()
 {
+// Write the message into the log file
+	int write_vector_size = write_vector.size();
+	int server_socket_vector_size = server_socket_vector.size();
+	for (int i = 0 ; i < write_vector_size ; i++)
+	{
+		PMSG_CFG msg_cfg = (PMSG_CFG)write_vector[i];
+		for(int j = 0 ; j < server_socket_vector_size ; j++)
+		{
+			PREMOTESERVERCFG remote_server_cfg = (PREMOTESERVERCFG)server_socket_vector[i];
+			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to remote server [%s]", msg_cfg->to_string(), remote_server_cfg->ip);
+			int msg_cfg_len = strlen(msg_cfg->to_string());
+			int numbytes = write(remote_server_cfg->sockfd, msg_cfg->to_string(), msg_cfg_len);
+			if (numbytes == -1)
+			{
+				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Fail to write the message[%s] to remote server [%s]", msg_cfg->to_string(), remote_server_cfg->ip);
+				return MSG_DUMPER_FAILURE_SOCKET;
+			}
+			else if (numbytes < msg_cfg_len)
+			{
+				int index_pointer = numbytes;
+				int left_msg_cfg_len = msg_cfg_len - numbytes;
+				const char* msg_cfg_content = msg_cfg->to_string();
+				while (left_msg_cfg_len > 0)
+				{
+					numbytes = write(remote_server_cfg->sockfd, &msg_cfg_content[index_pointer], left_msg_cfg_len);
+					if (numbytes == -1)
+					{
+						WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Fail to write the message[%s] to remote server [%s]", msg_cfg->to_string(), remote_server_cfg->ip);
+						return MSG_DUMPER_FAILURE_SOCKET;
+					}
+					index_pointer += numbytes;
+					left_msg_cfg_len -= numbytes;
+				}
+			}
+		}
+
+// Release the resource
+		delete[] msg_cfg;
+		write_vector[i] = NULL;
+	}
+
+// Clean-up the container
+	write_vector.clear();
 
 	return MSG_DUMPER_SUCCESS;
 }
@@ -135,14 +178,14 @@ unsigned short MsgDumperRemote::initialize(const char* config_path, void* config
 
 unsigned short MsgDumperRemote::deinitialize()
 {
-	list<PREMOTESERVERCFG>::iterator iter = server_socket_list.begin();
-	while(iter++ != server_socket_list.end())
+	int server_socket_vector_size = server_socket_vector.size();
+	for(int i = 0 ; i < server_socket_vector_size ; i++)
 	{
-		PREMOTESERVERCFG pRemoteServerCfg = (PREMOTESERVERCFG)*iter;
-		*iter = NULL;
+		PREMOTESERVERCFG pRemoteServerCfg = (PREMOTESERVERCFG)server_socket_vector[i];
+		server_socket_vector[i] = NULL;
 		delete pRemoteServerCfg;
 	}
-	server_socket_list.clear();
+	server_socket_vector.clear();
 
 	return MsgDumperTimerThread::deinitialize();
 }

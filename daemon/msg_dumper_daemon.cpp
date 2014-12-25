@@ -4,15 +4,19 @@
 #include <string.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <poll.h>
 #include <iostream>
 #include <string>
 #include <vector>
 #include "../msg_dumper.h"
 #include "../common.h"
 #include "msg_dumper_daemon.h"
+
+#define READ_METHOD 2
 
 
 using namespace std;
@@ -36,7 +40,7 @@ int main()
 	server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_sockfd == -1)
 	{
-		WRITE_ERR_SYSLOG("socket() fail");
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "socket() fail, due to: %s", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
@@ -51,7 +55,7 @@ int main()
 	server_len = sizeof(server_address);
 	if (bind(server_sockfd, (struct sockaddr*)&server_address, server_len) == -1)
 	{
-		WRITE_ERR_SYSLOG("bind() fail");
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "bind() fail, due to: %s", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
@@ -74,7 +78,7 @@ int main()
 		client_sockfd = accept(server_sockfd, (struct sockaddr*)&client_address, (socklen_t*)&client_len);
 		if (client_sockfd == -1)
 		{
-			WRITE_ERR_SYSLOG("accept() fail");
+			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "accept() fail, due to: %s", strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Got a connection request from the remote[%s]......", inet_ntoa(client_address.sin_addr));
@@ -129,20 +133,111 @@ unsigned short daemon_init()
 
 void* read_socket_thread_handler(void* void_param)
 {
-	static const int BUF_SIZE = 256;
+	static string end_of_packet = "\r\n\r\n";
+	static size_t end_of_packet_size = end_of_packet.size();
+	static const int BUF_SIZE = 512;
+
 	int client_socket = *((int*)void_param);
 	int numbytes;
 	char buf[BUF_SIZE];
+	string total_data = "";
 
 	WRITE_DEBUG_SYSLOG("The worker thread of receiving data daemon is running......");
-
+#if READ_METHOD == 1
 	while (true)
 	{
+// Read the data from the remote
+		memset(buf, 0x0, sizeof(char) * BUF_SIZE);
 		numbytes = read(client_socket, buf, sizeof(char) * BUF_SIZE);
-		if (numbytes == -1)
-			pthread_exit((void*)"Fail to read the data");
-		WRITE_DEBUG_SYSLOG(buf);
-	}
 
+		if (numbytes == -1)
+			pthread_exit((void*)"Fail to read the data...");
+//		else if (BUF_SIZE == numbytes)
+//			WRITE_DEBUG_SYSLOG("The data receiving from the remote site is LARGER THAN the buffer size");
+
+		total_data += string(buf);
+// If no data is received..., maybe the connection is closed by the client
+		if (total_data.empty())
+		{
+			WRITE_DEBUG_SYSLOG("The connection is closed by the client");
+			break;
+		}
+// Check if the data is completely sent from the remote site
+		size_t beg_pos = total_data.find(end_of_packet);
+		if (beg_pos == string::npos)
+		{
+			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "The data[%s] is NOT sent completely", total_data.c_str());
+			continue;
+		}
+
+// Show the data read from the remote site
+		WRITE_DEBUG_SYSLOG(total_data.substr(0, beg_pos).c_str());
+// Remove the data which is already shown
+		total_data = total_data.substr(beg_pos + end_of_packet_size);
+	}
+#elif READ_METHOD == 2
+	while (true)
+	{
+		struct pollfd pfd;
+		pfd.fd = client_socket;
+		pfd.events = POLLIN | POLLHUP | POLLRDNORM;
+//		pfd.revents = 0;
+
+		int ret = poll(&pfd, 1, 3000); // call poll with a timeout of 3000 ms
+//		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "poll() return value: %d", ret);
+		if (ret < 0)
+		{
+			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "poll() fail, due to %s", strerror(errno));
+			pthread_exit((void*)"Fail to read the data...");
+		}
+		else if (ret > 0)
+		{
+// Read the data from the remote
+			memset(buf, 0x0, sizeof(char) * BUF_SIZE);
+			ret = recv(client_socket, buf, sizeof(char) * BUF_SIZE, /*MSG_PEEK |*/ MSG_DONTWAIT);
+//			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "recv() return value: %d", ret);
+// if result > 0, this means that there is either data available on the socket, or the socket has been closed
+			if (ret == 0)
+			{
+// if recv() returns zero, that means the connection has been closed
+				WRITE_DEBUG_SYSLOG("The connection is closed by the client");
+				break;
+			}
+			else
+			{
+				total_data += string(buf);
+// If no data is received..., maybe the connection is closed by the client
+				if (total_data.empty())
+				{
+					WRITE_DEBUG_SYSLOG("The connection is closed by the client");
+					break;
+				}
+// Check if the data is completely sent from the remote site
+				size_t beg_pos = total_data.find(end_of_packet);
+				if (beg_pos == string::npos)
+				{
+					WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "The data[%s] is NOT sent completely", total_data.c_str());
+					continue;
+				}
+
+// Show the data read from the remote site
+				WRITE_DEBUG_SYSLOG(total_data.substr(0, beg_pos).c_str());
+// Remove the data which is already shown
+				total_data = total_data.substr(beg_pos + end_of_packet_size);
+			}
+		}
+		else
+		{
+			WRITE_DEBUG_SYSLOG("Time out. Nothing happen...");
+			if (total_data.size() != 0)
+				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "The data[%s] is STILL in the buffer !!!", total_data.c_str());
+		}
+	}
+#else
+	assert(0 && "Unknown way to read the data");
+	exit(1);
+#endif
+
+	WRITE_DEBUG_SYSLOG("The worker thread of reading socket is going to die......");
 	pthread_exit((void*)"Success");
 }

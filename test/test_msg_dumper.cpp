@@ -75,6 +75,7 @@ int main()
 // Write the message
 	printf("Write the ERROR message\n");
 	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_ERROR, "This is a test: Error");
+	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_ERROR, "This is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: Error");
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);

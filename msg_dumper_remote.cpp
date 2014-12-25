@@ -63,6 +63,9 @@ unsigned short MsgDumperRemote::create_device_file()
 
 unsigned short MsgDumperRemote::write_device_file()
 {
+	static string end_of_packet = "\r\n\r\n";
+//	static int end_of_packet_len = end_of_packet.size();
+
 // Write the message into the log file
 	int write_vector_size = write_vector.size();
 	int server_socket_vector_size = server_socket_vector.size();
@@ -73,8 +76,10 @@ unsigned short MsgDumperRemote::write_device_file()
 		{
 			PREMOTESERVERCFG remote_server_cfg = (PREMOTESERVERCFG)server_socket_vector[i];
 			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to remote server [%s]", msg_cfg->to_string(), remote_server_cfg->ip);
-			int msg_cfg_len = strlen(msg_cfg->to_string());
-			int numbytes = write(remote_server_cfg->sockfd, msg_cfg->to_string(), msg_cfg_len);
+
+			string packet_data = string(msg_cfg->to_string()) + end_of_packet;
+			int msg_cfg_len = packet_data.size(); //strlen(msg_cfg->to_string());
+			int numbytes = write(remote_server_cfg->sockfd, packet_data.c_str()/*msg_cfg->to_string()*/, msg_cfg_len);
 			if (numbytes == -1)
 			{
 				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Fail to write the message[%s] to remote server [%s]", msg_cfg->to_string(), remote_server_cfg->ip);
@@ -84,7 +89,7 @@ unsigned short MsgDumperRemote::write_device_file()
 			{
 				int index_pointer = numbytes;
 				int left_msg_cfg_len = msg_cfg_len - numbytes;
-				const char* msg_cfg_content = msg_cfg->to_string();
+				const char* msg_cfg_content = packet_data.c_str(); //msg_cfg->to_string();
 				while (left_msg_cfg_len > 0)
 				{
 					numbytes = write(remote_server_cfg->sockfd, &msg_cfg_content[index_pointer], left_msg_cfg_len);

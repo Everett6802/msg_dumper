@@ -5,10 +5,11 @@
 #include "msg_dumper_com.h"
 #include "msg_dumper_sql.h"
 #include "msg_dumper_remote.h"
+#include "msg_dumper_syslog.h"
 
 
-char* MsgDumperMgr::dev_name[] = {"Log", "Com", "Sql", "Remote"};
-short MsgDumperMgr::dev_flag[] = {MSG_DUMPER_FACILITY_LOG, MSG_DUMPER_FACILITY_COM, MSG_DUMPER_FACILITY_SQL, MSG_DUMPER_FACILITY_REMOTE};
+char* MsgDumperMgr::dev_name[] = {"Log", "Com", "Sql", "Remote", "Syslog"};
+short MsgDumperMgr::dev_flag[] = {MSG_DUMPER_FACILITY_LOG, MSG_DUMPER_FACILITY_COM, MSG_DUMPER_FACILITY_SQL, MSG_DUMPER_FACILITY_REMOTE, MSG_DUMPER_FACILITY_SYSLOG};
 
 MsgDumperMgr::MsgDumperMgr() :
 	is_init(false),
@@ -33,6 +34,7 @@ unsigned short MsgDumperMgr::initialize(const char* config_path)
 	REGISTER_CLASS(MsgDumperCom);
 	REGISTER_CLASS(MsgDumperSql);
 	REGISTER_CLASS(MsgDumperRemote);
+	REGISTER_CLASS(MsgDumperSyslog);
 
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	char dev_class_name[32];

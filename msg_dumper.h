@@ -32,8 +32,9 @@ static const unsigned short MSG_DUMPER_FACILITY_LOG = 0x1;
 static const unsigned short MSG_DUMPER_FACILITY_COM = 0x1 << 1;
 static const unsigned short MSG_DUMPER_FACILITY_SQL = 0x1 << 2;
 static const unsigned short MSG_DUMPER_FACILITY_REMOTE = 0x1 << 3;
-static const unsigned short MSG_DUMPER_FACILITY_ALL = (MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM | MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_REMOTE);
-enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_REMOTE, FACILITY_SIZE};
+static const unsigned short MSG_DUMPER_FACILITY_SYSLOG = 0x1 << 4;
+static const unsigned short MSG_DUMPER_FACILITY_ALL = (MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM | MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_REMOTE | MSG_DUMPER_FACILITY_SYSLOG);
+enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_REMOTE, FACILITY_SYSLOG, FACILITY_SIZE};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // APIs
@@ -44,6 +45,7 @@ extern "C"
 unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned char& minor_version);
 unsigned short msg_dumper_initialize(const char* config_path);
 unsigned short msg_dumper_set_severity(unsigned short severity);
+unsigned short msg_dumper_set_severity_ex(unsigned short facility, unsigned short severity);
 unsigned short msg_dumper_set_facility(unsigned short facility);
 unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg);
 unsigned short msg_dumper_deinitialize();
@@ -53,6 +55,7 @@ unsigned short msg_dumper_deinitialize();
 typedef unsigned short (*FP_msg_dumper_get_version)(unsigned char& major_version, unsigned char& minor_version);
 typedef unsigned short (*FP_msg_dumper_initialize)(const char* config_path);
 typedef unsigned short (*FP_msg_dumper_set_severity)(unsigned short severity);
+typedef unsigned short (*FP_msg_dumper_set_severity_ex)(unsigned short facility, unsigned short severity);
 typedef unsigned short (*FP_msg_dumper_set_facility)(unsigned short facility);
 typedef unsigned short (*FP_msg_dumper_write_msg)(unsigned short severity, const char* msg);
 typedef unsigned short (*FP_msg_dumper_deinitialize)();

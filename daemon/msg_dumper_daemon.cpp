@@ -219,7 +219,6 @@ void* read_socket_thread_handler(void* void_param)
 					WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "The data[%s] is NOT sent completely", total_data.c_str());
 					continue;
 				}
-
 // Show the data read from the remote site
 				WRITE_DEBUG_SYSLOG(total_data.substr(0, beg_pos).c_str());
 // Remove the data which is already shown

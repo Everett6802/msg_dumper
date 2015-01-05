@@ -22,7 +22,7 @@
 using namespace std;
 
 unsigned short daemon_init();
-void* read_socket_thread_handler(void* void_param);
+void* client_socket_thread_handler(void* void_param);
 
 int main()
 {
@@ -86,14 +86,14 @@ int main()
 // Create a worker thread to receive the data from the remote site
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Create another thread to receive the data from the remote[%s]", inet_ntoa(client_address.sin_addr));
 		pthread_t pid;
-		int res = pthread_create(&pid, NULL, read_socket_thread_handler, (void*)&client_sockfd);
+		int res = pthread_create(&pid, NULL, client_socket_thread_handler, (void*)&client_sockfd);
 		if (res != 0)
 		{
 			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "pthread_create() fail, due to %s", strerror(res));
 			exit(EXIT_FAILURE);
 		}
 	}
-	close(client_sockfd);
+	close(server_sockfd);
 
 	exit(EXIT_SUCCESS);
 }
@@ -131,7 +131,7 @@ unsigned short daemon_init()
 	return MSG_DUMPER_SUCCESS;
 }
 
-void* read_socket_thread_handler(void* void_param)
+void* client_socket_thread_handler(void* void_param)
 {
 	static string end_of_packet = "\r\n\r\n";
 	static size_t end_of_packet_size = end_of_packet.size();

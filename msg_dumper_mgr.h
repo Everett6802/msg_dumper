@@ -50,6 +50,8 @@ public:
 	unsigned short initialize(const char* config_path);
 	unsigned short set_severity(unsigned short severity);
 	unsigned short set_facility(unsigned short facility);
+	unsigned short get_severity()const{return dumper_severity;}
+	unsigned short get_facility()const{return dumper_facility;}
 	unsigned short write_msg(unsigned short severity, const char* msg);
 	unsigned short deinitialize();
 };

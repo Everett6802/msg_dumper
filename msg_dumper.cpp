@@ -1,5 +1,7 @@
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "msg_dumper.h"
 #include "common.h"
@@ -38,22 +40,23 @@ unsigned short msg_dumper_set_facility(unsigned short facility)
 
 unsigned short msg_dumper_get_severity()
 {
-
-}
-
-unsigned short msg_dumper_get_severity_ex(unsigned short facility)
-{
-
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+	return msg_dumepr_mgr.get_severity();
 }
 
 unsigned short msg_dumper_get_facility()
 {
-
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+	return msg_dumepr_mgr.get_facility();
 }
 
 unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg)
 {
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+
+	if (severity > msg_dumepr_mgr.get_severity())
+		return MSG_DUMPER_SUCCESS;
+
 	return msg_dumepr_mgr.write_msg(severity, msg);
 }
 
@@ -65,7 +68,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* 
 	static const int fmtbuf_len = 16;
 	static char fmtbuf[fmtbuf_len];
 
-	if (severity > dumper_severity)
+	if (severity > msg_dumepr_mgr.get_severity())
 		return MSG_DUMPER_SUCCESS;
 
 	if (fmt == NULL)
@@ -104,6 +107,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* 
 				default:
 				{
 					assert(0 && "Unsupported format");
+					return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 				}
 				break;
 			}

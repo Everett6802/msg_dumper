@@ -16,8 +16,82 @@ FP_msg_dumper_deinitialize fp_msg_dumper_deinitialize;
 
 bool export_api(void* handle);
 
+
+
+using namespace std;
+
+//void test_fmt_string(char* fmt_string, int fmt_string_len, const char* fmt, ...)
+//{
+//	if (fmt_string == NULL)
+//	{
+//
+//	}
+//
+//	static const int fmtbuf_len = 16;
+//	static char fmtbuf[fmtbuf_len];
+//
+//	va_list arg_list;
+//	va_start(arg_list, fmt);
+//
+//	char* arg_str = NULL;
+//	int arg_str_len = 0;
+//	int fmt_string_index = 0;
+//	bool out = false;
+//	for(const char* p = fmt; *p != '\0' && fmt_string_index < fmt_string_len ; p++)
+//	{
+//		if (*p == '%')
+//		{
+//			switch (*++p)
+//			{
+//				case 'd':
+//				{
+//	// itoa is not ansi C standard and you should probably avoid it. Here are some roll-your-own implementations if you really want to use it anyway:
+//	//				fputs(itoa(value, fmtbuf, 10), stdout);
+//					snprintf(fmtbuf, fmtbuf_len, "%d", va_arg(arg_list, int));
+//					arg_str = fmtbuf;
+//				}
+//				break;
+//				case 's':
+//				{
+//					arg_str = va_arg(arg_list, char*);
+//				}
+//				break;
+//				default:
+//				{
+//					assert(0 && "Unsupported format");
+//				}
+//				break;
+//			}
+//			arg_str_len = strlen(arg_str);
+//			if (fmt_string_index + arg_str_len >= fmt_string_len - 1)
+//			{
+//				arg_str_len = fmt_string_len - fmt_string_index - 1;
+//				out = true;
+//			}
+//			memcpy(&fmt_string[fmt_string_index], arg_str, sizeof(char) * arg_str_len);
+//			fmt_string_index += arg_str_len;
+//	//		fputs(arg_str, stdout);
+//
+//		}
+//		else
+//		{
+////			putchar(*p);
+//			fmt_string[fmt_string_index++] = *p;
+//		}
+//	}
+//	fmt_string[fmt_string_index] = '\0';
+//	va_end(arg_list);
+//}
+
 int main()
 {
+//	char buf[16];
+//	test_fmt_string(buf, 16, "%d %d %d", 1, 2, 3);
+//	printf("%s\n", buf);
+//	test_fmt_string(buf, 16, "%s %s %s", "Fuck", "Your", "Mother");
+//	printf("%s\n", buf);
+//	exit(0);
+
 // Load library
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	void* handle = NULL;

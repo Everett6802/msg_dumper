@@ -7,15 +7,9 @@
 #include <signal.h>
 #include <errno.h>
 #include <assert.h>
-#include <iostream>
-#include <vector>
 #include "msg_dumper_base.h"
 #include "msg_dumper_mgr.h"
 
-
-#define CURRENT_TIME_STRING_LENGTH 11
-
-using namespace std;
 
 class MsgDumperTimerThread : public MsgDumperBase
 {
@@ -76,7 +70,6 @@ protected:
 	typedef MsgCfg* PMSG_CFG;
 
 private:
-	static const char* CONF_FOLDER_NAME;
 	pthread_t pid;
 	int exit;
 	pthread_mutex_t mut;
@@ -96,14 +89,10 @@ protected:
 	virtual ~MsgDumperTimerThread();
 
 	pthread_t get_pid()const{return pid;}
-	unsigned short generate_current_time_string(char* current_time_string);
-	unsigned short parse_config(const char* conf_path, const char* dev_name);
+	virtual const char* get_thread_name()const;
 
 	virtual unsigned short create_device_file()=0;
 	virtual unsigned short write_device_file()=0;
-	virtual unsigned short parse_config_param(const char* param_title, const char* param_content)=0;
-
-	virtual const char* get_thread_name()const;
 
 public:
 	virtual unsigned short initialize(const char* conf_path, void* config=NULL);

@@ -34,7 +34,7 @@ int main()
 	}
 
 	unsigned short severity = MSG_DUMPER_SEVIRITY_DEBUG;
-	unsigned short facility = MSG_DUMPER_FACILITY_SYSLOG;
+	unsigned short facility = MSG_DUMPER_FACILITY_SYSLOG | MSG_DUMPER_FACILITY_LOG;
 
 // Export the APIs
 	if (!export_api(handle))

@@ -39,7 +39,7 @@ unsigned short MsgDumperBase::parse_config(const char* conf_path, const char* de
 // Open the file
 	char conf_filepath[MSG_DUMPER_STRING_SIZE];
 	snprintf(conf_filepath, MSG_DUMPER_STRING_SIZE, "%s/%s/%s_param.conf", conf_path, CONF_FOLDER_NAME, dev_name);
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to parse the conf file: %s", conf_path);
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to parse the conf file: %s", conf_filepath);
 	FILE* fp = fopen(conf_filepath, "r");
 	if (fp == NULL)
 	{

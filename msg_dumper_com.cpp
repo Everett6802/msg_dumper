@@ -10,8 +10,10 @@ char* MsgDumperCom::DEF_COM_PORT_SPEED = "B115200";
 MsgDumperCom::MsgDumperCom()
 {
 	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "COM");
-	memcpy(port_name, DEF_COM_PORT_NAME, sizeof(char) * MSG_DUMPER_STRING_SIZE);
-	memcpy(port_speed, DEF_COM_PORT_SPEED, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memset(port_name, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(port_name, DEF_COM_PORT_NAME, sizeof(char) * strlen(DEF_COM_PORT_NAME));
+	memset(port_speed, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(port_speed, DEF_COM_PORT_SPEED, sizeof(char) * strlen(DEF_COM_PORT_SPEED));
 }
 
 MsgDumperCom::~MsgDumperCom()

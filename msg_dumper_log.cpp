@@ -13,7 +13,8 @@ MsgDumperLog::MsgDumperLog() :
 	log_filepath(NULL)
 {
 	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "LOG");
-	memcpy(log_folder, DEF_LOG_FOLDER, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memset(log_folder, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(log_folder, DEF_LOG_FOLDER, sizeof(char) * strlen(DEF_LOG_FOLDER));
 }
 
 MsgDumperLog::~MsgDumperLog()

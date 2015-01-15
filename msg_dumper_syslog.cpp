@@ -12,7 +12,8 @@ char* MsgDumperSyslog::DEF_FACILITY_NAME = "daemon";
 
 MsgDumperSyslog::MsgDumperSyslog()
 {
-	memcpy(facility_name, DEF_FACILITY_NAME, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memset(facility_name, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(facility_name, DEF_FACILITY_NAME, sizeof(char) * strlen(DEF_FACILITY_NAME));
 }
 
 MsgDumperSyslog::~MsgDumperSyslog()

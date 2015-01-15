@@ -13,6 +13,7 @@ MsgDumperRemote::MsgDumperRemote()
 	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "REMOTE");
 	memset(server_list, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memset(server_port, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(server_port, DEF_SERVER_PORT, sizeof(char) * strlen(DEF_SERVER_PORT));
 }
 
 MsgDumperRemote::~MsgDumperRemote()

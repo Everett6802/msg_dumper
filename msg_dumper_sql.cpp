@@ -22,10 +22,14 @@ MsgDumperSql::MsgDumperSql() :
 	table_created(false)
 {
 	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "SQL");
-	memcpy(server, DEF_SERVER, sizeof(char) * MSG_DUMPER_STRING_SIZE);
-	memcpy(username, DEF_USERNAME, sizeof(char) * MSG_DUMPER_STRING_SIZE);
-	memcpy(password, DEF_PASSWORD, sizeof(char) * MSG_DUMPER_STRING_SIZE);
-	memcpy(database, DEF_DATABASE, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memset(server, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(server, DEF_SERVER, sizeof(char) * strlen(DEF_SERVER));
+	memset(username, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(username, DEF_USERNAME, sizeof(char) * strlen(DEF_USERNAME));
+	memset(password, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(password, DEF_PASSWORD, sizeof(char) * strlen(DEF_PASSWORD));
+	memset(database, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(database, DEF_DATABASE, sizeof(char) * strlen(DEF_DATABASE));
 }
 
 MsgDumperSql::~MsgDumperSql()

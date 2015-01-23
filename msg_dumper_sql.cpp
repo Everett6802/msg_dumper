@@ -47,12 +47,6 @@ unsigned short MsgDumperSql::try_connect_mysql()
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 
-//	if (connect == NULL)
-//	{
-//		WRITE_ERR_SYSLOG("The parameters connected to the MySQL database server is NOT initialized...");
-//		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
-//	}
-
 	WRITE_DEBUG_SYSLOG("Try to connect to the MySQL database server...");
 // 函数mysql_real_connect建立一个数据库连接，成功返回MYSQL*连接句柄，失败返回NULL
 	if(mysql_real_connect(connection, server, username, password, database, 0, NULL, 0) == NULL)

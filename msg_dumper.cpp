@@ -13,7 +13,7 @@ static char fmtmsg[MSG_DUMPER_EX_LONG_STRING_SIZE];
 
 unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned char& minor_version)
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 	major_version = MAJOR_VERSION;
 	minor_version = MINOR_VERSION;
 
@@ -22,37 +22,37 @@ unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned cha
 
 unsigned short msg_dumper_initialize(const char* config_path)
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 	return msg_dumepr_mgr.initialize(config_path);
 }
 
 unsigned short msg_dumper_set_severity(unsigned short severity)
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 	return msg_dumepr_mgr.set_severity(severity);
 }
 
 unsigned short msg_dumper_set_facility(unsigned short facility)
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 	return msg_dumepr_mgr.set_facility(facility);
 }
 
 unsigned short msg_dumper_get_severity()
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 	return msg_dumepr_mgr.get_severity();
 }
 
 unsigned short msg_dumper_get_facility()
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 	return msg_dumepr_mgr.get_facility();
 }
 
 unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg)
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 
 	if (severity > msg_dumepr_mgr.get_severity())
 		return MSG_DUMPER_SUCCESS;
@@ -62,7 +62,7 @@ unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg)
 
 unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* fmt, ...)
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 
 	static const int fmtmsg_len = sizeof(fmtmsg) / sizeof(fmtmsg[0]);
 	static const int fmtbuf_len = 16;
@@ -135,7 +135,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* 
 
 unsigned short msg_dumper_deinitialize()
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 	return msg_dumepr_mgr.deinitialize();
 }
 

@@ -17,12 +17,16 @@ class MsgDumperBase
 {
 private:
 	static const char* CONF_FOLDER_NAME;
+	unsigned short severity;
 
 protected:
 	bool device_handle_exist;
 
 	unsigned short generate_current_time_string(char* current_time_string);
 	unsigned short parse_config(const char* conf_path, const char* dev_name);
+
+	unsigned short set_severity(unsigned short new_severity);
+	unsigned short get_severity()const;
 
 	virtual unsigned short parse_config_param(const char* param_title, const char* param_content)=0;
 

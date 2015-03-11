@@ -9,15 +9,49 @@
 
 
 char* MsgDumperMgr::dev_name[] = {"Log", "Com", "Sql", "Remote", "Syslog"};
+int MsgDumperMgr::dev_name_size = sizeof(dev_name) / sizeof(dev_name[0]);
 short MsgDumperMgr::dev_flag[] = {MSG_DUMPER_FACILITY_LOG, MSG_DUMPER_FACILITY_COM, MSG_DUMPER_FACILITY_SQL, MSG_DUMPER_FACILITY_REMOTE, MSG_DUMPER_FACILITY_SYSLOG};
+int MsgDumperMgr::dev_flag_size = sizeof(dev_flag) / sizeof(dev_flag[0]);
 
 MsgDumperMgr::MsgDumperMgr() :
 	is_init(false),
-	dumper_severity(MSG_DUMPER_SEVIRITY_ERROR),
 	dumper_facility(MSG_DUMPER_FACILITY_LOG)
 {
+// Register the class to the simple factory
+	REGISTER_CLASS(MsgDumperLog);
+	REGISTER_CLASS(MsgDumperCom);
+	REGISTER_CLASS(MsgDumperSql);
+	REGISTER_CLASS(MsgDumperRemote);
+	REGISTER_CLASS(MsgDumperSyslog);
+// Check the parameter setting is correct
+	assert((device_factory.register_class_size() == FACILITY_SIZE) && "The facility size is NOT identical");
+	assert((dev_name_size == FACILITY_SIZE) && "The facility name size is NOT identical");
+	assert((dev_flag_size == FACILITY_SIZE) && "The facility flag size is NOT identical");
+
+	for (int i = 0 ; i < FACILITY_SIZE ; i++)
+		dumper_severity_arr[i] = MSG_DUMPER_SEVIRITY_ERROR;
+
+// Create the facility mapping table
+	for (int i = 0 ; i < FACILITY_SIZE ; i++)
+		facility_mapping_table.insert(make_pair(dev_flag[i], (MSG_DUMPER_FACILITY)i));
+
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 		msg_dumper[i] = NULL;
+}
+
+MsgDumperMgr::~MsgDumperMgr()
+{
+}
+
+
+bool MsgDumperMgr::can_ignore(unsigned short severity)const
+{
+	for (int i = 0 ; i < FACILITY_SIZE ; i++)
+	{
+		if (msg_dumper[i] && severity <= dumper_severity_arr[i])
+			return false;
+		return true;
+	}
 }
 
 unsigned short MsgDumperMgr::initialize(const char* config_path)
@@ -28,13 +62,6 @@ unsigned short MsgDumperMgr::initialize(const char* config_path)
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The config path: %s", config_path);
-
-// Register the class to the simple factory
-	REGISTER_CLASS(MsgDumperLog);
-	REGISTER_CLASS(MsgDumperCom);
-	REGISTER_CLASS(MsgDumperSql);
-	REGISTER_CLASS(MsgDumperRemote);
-	REGISTER_CLASS(MsgDumperSyslog);
 
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	char dev_class_name[32];
@@ -82,18 +109,32 @@ EXIT:
 	return ret;
 }
 
-unsigned short MsgDumperMgr::set_severity(unsigned short severity)
+int MsgDumperMgr::get_facility_index(unsigned short msg_dumper_facility_flag)const
+{
+	if (!(MSG_DUMPER_FACILITY_ALL & msg_dumper_facility_flag))
+	{
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect facility flag: %d", msg_dumper_facility_flag);
+		throw invalid_argument("Incorrect facility flag");
+	}
+
+	return (int)facility_mapping_table.find(msg_dumper_facility_flag)->second;
+}
+
+unsigned short MsgDumperMgr::set_severity(unsigned short severity, unsigned short single_facility)
 {
 	if (is_init)
 	{
 		WRITE_ERR_SYSLOG("Library has been initialized");
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity to %d", severity);
-	dumper_severity = severity;
+
+	int facility_index = (int)get_facility_index(single_facility);
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%d] to facility[%s]", severity, dev_name[facility_index]);
+	dumper_severity_arr[facility_index] = severity;
 
 	return MSG_DUMPER_SUCCESS;
 }
+
 
 unsigned short MsgDumperMgr::set_facility(unsigned short facility)
 {
@@ -106,6 +147,19 @@ unsigned short MsgDumperMgr::set_facility(unsigned short facility)
 	dumper_facility = facility;
 
 	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperMgr::get_severity(unsigned short single_facility)const
+{
+	int facility_index = (int)get_facility_index(single_facility);
+	unsigned short severity = dumper_severity_arr[facility_index];
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Get the severity of facility[%s]: %d", dev_name[facility_index], severity);
+	return severity;
+}
+
+unsigned short MsgDumperMgr::get_facility()const
+{
+	return dumper_facility;
 }
 
 unsigned short MsgDumperMgr::write_msg(unsigned short severity, const char* msg)
@@ -129,7 +183,7 @@ unsigned short MsgDumperMgr::write_msg(unsigned short severity, const char* msg)
 
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 	{
-		if (msg_dumper[i])
+		if (msg_dumper[i] && severity <= dumper_severity_arr[i])
 		{
 			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [%s] to %s", msg, dev_name[i]);
 			ret = msg_dumper[i]->write_msg(timep, severity, msg);

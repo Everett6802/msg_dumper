@@ -6,7 +6,8 @@
 const char* MsgDumperBase::CONF_FOLDER_NAME = "conf";
 
 MsgDumperBase::MsgDumperBase() :
-	device_handle_exist(false)
+	device_handle_exist(false),
+	severity(MSG_DUMPER_SEVIRITY_DEBUG)
 {
 
 }
@@ -88,4 +89,16 @@ unsigned short MsgDumperBase::parse_config(const char* conf_path, const char* de
 	fp = NULL;
 
 	return ret;
+}
+
+unsigned short MsgDumperBase::set_severity(unsigned short new_severity)
+{
+	severity = new_severity;
+
+	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperBase::get_severity()const
+{
+	return severity;
 }

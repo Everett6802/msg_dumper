@@ -10,6 +10,7 @@
 static char* MODULE_NAME = "MSG_DUMPER";
 static unsigned char MAJOR_VERSION = 1;
 static unsigned char MINOR_VERSION = 0;
+static char* MSG_DUMPER_SEVERITY_DESC[] = {"Error", "Warn", "Info", "Debug"};
 
 // Constant
 static const unsigned short MSG_DUMPER_SHORT_STRING_SIZE = 32;

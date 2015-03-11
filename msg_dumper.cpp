@@ -26,10 +26,10 @@ unsigned short msg_dumper_initialize(const char* config_path)
 	return msg_dumepr_mgr.initialize(config_path);
 }
 
-unsigned short msg_dumper_set_severity(unsigned short severity)
+unsigned short msg_dumper_set_severity(unsigned short severity, unsigned short single_facility)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.set_severity(severity);
+	return msg_dumepr_mgr.set_severity(severity, single_facility);
 }
 
 unsigned short msg_dumper_set_facility(unsigned short facility)
@@ -38,10 +38,10 @@ unsigned short msg_dumper_set_facility(unsigned short facility)
 	return msg_dumepr_mgr.set_facility(facility);
 }
 
-unsigned short msg_dumper_get_severity()
+unsigned short msg_dumper_get_severity(unsigned short single_facility)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.get_severity();
+	return msg_dumepr_mgr.get_severity(single_facility);
 }
 
 unsigned short msg_dumper_get_facility()
@@ -54,7 +54,7 @@ unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 
-	if (severity > msg_dumepr_mgr.get_severity())
+	if (msg_dumepr_mgr.can_ignore(severity))
 		return MSG_DUMPER_SUCCESS;
 
 	return msg_dumepr_mgr.write_msg(severity, msg);
@@ -68,7 +68,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* 
 	static const int fmtbuf_len = 16;
 	static char fmtbuf[fmtbuf_len];
 
-	if (severity > msg_dumepr_mgr.get_severity())
+	if (msg_dumepr_mgr.can_ignore(severity))
 		return MSG_DUMPER_SUCCESS;
 
 	if (fmt == NULL)

@@ -10,6 +10,7 @@
 FP_msg_dumper_initialize fp_msg_dumper_initialize;
 FP_msg_dumper_get_version fp_msg_dumper_get_version;
 FP_msg_dumper_set_severity fp_msg_dumper_set_severity;
+FP_msg_dumper_set_severity_all fp_msg_dumper_set_severity_all;
 FP_msg_dumper_set_facility fp_msg_dumper_set_facility;
 FP_msg_dumper_get_severity fp_msg_dumper_get_severity;
 FP_msg_dumper_get_facility fp_msg_dumper_get_facility;
@@ -18,6 +19,7 @@ FP_msg_dumper_write_format_msg fp_msg_dumper_write_format_msg;
 FP_msg_dumper_deinitialize fp_msg_dumper_deinitialize;
 
 bool export_api(void* handle);
+int get_device_type_amount();
 
 using namespace std;
 
@@ -33,8 +35,14 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	unsigned short severity = MSG_DUMPER_SEVIRITY_DEBUG;
-	unsigned short facility = MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_SYSLOG;
+	char* dev_name[] = {"Log", "Com", "Sql", "Remote", "Syslog"};
+	unsigned short severity_arr[] = {MSG_DUMPER_SEVIRITY_ERROR};
+	unsigned short facility = MSG_DUMPER_FACILITY_LOG;
+//	unsigned short severity_arr[] = {MSG_DUMPER_SEVIRITY_ERROR, MSG_DUMPER_SEVIRITY_WARN, MSG_DUMPER_SEVIRITY_DEBUG};
+//	unsigned short facility = MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_SYSLOG;
+
+	int device_type_amount = get_device_type_amount();
+	int flags = 0x1;
 
 // Export the APIs
 	if (!export_api(handle))
@@ -49,12 +57,20 @@ int main()
 	printf("API version: (%d.%d)\n", major_version, minor_version);
 
 // Set severity
-	printf("Set severity to :%d\n", severity);
-	ret = fp_msg_dumper_set_severity(severity);
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	for (int i = 0, severity_cnt = 0 ; i < device_type_amount ; i++)
 	{
-		fprintf(stderr, "fp_msg_dumper_set_severity() fails, due to %d\n", ret);
-		goto EXIT;
+		if (flags & facility)
+		{
+			printf("Set severity of facility[%s] to :%d\n", dev_name[i], severity_arr[severity_cnt]);
+			ret = fp_msg_dumper_set_severity(severity_arr[severity_cnt], flags);
+			if (CHECK_MSG_DUMPER_FAILURE(ret))
+			{
+				fprintf(stderr, "fp_msg_dumper_set_severity() fails, due to %d\n", ret);
+				goto EXIT;
+			}
+			severity_cnt++;
+		}
+		flags <<= 1;
 	}
 
 // Set facility
@@ -137,6 +153,19 @@ EXIT:
 	exit(EXIT_SUCCESS);
 }
 
+int get_device_type_amount()
+{
+	unsigned short flag = 0x1;
+	int count = 0;
+	while (MSG_DUMPER_FACILITY_ALL & flag)
+	{
+		count++;
+		flag <<= 1;
+	}
+
+	return count;
+}
+
 bool export_api(void* handle)
 {
 	fp_msg_dumper_get_version = (FP_msg_dumper_get_version)dlsym(handle, "msg_dumper_get_version");
@@ -157,6 +186,13 @@ bool export_api(void* handle)
 	if (fp_msg_dumper_set_severity == NULL)
 	{
 		fprintf(stderr, "dlsym() fails when exporting msg_dumper_set_severity() due to %s\n", dlerror());
+		return false;
+	}
+
+	fp_msg_dumper_set_severity_all = (FP_msg_dumper_set_severity_all)dlsym(handle, "msg_dumper_set_severity_all");
+	if (fp_msg_dumper_set_severity_all == NULL)
+	{
+		fprintf(stderr, "dlsym() fails when exporting msg_dumper_set_severity_all() due to %s\n", dlerror());
 		return false;
 	}
 

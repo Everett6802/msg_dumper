@@ -65,6 +65,7 @@ public:
 
 	unsigned short initialize(const char* config_path);
 	unsigned short set_severity(unsigned short facility, unsigned short single_severity);
+	unsigned short set_severity_all(unsigned short facility);
 	unsigned short set_facility(unsigned short facility);
 	unsigned short get_severity(unsigned short single_facility)const;
 	unsigned short get_facility()const;

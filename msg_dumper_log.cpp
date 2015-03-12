@@ -46,7 +46,7 @@ unsigned short MsgDumperLog::create_device_file()
 
 // Create the log file
 	log_filename = new char[MSG_DUMPER_SHORT_STRING_SIZE];
-	log_filepath = new char[MSG_DUMPER_SHORT_STRING_SIZE];
+	log_filepath = new char[MSG_DUMPER_LONG_STRING_SIZE];
 	if (log_filename == NULL || log_filepath == NULL)
 	{
 		WRITE_DEBUG_SYSLOG("Fail to allocate the memory: log_filename/log_filepath");
@@ -56,8 +56,14 @@ unsigned short MsgDumperLog::create_device_file()
 	memset(log_filename, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
 	snprintf(log_filename, MSG_DUMPER_SHORT_STRING_SIZE, "%s.log", current_time_string);
 	memset(log_filepath, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
-	snprintf(log_filepath, MSG_DUMPER_SHORT_STRING_SIZE, "%s/%s", log_folder, log_filename);
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log file path: %s", log_filepath);
+	char cwd[MSG_DUMPER_STRING_SIZE];
+	if (getcwd(cwd, sizeof(cwd)) == NULL)
+	{
+		WRITE_DEBUG_SYSLOG("Fail to get the current working folder");
+		return MSG_DUMPER_FAILURE_UNKNOWN;
+	}
+	snprintf(log_filepath, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s/%s", cwd, log_folder, log_filename);
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Log file path: %s", log_filepath);
 
 	return MSG_DUMPER_SUCCESS;
 }

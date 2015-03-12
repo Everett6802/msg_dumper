@@ -32,6 +32,12 @@ unsigned short msg_dumper_set_severity(unsigned short severity, unsigned short s
 	return msg_dumepr_mgr.set_severity(severity, single_facility);
 }
 
+unsigned short msg_dumper_set_severity_all(unsigned short severity)
+{
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+	return msg_dumepr_mgr.set_severity_all(severity);
+}
+
 unsigned short msg_dumper_set_facility(unsigned short facility)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);

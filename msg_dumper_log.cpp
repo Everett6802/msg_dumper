@@ -100,12 +100,12 @@ unsigned short MsgDumperLog::write_device_file()
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperLog::create_log_folder()
+unsigned short MsgDumperLog::create_log_folder(const char* config_path)
 {
 	struct stat st = {0};
 
-	char folder_path[MSG_DUMPER_STRING_SIZE];
-	snprintf(folder_path, MSG_DUMPER_SHORT_STRING_SIZE, "./%s", log_folder);
+	char folder_path[MSG_DUMPER_LONG_STRING_SIZE];
+	snprintf(folder_path, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", config_path, log_folder);
 
 // Check if the log folder exists or not
 	if (stat(folder_path, &st) == -1)
@@ -187,7 +187,7 @@ unsigned short MsgDumperLog::initialize(const char* config_path, void* config)
 		return ret;
 
 // Create the log folder
-	ret = create_log_folder();
+	ret = create_log_folder(config_path);
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	return ret;
 

@@ -16,7 +16,7 @@ private:
 	char* log_filename;
 	char* log_filepath;
 
-	unsigned short create_log_folder();
+	unsigned short create_log_folder(const char* config_path);
 
 protected:
 	virtual unsigned short create_device_file();

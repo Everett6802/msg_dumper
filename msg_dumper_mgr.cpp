@@ -28,6 +28,8 @@ MsgDumperMgr::MsgDumperMgr() :
 	assert((dev_name_size == FACILITY_SIZE) && "The facility name size is NOT identical");
 	assert((dev_flag_size == FACILITY_SIZE) && "The facility flag size is NOT identical");
 
+	memset(current_working_directory, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 		dumper_severity_arr[i] = MSG_DUMPER_SEVIRITY_ERROR;
 
@@ -54,14 +56,20 @@ bool MsgDumperMgr::can_ignore(unsigned short severity)const
 	return true;
 }
 
-unsigned short MsgDumperMgr::initialize(const char* config_path)
+unsigned short MsgDumperMgr::initialize()
 {
 	if (is_init)
 	{
 		WRITE_ERR_SYSLOG("Library has been initialized");
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The config path: %s", config_path);
+
+	if (getcwd(current_working_directory, sizeof(current_working_directory)) == NULL)
+	{
+		WRITE_DEBUG_SYSLOG("Fail to get the current working folder");
+		return MSG_DUMPER_FAILURE_UNKNOWN;
+	}
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Current working folder: %s", current_working_directory);
 
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	char dev_class_name[32];
@@ -81,7 +89,7 @@ unsigned short MsgDumperMgr::initialize(const char* config_path)
 			}
 
 			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Initialize the %s object", dev_class_name);
-			ret = msg_dumper[i]->initialize(config_path);
+			ret = msg_dumper[i]->initialize(current_working_directory);
 			if (CHECK_MSG_DUMPER_FAILURE(ret))
 			{
 				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to initialize the %s object", dev_class_name);

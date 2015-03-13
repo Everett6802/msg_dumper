@@ -84,7 +84,7 @@ int main()
 
 // Initialize the library
 	printf("Initialize the library\n");
-	ret = fp_msg_dumper_initialize("..");
+	ret = fp_msg_dumper_initialize();
 	if (CHECK_MSG_DUMPER_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_initialize() fails, due to %d\n", ret);

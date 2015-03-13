@@ -20,10 +20,10 @@ unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned cha
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short msg_dumper_initialize(const char* config_path)
+unsigned short msg_dumper_initialize()
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.initialize(config_path);
+	return msg_dumepr_mgr.initialize();
 }
 
 unsigned short msg_dumper_set_severity(unsigned short severity, unsigned short single_facility)

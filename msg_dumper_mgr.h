@@ -48,6 +48,7 @@ private:
 	static short dev_flag[];
 	static int dev_flag_size;
 
+	char current_working_directory[MSG_DUMPER_STRING_SIZE];
 	factory device_factory;
 	bool is_init;
 	unsigned short dumper_severity_arr[FACILITY_SIZE];
@@ -63,7 +64,7 @@ public:
 
 	bool can_ignore(unsigned short severity)const;
 
-	unsigned short initialize(const char* config_path);
+	unsigned short initialize();
 	unsigned short set_severity(unsigned short facility, unsigned short single_severity);
 	unsigned short set_severity_all(unsigned short facility);
 	unsigned short set_facility(unsigned short facility);

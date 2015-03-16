@@ -3,6 +3,7 @@
 
 #include <termios.h>
 #include <unistd.h>
+#include "common.h"
 #include "msg_dumper_timer_thread.h"
 #include "msg_dumper_mgr.h"
 

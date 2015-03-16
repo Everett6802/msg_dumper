@@ -2,6 +2,7 @@
 #define MSG_DUMPER_LOG_H
 
 #include <stdio.h>
+#include "common.h"
 #include "msg_dumper_timer_thread.h"
 #include "msg_dumper_mgr.h"
 

@@ -2,7 +2,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "msg_dumper.h"
-#include "common.h"
 #include "msg_dumper_log.h"
 
 

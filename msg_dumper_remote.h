@@ -17,35 +17,12 @@ class MsgDumperRemote : public MsgDumperTimerThread
 {
 	friend class MsgDumperMgr;
 
-	class RemoteServerCfg
-	{
-		static const int IP_LEN = 16;
-
-	public:
-		char ip[IP_LEN];
-		int sockfd;
-
-		RemoteServerCfg(const char* new_ip) :
-			sockfd(-1)
-		{
-			memset(ip, 0x0, sizeof(char) * IP_LEN);
-			memcpy(ip, new_ip, strlen(new_ip));
-		}
-
-		~RemoteServerCfg()
-		{
-			if (sockfd != 0)
-			{
-				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Close the connection: %s", ip);
-				close(sockfd);
-				sockfd = -1;
-			}
-		}
-	};
-	typedef RemoteServerCfg* PREMOTESERVERCFG;
 
 private:
 	static char* DEF_SERVER_PORT;
+
+	class RemoteServerCfg;
+	typedef RemoteServerCfg* PREMOTESERVERCFG;
 
 	char server_list[MSG_DUMPER_STRING_SIZE];
 	char server_port[MSG_DUMPER_STRING_SIZE];

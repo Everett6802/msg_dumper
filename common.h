@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <syslog.h>
+#include <string.h>
+#include <time.h>
+#include <assert.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -89,5 +92,26 @@ WRITE_SYSLOG(LOG_ERR, message)
 #else
 #define WRITE_ERR_SYSLOG(message)
 #endif
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Class
+class MsgCfg
+{
+private:
+	time_t timep;
+	struct tm *p;
+	char* format_message;
+
+public:
+	char date_str[MSG_DUMPER_SHORT_STRING_SIZE];
+	char time_str[MSG_DUMPER_SHORT_STRING_SIZE];
+	unsigned short severity;
+	char data[MSG_DUMPER_LONG_STRING_SIZE];
+
+	MsgCfg(const time_t& new_timep, unsigned short new_severity, const char* new_data);
+	const char* to_string();
+};
+typedef MsgCfg* PMSG_CFG;
+
 
 #endif

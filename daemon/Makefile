@@ -16,6 +16,6 @@ $(OUTPUT): $(OBJS)
 	$(CC) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS)
-	rm $(OUTPUT)
+	rm -f $(OBJS) 2> /dev/null
+	rm -f $(OUTPUT) 2> /dev/null
 

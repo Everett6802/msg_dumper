@@ -3,6 +3,7 @@
 
 #include <mysql/mysql.h>
 #include <mysql/mysqld_error.h>
+#include "common.h"
 #include "msg_dumper_timer_thread.h"
 #include "msg_dumper_mgr.h"
 

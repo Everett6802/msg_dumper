@@ -1,6 +1,5 @@
 #include <fcntl.h>
 #include "msg_dumper.h"
-#include "common.h"
 #include "msg_dumper_com.h"
 
 

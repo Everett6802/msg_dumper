@@ -3,7 +3,7 @@ CC := g++
 CXXFLAGS := -g -Wall -fPIC
 #INCLUDE_PATH := ../include
 
-SOURCES := msg_dumper.cpp msg_dumper_mgr.cpp msg_dumper_base.cpp msg_dumper_timer_thread.cpp msg_dumper_log.cpp msg_dumper_com.cpp msg_dumper_sql.cpp msg_dumper_remote.cpp msg_dumper_syslog.cpp
+SOURCES := common.cpp msg_dumper.cpp msg_dumper_mgr.cpp msg_dumper_base.cpp msg_dumper_timer_thread.cpp msg_dumper_log.cpp msg_dumper_com.cpp msg_dumper_sql.cpp msg_dumper_remote.cpp msg_dumper_syslog.cpp
 OBJS := $(SOURCES:.cpp=.o)
 
 OUTPUT := libmsg_dumper.so

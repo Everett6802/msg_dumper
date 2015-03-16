@@ -38,7 +38,6 @@ struct factory
 class MsgDumperMgr
 {
 private:
-//	enum MSG_DUMPER_SEVERITY{SEVERITY_ERROR, SEVERITY_WARN, SEVIRITY_INFO, SEVIRITY_DEBUG, SEVIRITY_SIZE};
 	enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_REMOTE, FACILITY_SYSLOG, FACILITY_SIZE};
 	typedef map<short, MSG_DUMPER_FACILITY> facility_map_type;
 	facility_map_type facility_mapping_table;

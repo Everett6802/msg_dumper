@@ -42,10 +42,10 @@ private:
 	typedef map<short, MSG_DUMPER_FACILITY> facility_map_type;
 	facility_map_type facility_mapping_table;
 
-	static char* dev_name[];
-	static int dev_name_size;
-	static short dev_flag[];
-	static int dev_flag_size;
+	static char* facility_name[];
+	static int facility_name_size;
+	static short facility_flag[];
+	static int facility_flag_size;
 
 	char current_working_directory[MSG_DUMPER_STRING_SIZE];
 	factory device_factory;

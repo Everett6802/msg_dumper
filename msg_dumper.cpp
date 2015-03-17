@@ -9,7 +9,6 @@
 
 
 static MsgDumperMgr msg_dumepr_mgr;
-static char fmtmsg[MSG_DUMPER_EX_LONG_STRING_SIZE];
 
 unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned char& minor_version)
 {
@@ -70,6 +69,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* 
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 
+	static char fmtmsg[MSG_DUMPER_EX_LONG_STRING_SIZE];
 	static const int fmtmsg_len = sizeof(fmtmsg) / sizeof(fmtmsg[0]);
 	static const int fmtbuf_len = 16;
 	static char fmtbuf[fmtbuf_len];
@@ -136,7 +136,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* 
 	fmtmsg[fmtmsg_index] = '\0';
 	va_end(arg_list);
 
-	return msg_dumper_write_msg(severity, fmtmsg);
+	return msg_dumepr_mgr.write_msg(severity, fmtmsg);
 }
 
 unsigned short msg_dumper_deinitialize()

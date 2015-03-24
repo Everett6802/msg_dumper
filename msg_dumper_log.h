@@ -4,12 +4,10 @@
 #include <stdio.h>
 #include "common.h"
 #include "msg_dumper_base.h"
-#include "msg_dumper_mgr.h"
 
 
 class MsgDumperLog : public MsgDumperBase
 {
-	friend class MsgDumperMgr;
 private:
 	static char* DEF_LOG_FOLDER;
 	char log_folder[MSG_DUMPER_STRING_SIZE];

@@ -5,12 +5,10 @@
 #include <mysql/mysqld_error.h>
 #include "common.h"
 #include "msg_dumper_base.h"
-#include "msg_dumper_mgr.h"
 
 
 class MsgDumperSql : public MsgDumperBase
 {
-	friend class MsgDumperMgr;
 private:
 	static char* DEF_SERVER;
 	static char* DEF_USERNAME;

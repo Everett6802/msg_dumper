@@ -5,12 +5,10 @@
 #include <unistd.h>
 #include "common.h"
 #include "msg_dumper_base.h"
-#include "msg_dumper_mgr.h"
 
 
 class MsgDumperCom : public MsgDumperBase
 {
-	friend class MsgDumperMgr;
 private:
 	static char* DEF_COM_PORT_NAME;
 	static char* DEF_COM_PORT_SPEED;

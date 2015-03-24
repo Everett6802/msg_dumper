@@ -82,8 +82,9 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 			for (int i = 0 ; i < write_vector_size ; i++)
 			{
 				ret = msg_dumper->write_msg(write_vector[i]);
+
 // Remove the old message
-				delete[] write_vector[i];
+				delete write_vector[i];
 				write_vector[i] = NULL;
 				if (CHECK_FAILURE(ret))
 				{
@@ -91,6 +92,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 					break;
 				}
 			}
+			write_vector.clear();
 // Close the device
 			ret = msg_dumper->close_device();
 			if (CHECK_FAILURE(ret))
@@ -193,7 +195,7 @@ unsigned short MsgDumperTimerThread::deinitialize()
 	if (write_vector.size() > 0)
 		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "#####   ERROR write vector is NOT empty: %d   #####", write_vector.size());
 
-	// De-initialize the msg_dumper object
+// De-initialize the msg_dumper object
 	unsigned short ret = msg_dumper->deinitialize();
 	if (CHECK_FAILURE(ret))
 	{

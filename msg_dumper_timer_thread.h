@@ -9,13 +9,10 @@
 #include <assert.h>
 #include "common.h"
 #include "msg_dumper_base.h"
-//#include "msg_dumper_mgr.h"
 
 
 class MsgDumperTimerThread
 {
-//	friend class MsgDumperMgr;
-
 private:
 	pthread_t pid;
 	int exit;

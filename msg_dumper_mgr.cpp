@@ -13,10 +13,39 @@ int MsgDumperMgr::facility_name_size = sizeof(MSG_DUMPER_FACILITY_DESC) / sizeof
 short MsgDumperMgr::facility_flag[] = {MSG_DUMPER_FACILITY_LOG, MSG_DUMPER_FACILITY_COM, MSG_DUMPER_FACILITY_SQL, MSG_DUMPER_FACILITY_REMOTE, MSG_DUMPER_FACILITY_SYSLOG};
 int MsgDumperMgr::facility_flag_size = sizeof(facility_flag) / sizeof(facility_flag[0]);
 
+#define REGISTER_CLASS(n) facility_factory->register_class<n>(#n)
+
+template <class T> MsgDumperBase* constructor() { return (MsgDumperBase*)new T(); }
+
+// A simple factory. To allocate a memory by sending the type name as an argument
+struct MsgDumperMgr::MsgDumperFacilityFactory
+{
+	typedef MsgDumperBase*(*constructor_t)();
+	typedef map<string, constructor_t> map_type;
+	map_type m_classes;
+
+	template <class T>
+	void register_class(string const& n){ m_classes.insert(make_pair(n, &constructor<T>));}
+
+	MsgDumperBase* construct(std::string const& n)
+	{
+		map_type::iterator i = m_classes.find(n);
+		if (i == m_classes.end())
+			return NULL; // or throw or whatever you want
+		return (MsgDumperBase*)i->second(); // Allocate the memory of a specific type
+	}
+
+	int register_class_size()const{return m_classes.size();}
+};
+
 MsgDumperMgr::MsgDumperMgr() :
 	is_init(false),
 	dumper_facility(MSG_DUMPER_FACILITY_LOG)
 {
+	facility_factory = new MsgDumperFacilityFactory();
+	if (facility_factory == NULL)
+		throw bad_alloc();
+
 // Register the class to the simple factory
 	REGISTER_CLASS(MsgDumperLog);
 	REGISTER_CLASS(MsgDumperCom);
@@ -24,7 +53,7 @@ MsgDumperMgr::MsgDumperMgr() :
 	REGISTER_CLASS(MsgDumperRemote);
 	REGISTER_CLASS(MsgDumperSyslog);
 // Check the parameter setting is correct
-	assert((facility_factory.register_class_size() == FACILITY_SIZE) && "The facility size is NOT identical");
+	assert((facility_factory->register_class_size() == FACILITY_SIZE) && "The facility size is NOT identical");
 	assert((facility_name_size == FACILITY_SIZE) && "The facility name size is NOT identical");
 	assert((facility_flag_size == FACILITY_SIZE) && "The facility flag size is NOT identical");
 
@@ -81,7 +110,7 @@ unsigned short MsgDumperMgr::initialize()
 		if (dumper_facility & facility_flag[i])
 		{
 			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Allocate the %s object", facility_class_name);
-			msg_dumper_thread[i] = new MsgDumperTimerThread(facility_factory.construct(facility_class_name));
+			msg_dumper_thread[i] = new MsgDumperTimerThread(facility_factory->construct(facility_class_name));
 			if (msg_dumper_thread[i] == NULL)
 			{
 				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to allocate the %s object", facility_class_name);

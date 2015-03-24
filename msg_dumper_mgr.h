@@ -11,36 +11,11 @@
 
 using namespace std;
 
-#define REGISTER_CLASS(n) facility_factory.register_class<n>(#n)
-
-template <class T> MsgDumperBase* constructor() { return (MsgDumperBase*)new T(); }
-
-// A simple factory. To allocate a memory by sending the type name as an argument
-struct MsgDumperFacilityFactory
-{
-	typedef MsgDumperBase*(*constructor_t)();
-	typedef map<string, constructor_t> map_type;
-	map_type m_classes;
-
-	template <class T>
-	void register_class(string const& n){ m_classes.insert(make_pair(n, &constructor<T>));}
-
-	MsgDumperBase* construct(std::string const& n)
-	{
-		map_type::iterator i = m_classes.find(n);
-		if (i == m_classes.end())
-			return NULL; // or throw or whatever you want
-		return (MsgDumperBase*)i->second(); // Allocate the memory of a specific type
-	}
-
-	int register_class_size()const{return m_classes.size();}
-};
-
 class MsgDumperMgr
 {
 private:
-	MsgDumperFacilityFactory facility_factory;
-
+	struct MsgDumperFacilityFactory;
+	MsgDumperFacilityFactory* facility_factory;
 
 	typedef map<short, MSG_DUMPER_FACILITY> facility_map_type;
 	facility_map_type facility_mapping_table;

@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "msg_dumper.h"
 #include "common.h"
+#include "msg_dumper.h"
 #include "msg_dumper_mgr.h"
 
 

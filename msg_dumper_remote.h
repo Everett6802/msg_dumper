@@ -8,16 +8,12 @@
 #include <arpa/inet.h>
 #include "common.h"
 #include "msg_dumper_base.h"
-#include "msg_dumper_mgr.h"
 
 
 using namespace std;
 
 class MsgDumperRemote : public MsgDumperBase
 {
-	friend class MsgDumperMgr;
-
-
 private:
 	static char* DEF_SERVER_PORT;
 

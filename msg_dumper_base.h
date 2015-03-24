@@ -38,7 +38,6 @@ public:
 
 	const char* get_facility_name()const;
 
-//	virtual unsigned short create_device()=0;
 	virtual unsigned short open_device()=0;
 	virtual unsigned short close_device()=0;
 

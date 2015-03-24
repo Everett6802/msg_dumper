@@ -36,10 +36,10 @@ int main()
 	}
 
 	char* facility_name[] = {"Log", "Com", "Sql", "Remote", "Syslog"};
-	unsigned short severity_arr[] = {MSG_DUMPER_SEVIRITY_WARN};
-	unsigned short facility = MSG_DUMPER_FACILITY_LOG;
-//	unsigned short severity_arr[] = {MSG_DUMPER_SEVIRITY_ERROR, MSG_DUMPER_SEVIRITY_WARN, MSG_DUMPER_SEVIRITY_DEBUG};
-//	unsigned short facility = MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_SYSLOG;
+//	unsigned short severity_arr[] = {MSG_DUMPER_SEVIRITY_DEBUG};
+//	unsigned short facility = MSG_DUMPER_FACILITY_LOG;
+	unsigned short severity_arr[] = {MSG_DUMPER_SEVIRITY_ERROR, MSG_DUMPER_SEVIRITY_WARN, MSG_DUMPER_SEVIRITY_DEBUG};
+	unsigned short facility = MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_SYSLOG;
 
 	int device_type_amount = get_device_type_amount();
 	int flags = 0x1;

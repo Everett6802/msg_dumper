@@ -20,7 +20,7 @@ MsgDumperSql::MsgDumperSql() :
 	connection(NULL),
 	table_created(false)
 {
-	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "SQL");
+	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_SQL], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_SQL]));
 	memset(server, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memcpy(server, DEF_SERVER, sizeof(char) * strlen(DEF_SERVER));
 	memset(username, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
@@ -78,87 +78,6 @@ unsigned short MsgDumperSql::try_connect_mysql()
 		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "mysql_select_db() fails, due to: %s", mysql_error(connection));
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
-
-	return MSG_DUMPER_SUCCESS;
-}
-
-unsigned short MsgDumperSql::create_device_file()
-{
-// Create the connection to the MySQL server
-	unsigned short ret = try_connect_mysql();
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
-		return ret;
-
-//	mysql_close(connection);
-//	connection = NULL;
-
-	return MSG_DUMPER_SUCCESS;
-}
-
-unsigned short MsgDumperSql::write_device_file()
-{
-// Check if the connection is established
-	if (connection == NULL)
-	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT established", get_thread_name());
-		return MSG_DUMPER_FAILURE_MYSQL;
-	}
-
-// Checks to see if the connection to the MySQL server is still alive. If it is not, the client will attempt to reconnect automatically.
-// This function returns zero if the connection is alive and nonzero in the case of an error.
-	if (mysql_ping(connection))
-	{
-		WRITE_INFO_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT alive.Attempt to reconnect it......", get_thread_name());
-// Select the database
-		if (mysql_select_db(connection, database))
-		{
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_select_db() fails, due to: %s", get_thread_name(), mysql_error(connection));
-			return MSG_DUMPER_FAILURE_MYSQL;
-		}
-	}
-
-	if (!table_created)
-	{
-// Get the current time
-		generate_current_time_string(current_time_string);
-
-// Create the table in the database...
-		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_create_table, current_time_string);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to create table[sql%s] by command: %s", get_thread_name(), current_time_string, cmd_buf);
-		if(mysql_query(connection, cmd_buf) != NULL)
-		{
-			int error = mysql_errno(connection);
-			if (error != ER_TABLE_EXISTS_ERROR)
-			{
-				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %d, %s", get_thread_name(), error, mysql_error(connection));
-				return MSG_DUMPER_FAILURE_MYSQL;
-			}
-			else
-				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The sql%s has already existed", get_thread_name(), current_time_string);
-		}
-		table_created = true;
-	}
-
-// Write the message into the log file
-	for (int i = 0 ; i < write_vector.size() ; i++)
-	{
-		PMSG_CFG msg_cfg = write_vector[i];
-		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_insert_into_table, current_time_string, msg_cfg->date_str, msg_cfg->time_str, msg_cfg->severity, msg_cfg->data);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to Write the message[%s] to MySQL by command: %s", get_thread_name(), msg_cfg->to_string(), cmd_buf);
-		if(mysql_query(connection, cmd_buf) != NULL)
-		{
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %s", get_thread_name(), mysql_error(connection));
-			return MSG_DUMPER_FAILURE_MYSQL;
-		}
-// Release the resource
-		delete[] msg_cfg;
-		write_vector[i] = NULL;
-	}
-// Clean-up the container
-	write_vector.clear();
-
-// Close the MySQL
-//	mysql_close(connection);
 
 	return MSG_DUMPER_SUCCESS;
 }
@@ -222,22 +141,82 @@ unsigned short MsgDumperSql::parse_config_param(const char* param_title, const c
 	return ret;
 }
 
+unsigned short MsgDumperSql::open_device()
+{
+// Check if the connection is established
+	if (connection == NULL)
+	{
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT established", facility_name);
+		return MSG_DUMPER_FAILURE_MYSQL;
+	}
+
+// Checks to see if the connection to the MySQL server is still alive. If it is not, the client will attempt to reconnect automatically.
+// This function returns zero if the connection is alive and nonzero in the case of an error.
+	if (mysql_ping(connection))
+	{
+		WRITE_INFO_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT alive.Attempt to reconnect it......", facility_name);
+// Select the database
+		if (mysql_select_db(connection, database))
+		{
+			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_select_db() fails, due to: %s", facility_name, mysql_error(connection));
+			return MSG_DUMPER_FAILURE_MYSQL;
+		}
+	}
+
+	if (!table_created)
+	{
+// Get the current time
+		generate_current_time_string(current_time_string);
+
+// Create the table in the database...
+		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_create_table, current_time_string);
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to create table[sql%s] by command: %s", facility_name, current_time_string, cmd_buf);
+		if(mysql_query(connection, cmd_buf) != NULL)
+		{
+			int error = mysql_errno(connection);
+			if (error != ER_TABLE_EXISTS_ERROR)
+			{
+				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %d, %s", facility_name, error, mysql_error(connection));
+				return MSG_DUMPER_FAILURE_MYSQL;
+			}
+			else
+				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The sql%s has already existed", facility_name, current_time_string);
+		}
+		table_created = true;
+	}
+
+	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperSql::close_device()
+{
+// Close the MySQL
+//	mysql_close(connection);
+
+	return MSG_DUMPER_SUCCESS;
+}
+
 unsigned short MsgDumperSql::initialize(const char* config_path, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperSql object......");
 
 // Parse the config file first
 	unsigned short ret = parse_config(config_path, "sql");
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 		return ret;
 
-// Create the specific table
-	ret = create_device_file();
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+// Create the connection to the MySQL server
+	ret = try_connect_mysql();
+	if (CHECK_FAILURE(ret))
+		return ret;
+	//	mysql_close(connection);
+	//	connection = NULL;
+
+	if (CHECK_FAILURE(ret))
 		return ret;
 	device_handle_exist = true;
 
-	return MsgDumperTimerThread::initialize(config_path, config);
+	return MSG_DUMPER_SUCCESS;
 }
 
 unsigned short MsgDumperSql::deinitialize()
@@ -250,5 +229,19 @@ unsigned short MsgDumperSql::deinitialize()
 		connection = NULL;
 	}
 
-	return MsgDumperTimerThread::deinitialize();
+	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperSql::write_msg(PMSG_CFG msg_cfg)
+{
+// Write the message into SQL database
+	snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_insert_into_table, current_time_string, msg_cfg->date_str, msg_cfg->time_str, msg_cfg->severity, msg_cfg->data);
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to Write the message[%s] to MySQL by command: %s", facility_name, msg_cfg->to_string(), cmd_buf);
+	if(mysql_query(connection, cmd_buf) != NULL)
+	{
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %s", facility_name, mysql_error(connection));
+		return MSG_DUMPER_FAILURE_MYSQL;
+	}
+
+	return MSG_DUMPER_SUCCESS;
 }

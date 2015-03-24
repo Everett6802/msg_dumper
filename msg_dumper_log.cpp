@@ -9,15 +9,22 @@ char* MsgDumperLog::DEF_LOG_FOLDER = "log";
 
 MsgDumperLog::MsgDumperLog() :
 	log_filename(NULL),
-	log_filepath(NULL)
+	log_filepath(NULL),
+	fp_log(NULL)
 {
-	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "LOG");
+	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_LOG], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_LOG]));
 	memset(log_folder, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memcpy(log_folder, DEF_LOG_FOLDER, sizeof(char) * strlen(DEF_LOG_FOLDER));
 }
 
 MsgDumperLog::~MsgDumperLog()
 {
+	if (fp_log != NULL)
+	{
+		fclose(fp_log);
+		fp_log = NULL;
+	}
+
 	if (log_filepath != NULL)
 	{
 		delete[] log_filepath;
@@ -30,73 +37,6 @@ MsgDumperLog::~MsgDumperLog()
 		log_filename = NULL;
 	}
 //	deinitialize();
-}
-
-unsigned short MsgDumperLog::create_device_file()
-{
-	if (log_filename != NULL)
-	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log file[%s] has already been created", log_filename);
-		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
-	}
-
-	char current_time_string[CURRENT_TIME_STRING_LENGTH];
-	generate_current_time_string(current_time_string);
-
-// Create the log file
-	log_filename = new char[MSG_DUMPER_SHORT_STRING_SIZE];
-	log_filepath = new char[MSG_DUMPER_LONG_STRING_SIZE];
-	if (log_filename == NULL || log_filepath == NULL)
-	{
-		WRITE_DEBUG_SYSLOG("Fail to allocate the memory: log_filename/log_filepath");
-		return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
-	}
-
-	memset(log_filename, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
-	snprintf(log_filename, MSG_DUMPER_SHORT_STRING_SIZE, "%s.log", current_time_string);
-	memset(log_filepath, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
-	char cwd[MSG_DUMPER_STRING_SIZE];
-	if (getcwd(cwd, sizeof(cwd)) == NULL)
-	{
-		WRITE_DEBUG_SYSLOG("Fail to get the current working folder");
-		return MSG_DUMPER_FAILURE_UNKNOWN;
-	}
-	snprintf(log_filepath, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s/%s", cwd, log_folder, log_filename);
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Log file path: %s", log_filepath);
-
-	return MSG_DUMPER_SUCCESS;
-}
-
-unsigned short MsgDumperLog::write_device_file()
-{
-// Open the file
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Open the log file: %s", log_filename);
-	FILE* fp = fopen(log_filepath, "a");
-	if (fp == NULL)
-	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to open log file: %s", log_filename);
-		return MSG_DUMPER_FAILURE_OPEN_FILE;
-	}
-
-// Write the message into the log file
-	for (int i = 0 ; i < write_vector.size() ; i++)
-	{
-		PMSG_CFG msg_cfg = write_vector[i];
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to file [%s]", msg_cfg->to_string(), log_filename);
-		fputs(msg_cfg->to_string(), fp);
-// Release the resource
-		delete[] msg_cfg;
-		write_vector[i] = NULL;
-	}
-
-// Clean-up the container
-	write_vector.clear();
-
-// Close the file
-	if (fp != NULL)
-		fclose(fp);
-
-	return MSG_DUMPER_SUCCESS;
 }
 
 unsigned short MsgDumperLog::create_log_folder(const char* config_path)
@@ -119,7 +59,7 @@ unsigned short MsgDumperLog::create_log_folder(const char* config_path)
 	}
 	else
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log folder[%s] has already existed", folder_path);
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "The log folder[%s] has already existed", folder_path);
 	}
 
 	return MSG_DUMPER_SUCCESS;
@@ -176,19 +116,91 @@ unsigned short MsgDumperLog::parse_config_param(const char* param_title, const c
 
 }
 
+unsigned short MsgDumperLog::open_device()
+{
+// Open the file
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Open the log file: %s", log_filename);
+	fp_log = fopen(log_filepath, "a");
+	if (fp_log == NULL)
+	{
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to open log file: %s", log_filename);
+		return MSG_DUMPER_FAILURE_OPEN_FILE;
+	}
+
+	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperLog::close_device()
+{
+// Close the file
+	if (fp_log != NULL)
+	{
+		fclose(fp_log);
+		fp_log = NULL;
+	}
+
+	return MSG_DUMPER_SUCCESS;
+}
+
 unsigned short MsgDumperLog::initialize(const char* config_path, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperLog object......");
 
 // Parse the config file first
 	unsigned short ret = parse_config(config_path, "log");
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 		return ret;
 
 // Create the log folder
 	ret = create_log_folder(config_path);
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
-	return ret;
+	if (CHECK_FAILURE(ret))
+		return ret;
 
-	return MsgDumperTimerThread::initialize(config_path, config);
+	if (log_filename != NULL)
+	{
+		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log file[%s] is NOT null", log_filename);
+		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
+	}
+
+	char current_time_string[CURRENT_TIME_STRING_LENGTH];
+	generate_current_time_string(current_time_string);
+
+// Determine the log file name
+	log_filename = new char[MSG_DUMPER_SHORT_STRING_SIZE];
+	log_filepath = new char[MSG_DUMPER_LONG_STRING_SIZE];
+	if (log_filename == NULL || log_filepath == NULL)
+	{
+		WRITE_DEBUG_SYSLOG("Fail to allocate the memory: log_filename/log_filepath");
+		return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
+	}
+
+	memset(log_filename, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
+	snprintf(log_filename, MSG_DUMPER_SHORT_STRING_SIZE, "%s.log", current_time_string);
+	memset(log_filepath, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
+	char cwd[MSG_DUMPER_STRING_SIZE];
+	if (getcwd(cwd, sizeof(cwd)) == NULL)
+	{
+		WRITE_DEBUG_SYSLOG("Fail to get the current working folder");
+		return MSG_DUMPER_FAILURE_UNKNOWN;
+	}
+	snprintf(log_filepath, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s/%s", cwd, log_folder, log_filename);
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Log file path: %s", log_filepath);
+
+	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperLog::deinitialize()
+{
+	WRITE_DEBUG_SYSLOG("DeInitialize the MsgDumperLog object......");
+
+	return close_device();
+}
+
+unsigned short MsgDumperLog::write_msg(PMSG_CFG msg_cfg)
+{
+// Write the message into the log file
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to file [%s]", msg_cfg->to_string(), log_filename);
+	fputs(msg_cfg->to_string(), fp_log);
+
+	return MSG_DUMPER_SUCCESS;
 }

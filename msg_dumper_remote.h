@@ -7,13 +7,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "common.h"
-#include "msg_dumper_timer_thread.h"
+#include "msg_dumper_base.h"
 #include "msg_dumper_mgr.h"
 
 
 using namespace std;
 
-class MsgDumperRemote : public MsgDumperTimerThread
+class MsgDumperRemote : public MsgDumperBase
 {
 	friend class MsgDumperMgr;
 
@@ -29,16 +29,18 @@ private:
 	vector<PREMOTESERVERCFG> server_socket_vector;
 
 protected:
-	virtual unsigned short create_device_file();
-	virtual unsigned short write_device_file();
 	virtual unsigned short parse_config_param(const char* param_title, const char* param_content);
 
 public:
 	MsgDumperRemote();
 	virtual ~MsgDumperRemote();
 
+	virtual unsigned short open_device();
+	virtual unsigned short close_device();
+
 	virtual unsigned short initialize(const char* config_path, void* config=NULL);
 	virtual unsigned short deinitialize();
+	virtual unsigned short write_msg(PMSG_CFG msg_cfg);
 };
 
 #endif

@@ -6,9 +6,10 @@
 char* MsgDumperCom::DEF_COM_PORT_NAME = "/dev/ttyUSB1";
 char* MsgDumperCom::DEF_COM_PORT_SPEED = "B115200";
 
-MsgDumperCom::MsgDumperCom()
+MsgDumperCom::MsgDumperCom() :
+	fd_com(0)
 {
-	snprintf(worker_thread_name, MSG_DUMPER_SHORT_STRING_SIZE, "COM");
+	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_COM], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_COM]));
 	memset(port_name, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memcpy(port_name, DEF_COM_PORT_NAME, sizeof(char) * strlen(DEF_COM_PORT_NAME));
 	memset(port_speed, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
@@ -40,7 +41,7 @@ unsigned short MsgDumperCom::try_open_comport(int& fd_com)const
 /* Set Baud Rate */
 	speed_t com_port_speed;
 	unsigned short ret = transform_com_port_speed(com_port_speed);
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 		return ret;
 
 	cfsetospeed (&tty, com_port_speed);
@@ -85,44 +86,6 @@ unsigned short MsgDumperCom::transform_com_port_speed(speed_t& com_port_speed)co
 
 	WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Un-support COM port speed: %s", port_speed);
 	return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
-}
-
-unsigned short MsgDumperCom::create_device_file()
-{
-	int fd_com;
-	unsigned short ret = try_open_comport(fd_com);
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
-		return ret;
-	close(fd_com);
-
-	return MSG_DUMPER_SUCCESS;
-}
-
-unsigned short MsgDumperCom::write_device_file()
-{
-	int fd_com;
-// Open the COM port
-	unsigned short ret = try_open_comport(fd_com);
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
-		return ret;
-
-// Write the message into the log file
-	for (int i = 0 ; i < write_vector.size() ; i++)
-	{
-		PMSG_CFG msg_cfg = write_vector[i];
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to COM port", msg_cfg->to_string());
-		write(fd_com, msg_cfg->to_string(), strlen(msg_cfg->to_string()));
-// Release the resource
-		delete[] msg_cfg;
-		write_vector[i] = NULL;
-	}
-// Clean-up the container
-	write_vector.clear();
-
-// Close the COM port
-	close(fd_com);
-
-	return MSG_DUMPER_SUCCESS;
 }
 
 unsigned short MsgDumperCom::parse_config_param(const char* param_title, const char* param_content)
@@ -179,20 +142,69 @@ unsigned short MsgDumperCom::parse_config_param(const char* param_title, const c
 
 }
 
+unsigned short MsgDumperCom::open_device()
+{
+// Open the COM port
+	return  try_open_comport(fd_com);
+}
+
+unsigned short MsgDumperCom::close_device()
+{
+// Close the COM port
+	if (fd_com != 0)
+	{
+		close(fd_com);
+		fd_com = 0;
+	}
+
+	return MSG_DUMPER_SUCCESS;
+}
+
 unsigned short MsgDumperCom::initialize(const char* config_path, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperCom object......");
 
 // Parse the config file first
 	unsigned short ret = parse_config(config_path, "com");
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 		return ret;
 
-// Create the log folder
-	ret = create_device_file();
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+// Try to connect to the serial port
+	ret = try_open_comport(fd_com);
+	if (CHECK_FAILURE(ret))
 		return ret;
+	close(fd_com);
+	fd_com = 0;
+
 	device_handle_exist = true;
 
-	return MsgDumperTimerThread::initialize(config_path, config);
+	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperCom::deinitialize()
+{
+	WRITE_DEBUG_SYSLOG("DeInitialize the MsgDumperCom object......");
+
+	return close_device();
+}
+
+unsigned short MsgDumperCom::write_msg(PMSG_CFG msg_cfg)
+{
+	if (fd_com == 0)
+	{
+		WRITE_ERR_SYSLOG("The file handle does NOT connect to serial port");
+		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
+	}
+
+// Write the message into the log file
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to COM port", msg_cfg->to_string());
+	const char* msg_cfg_string = msg_cfg->to_string();
+	int acutal_len = write(fd_com, msg_cfg_string, strlen(msg_cfg_string));
+	if (acutal_len == -1)
+	{
+		WRITE_ERR_SYSLOG("Fail to write the data to the serial port...");
+		return MSG_DUMPER_FAILURE_UNKNOWN ;
+	}
+
+	return MSG_DUMPER_SUCCESS;
 }

@@ -35,8 +35,8 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	char* dev_name[] = {"Log", "Com", "Sql", "Remote", "Syslog"};
-	unsigned short severity_arr[] = {MSG_DUMPER_SEVIRITY_ERROR};
+	char* facility_name[] = {"Log", "Com", "Sql", "Remote", "Syslog"};
+	unsigned short severity_arr[] = {MSG_DUMPER_SEVIRITY_WARN};
 	unsigned short facility = MSG_DUMPER_FACILITY_LOG;
 //	unsigned short severity_arr[] = {MSG_DUMPER_SEVIRITY_ERROR, MSG_DUMPER_SEVIRITY_WARN, MSG_DUMPER_SEVIRITY_DEBUG};
 //	unsigned short facility = MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_SYSLOG;
@@ -61,9 +61,9 @@ int main()
 	{
 		if (flags & facility)
 		{
-			printf("Set severity of facility[%s] to :%d\n", dev_name[i], severity_arr[severity_cnt]);
+			printf("Set severity of facility[%s] to %d\n", facility_name[i], severity_arr[severity_cnt]);
 			ret = fp_msg_dumper_set_severity(severity_arr[severity_cnt], flags);
-			if (CHECK_MSG_DUMPER_FAILURE(ret))
+			if (CHECK_FAILURE(ret))
 			{
 				fprintf(stderr, "fp_msg_dumper_set_severity() fails, due to %d\n", ret);
 				goto EXIT;
@@ -74,9 +74,9 @@ int main()
 	}
 
 // Set facility
-	printf("Set facility to :%d\n", facility);
+	printf("Set facility to %d\n", facility);
 	ret = fp_msg_dumper_set_facility(facility);
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_set_facility() fails, due to %d\n", ret);
 		goto EXIT;
@@ -85,7 +85,7 @@ int main()
 // Initialize the library
 	printf("Initialize the library\n");
 	ret = fp_msg_dumper_initialize();
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_initialize() fails, due to %d\n", ret);
 		goto EXIT1;
@@ -98,7 +98,7 @@ int main()
 	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_ERROR, "This is a test: Error");
 	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVIRITY_ERROR, "This is a format test: %s, %d", "Error", MSG_DUMPER_SEVIRITY_ERROR);
 //	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_ERROR, "This is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: Error");
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
 		goto EXIT1;
@@ -108,7 +108,7 @@ int main()
 	printf("Write the WARN message\n");
 	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_WARN, "This is a test: Warn");
 	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVIRITY_WARN, "This is a format test: %s, %d", "Warn", MSG_DUMPER_SEVIRITY_WARN);
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
 		goto EXIT1;
@@ -118,7 +118,7 @@ int main()
 	printf("Write the INFO message\n");
 	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_INFO, "This is a test: Info");
 	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVIRITY_INFO, "This is a format test: %s, %d", "Info", MSG_DUMPER_SEVIRITY_INFO);
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
 		goto EXIT1;
@@ -128,7 +128,7 @@ int main()
 	printf("Write the DEBUG message\n");
 	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_DEBUG, "This is a test: Debug");
 	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVIRITY_DEBUG, "This is a format test: %s, %d", "Debug", MSG_DUMPER_SEVIRITY_DEBUG);
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
 		goto EXIT1;

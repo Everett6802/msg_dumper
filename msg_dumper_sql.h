@@ -4,11 +4,11 @@
 #include <mysql/mysql.h>
 #include <mysql/mysqld_error.h>
 #include "common.h"
-#include "msg_dumper_timer_thread.h"
+#include "msg_dumper_base.h"
 #include "msg_dumper_mgr.h"
 
 
-class MsgDumperSql : public MsgDumperTimerThread
+class MsgDumperSql : public MsgDumperBase
 {
 	friend class MsgDumperMgr;
 private:
@@ -33,16 +33,18 @@ private:
 	unsigned short try_connect_mysql();
 
 protected:
-	virtual unsigned short create_device_file();
-	virtual unsigned short write_device_file();
 	virtual unsigned short parse_config_param(const char* param_title, const char* param_content);
 
 public:
 	MsgDumperSql();
 	virtual ~MsgDumperSql();
 
+	virtual unsigned short open_device();
+	virtual unsigned short close_device();
+
 	virtual unsigned short initialize(const char* config_path, void* config=NULL);
 	virtual unsigned short deinitialize();
+	virtual unsigned short write_msg(PMSG_CFG msg_cfg);
 };
 
 #endif

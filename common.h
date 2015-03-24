@@ -14,8 +14,8 @@ static char* MODULE_NAME = "MSG_DUMPER";
 static unsigned char MAJOR_VERSION = 1;
 static unsigned char MINOR_VERSION = 0;
 static char* MSG_DUMPER_SEVERITY_DESC[] = {"Error", "Warn", "Info", "Debug"};
+static char* MSG_DUMPER_FACILITY_DESC[] = {"Log", "Com", "Sql", "Remote", "Syslog"};
 
-// Constant
 static const unsigned short MSG_DUMPER_SHORT_STRING_SIZE = 32;
 static const unsigned short MSG_DUMPER_STRING_SIZE = 64;
 static const unsigned short MSG_DUMPER_LONG_STRING_SIZE = 256;
@@ -23,6 +23,10 @@ static const unsigned short MSG_DUMPER_EX_LONG_STRING_SIZE = MSG_DUMPER_LONG_STR
 
 static const unsigned short SERVER_PORT_NO = 6802;
 static const unsigned short MAX_CONNECTED_CLIENT = 5;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Enumeration
+enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_REMOTE, FACILITY_SYSLOG, FACILITY_SIZE};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Macro

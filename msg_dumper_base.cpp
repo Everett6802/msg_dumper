@@ -1,6 +1,5 @@
 #include "msg_dumper_base.h"
 #include "msg_dumper.h"
-#include "common.h"
 
 
 const char* MsgDumperBase::CONF_FOLDER_NAME = "conf";
@@ -9,7 +8,7 @@ MsgDumperBase::MsgDumperBase() :
 	device_handle_exist(false),
 	severity(MSG_DUMPER_SEVIRITY_DEBUG)
 {
-
+	memset(facility_name, 0x0, MSG_DUMPER_SHORT_STRING_SIZE);
 }
 
 unsigned short MsgDumperBase::generate_current_time_string(char* current_time_string)
@@ -80,7 +79,7 @@ unsigned short MsgDumperBase::parse_config(const char* conf_path, const char* de
 // Update the parameter value
 		string new_param(buf);
 		ret = parse_config_param(new_param.substr(0, split_pos).c_str(), new_param.substr(split_pos + 1).c_str());
-		if (CHECK_MSG_DUMPER_FAILURE(ret))
+		if (CHECK_FAILURE(ret))
 			break;
 	}
 
@@ -101,4 +100,9 @@ unsigned short MsgDumperBase::set_severity(unsigned short new_severity)
 unsigned short MsgDumperBase::get_severity()const
 {
 	return severity;
+}
+
+const char* MsgDumperBase::get_facility_name()const
+{
+	return facility_name;
 }

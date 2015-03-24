@@ -7,12 +7,14 @@
 
 
 char* MsgDumperSyslog::MSG_DUMPER_TITLE = "MsgDumper";
-char* MsgDumperSyslog::DEF_FACILITY_NAME = "daemon";
+char* MsgDumperSyslog::DEF_SYSLOG_FACILITY_NAME = "daemon";
 
 MsgDumperSyslog::MsgDumperSyslog()
 {
-	memset(facility_name, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
-	memcpy(facility_name, DEF_FACILITY_NAME, sizeof(char) * strlen(DEF_FACILITY_NAME));
+	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_SYSLOG], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_SYSLOG]));
+
+	memset(syslog_facility_name, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
+	memcpy(syslog_facility_name, DEF_SYSLOG_FACILITY_NAME, sizeof(char) * strlen(DEF_SYSLOG_FACILITY_NAME));
 }
 
 MsgDumperSyslog::~MsgDumperSyslog()
@@ -21,7 +23,7 @@ MsgDumperSyslog::~MsgDumperSyslog()
 
 unsigned short MsgDumperSyslog::get_facility_number()
 {
-	static char* facility_name_array[] = {
+	static char* syslog_facility_name_array[] = {
 		"kern", "user", "mail", "daemon", "auth", "syslog", "lpr", "News", "Uucp", "cron", "authpriv", "ftp",
 		"local0", "local1", "local2", "local3", "local4", "local5", "local6", "local7"
 	};
@@ -30,16 +32,17 @@ unsigned short MsgDumperSyslog::get_facility_number()
 		LOG_LOCAL0, LOG_LOCAL1, LOG_LOCAL2, LOG_LOCAL3, LOG_LOCAL4, LOG_LOCAL5, LOG_LOCAL6, LOG_LOCAL7
 	};
 	static const int facility_len = sizeof facility_array / sizeof facility_array[0];
+
 	for (int i = 0 ; i < facility_len ; i++)
 	{
-		if (strcmp(facility_name_array[i], facility_name) == 0)
+		if (strcmp(syslog_facility_name_array[i], syslog_facility_name) == 0)
 		{
 			facility_number = facility_array[i];
 			return MSG_DUMPER_SUCCESS;
 		}
 	}
 
-	WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the facility number: %s", facility_name);
+	WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the facility number: %s", syslog_facility_name);
 	return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 }
 
@@ -64,7 +67,7 @@ unsigned short MsgDumperSyslog::parse_config_param(const char* param_title, cons
 			switch(index)
 			{
 			case 0:
-				param_member_variable = facility_name;
+				param_member_variable = syslog_facility_name;
 				break;
 			}
 
@@ -93,18 +96,28 @@ unsigned short MsgDumperSyslog::parse_config_param(const char* param_title, cons
 	return ret;
 }
 
+unsigned short MsgDumperSyslog::open_device()
+{
+	return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short MsgDumperSyslog::close_device()
+{
+	return MSG_DUMPER_SUCCESS;
+}
+
 unsigned short MsgDumperSyslog::initialize(const char* config_path, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperSyslog object......");
 
 // Parse the config file first
 	unsigned short ret = parse_config(config_path, "syslog");
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 		return ret;
 
 // Get the facility number
 	ret = get_facility_number();
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 		return ret;
 
 	return MSG_DUMPER_SUCCESS;
@@ -112,17 +125,24 @@ unsigned short MsgDumperSyslog::initialize(const char* config_path, void* config
 
 unsigned short MsgDumperSyslog::deinitialize()
 {
+	WRITE_DEBUG_SYSLOG("DeInitialize the MsgDumperSyslog object......");
+
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperSyslog::write_msg(const time_t& timep, unsigned short severity, const char* msg)
+unsigned short MsgDumperSyslog::write_msg(PMSG_CFG msg_cfg)
 {
 	static int SyslogLevel[] = {LOG_ERR, LOG_WARNING, LOG_INFO, LOG_DEBUG};
 
-	snprintf(title, 64, "[%s:%s]", MSG_DUMPER_TITLE, MSG_DUMPER_SEVERITY_DESC[severity]);
+// Connect to syslog server
+	snprintf(title, 64, "[%s:%s]", MSG_DUMPER_TITLE, MSG_DUMPER_SEVERITY_DESC[msg_cfg->severity]);
 	openlog(title, /*LOG_PID |*/ LOG_CONS, facility_number);
+
 //	snprintf(syslog_buf, MSG_DUMPER_EX_LONG_STRING_SIZE, "%s%s", MSG_DUMPER_TITLE, msg);
-	syslog(SyslogLevel[severity], msg);
+	syslog(SyslogLevel[msg_cfg->severity], msg_cfg->data);
+
+// Close the syslog
+	closelog();
 
 	return MSG_DUMPER_SUCCESS;
 }

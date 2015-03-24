@@ -12,12 +12,12 @@ class MsgDumperSyslog : public MsgDumperBase
 {
 	friend class MsgDumperMgr;
 	static char* MSG_DUMPER_TITLE;
-	static char* DEF_FACILITY_NAME;
+	static char* DEF_SYSLOG_FACILITY_NAME;
 
 private:
 	char title[64];
 	char syslog_buf[MSG_DUMPER_EX_LONG_STRING_SIZE];
-	char facility_name[MSG_DUMPER_STRING_SIZE];
+	char syslog_facility_name[MSG_DUMPER_STRING_SIZE];
 	int facility_number;
 
 	unsigned short get_facility_number();
@@ -29,9 +29,12 @@ public:
 	MsgDumperSyslog();
 	virtual ~MsgDumperSyslog();
 
+	virtual unsigned short open_device();
+	virtual unsigned short close_device();
+
 	virtual unsigned short initialize(const char* config_path, void* config=NULL);
 	virtual unsigned short deinitialize();
-	virtual unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg);
+	virtual unsigned short write_msg(PMSG_CFG msg_cfg);
 };
 
 #endif

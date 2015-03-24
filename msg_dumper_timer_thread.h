@@ -9,14 +9,12 @@
 #include <assert.h>
 #include "common.h"
 #include "msg_dumper_base.h"
-#include "msg_dumper_mgr.h"
+//#include "msg_dumper_mgr.h"
 
 
-class MsgDumperTimerThread : public MsgDumperBase
+class MsgDumperTimerThread
 {
-	friend class MsgDumperMgr;
-
-protected:
+//	friend class MsgDumperMgr;
 
 private:
 	pthread_t pid;
@@ -26,6 +24,8 @@ private:
 	bool thread_is_running;
 	bool new_data_trigger;
 
+	MsgDumperBase* msg_dumper;
+
 	static void* msg_dumper_thread_handler(void* void_ptr);
 	unsigned short msg_dumper_thread_handler_internal();
 
@@ -34,16 +34,12 @@ protected:
 	vector<PMSG_CFG> write_vector;
 	char worker_thread_name[MSG_DUMPER_SHORT_STRING_SIZE];
 
-	MsgDumperTimerThread();
-	virtual ~MsgDumperTimerThread();
-
 	pthread_t get_pid()const{return pid;}
-	virtual const char* get_thread_name()const;
-
-	virtual unsigned short create_device_file()=0;
-	virtual unsigned short write_device_file()=0;
 
 public:
+	MsgDumperTimerThread(MsgDumperBase* msg_dumper_obj);
+	~MsgDumperTimerThread();
+
 	virtual unsigned short initialize(const char* conf_path, void* config=NULL);
 	virtual unsigned short deinitialize();
 	virtual unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg);

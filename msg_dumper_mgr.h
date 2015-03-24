@@ -6,16 +6,17 @@
 #include <string>
 #include <stdexcept>
 #include "msg_dumper.h"
-#include "msg_dumper_base.h"
+#include "msg_dumper_timer_thread.h"
 
 
 using namespace std;
-#define REGISTER_CLASS(n) device_factory.register_class<n>(#n)
+
+#define REGISTER_CLASS(n) facility_factory.register_class<n>(#n)
 
 template <class T> MsgDumperBase* constructor() { return (MsgDumperBase*)new T(); }
 
 // A simple factory. To allocate a memory by sending the type name as an argument
-struct factory
+struct MsgDumperFacilityFactory
 {
 	typedef MsgDumperBase*(*constructor_t)();
 	typedef map<string, constructor_t> map_type;
@@ -38,22 +39,22 @@ struct factory
 class MsgDumperMgr
 {
 private:
-	enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_REMOTE, FACILITY_SYSLOG, FACILITY_SIZE};
+	MsgDumperFacilityFactory facility_factory;
+
+
 	typedef map<short, MSG_DUMPER_FACILITY> facility_map_type;
 	facility_map_type facility_mapping_table;
 
-	static char* facility_name[];
 	static int facility_name_size;
 	static short facility_flag[];
 	static int facility_flag_size;
 
 	char current_working_directory[MSG_DUMPER_STRING_SIZE];
-	factory device_factory;
 	bool is_init;
 	unsigned short dumper_severity_arr[FACILITY_SIZE];
 	unsigned short dumper_facility;
 
-	MsgDumperBase* msg_dumper[FACILITY_SIZE];
+	MsgDumperTimerThread* msg_dumper_thread[FACILITY_SIZE];
 
 	int get_facility_index(unsigned short msg_dumper_facility_flag)const;
 

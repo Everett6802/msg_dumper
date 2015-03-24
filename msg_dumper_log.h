@@ -3,11 +3,11 @@
 
 #include <stdio.h>
 #include "common.h"
-#include "msg_dumper_timer_thread.h"
+#include "msg_dumper_base.h"
 #include "msg_dumper_mgr.h"
 
 
-class MsgDumperLog : public MsgDumperTimerThread
+class MsgDumperLog : public MsgDumperBase
 {
 	friend class MsgDumperMgr;
 private:
@@ -16,19 +16,23 @@ private:
 
 	char* log_filename;
 	char* log_filepath;
+	FILE* fp_log;
 
 	unsigned short create_log_folder(const char* config_path);
 
 protected:
-	virtual unsigned short create_device_file();
-	virtual unsigned short write_device_file();
 	virtual unsigned short parse_config_param(const char* param_title, const char* param_content);
 
 public:
 	MsgDumperLog();
 	virtual ~MsgDumperLog();
 
+	virtual unsigned short open_device();
+	virtual unsigned short close_device();
+
 	virtual unsigned short initialize(const char* config_path, void* config=NULL);
+	virtual unsigned short deinitialize();
+	virtual unsigned short write_msg(PMSG_CFG msg_cfg);
 };
 
 #endif

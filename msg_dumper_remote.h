@@ -10,8 +10,6 @@
 #include "msg_dumper_base.h"
 
 
-using namespace std;
-
 class MsgDumperRemote : public MsgDumperBase
 {
 private:
@@ -22,7 +20,7 @@ private:
 
 	char server_list[MSG_DUMPER_STRING_SIZE];
 	char server_port[MSG_DUMPER_STRING_SIZE];
-	vector<PREMOTESERVERCFG> server_socket_vector;
+	std::vector<PREMOTESERVERCFG> server_socket_vector;
 
 protected:
 	virtual unsigned short parse_config_param(const char* param_title, const char* param_content);

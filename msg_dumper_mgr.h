@@ -5,11 +5,10 @@
 #include <map>
 #include <string>
 #include <stdexcept>
+#include "common.h"
 #include "msg_dumper.h"
 #include "msg_dumper_timer_thread.h"
 
-
-using namespace std;
 
 class MsgDumperMgr
 {
@@ -17,7 +16,7 @@ private:
 	struct MsgDumperFacilityFactory;
 	MsgDumperFacilityFactory* facility_factory;
 
-	typedef map<short, MSG_DUMPER_FACILITY> facility_map_type;
+	typedef std::map<short, MSG_DUMPER_FACILITY> facility_map_type;
 	facility_map_type facility_mapping_table;
 
 	static int facility_name_size;

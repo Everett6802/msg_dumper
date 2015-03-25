@@ -6,6 +6,8 @@
 #include "msg_dumper_remote.h"
 
 
+using namespace std;
+
 class MsgDumperRemote::RemoteServerCfg
 {
 	static const int IP_LEN = 16;

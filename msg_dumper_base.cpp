@@ -2,6 +2,8 @@
 #include "msg_dumper.h"
 
 
+using namespace std;
+
 const char* MsgDumperBase::CONF_FOLDER_NAME = "conf";
 
 MsgDumperBase::MsgDumperBase() :

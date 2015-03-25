@@ -12,8 +12,6 @@
 
 #define CURRENT_TIME_STRING_LENGTH 11
 
-using namespace std;
-
 class MsgDumperBase
 {
 private:

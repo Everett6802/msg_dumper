@@ -1,13 +1,12 @@
-#include "msg_dumper.h"
-#include "common.h"
 #include "msg_dumper_mgr.h"
-#include "msg_dumper_timer_thread.h"
 #include "msg_dumper_log.h"
 #include "msg_dumper_com.h"
 #include "msg_dumper_sql.h"
 #include "msg_dumper_remote.h"
 #include "msg_dumper_syslog.h"
 
+
+using namespace std;
 
 int MsgDumperMgr::facility_name_size = sizeof(MSG_DUMPER_FACILITY_DESC) / sizeof(MSG_DUMPER_FACILITY_DESC[0]);
 short MsgDumperMgr::facility_flag[] = {MSG_DUMPER_FACILITY_LOG, MSG_DUMPER_FACILITY_COM, MSG_DUMPER_FACILITY_SQL, MSG_DUMPER_FACILITY_REMOTE, MSG_DUMPER_FACILITY_SYSLOG};
@@ -31,8 +30,19 @@ struct MsgDumperMgr::MsgDumperFacilityFactory
 	{
 		map_type::iterator i = m_classes.find(n);
 		if (i == m_classes.end())
+		{
+			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to find the MsgDumper%s class", n.c_str());
+			throw invalid_argument("Unknown class");
 			return NULL; // or throw or whatever you want
-		return (MsgDumperBase*)i->second(); // Allocate the memory of a specific type
+		}
+
+		MsgDumperBase* msg_dumper = (MsgDumperBase*)i->second();  // Allocate the memory of a specific type
+		if (msg_dumper == NULL)
+		{
+			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to allocate the MsgDumper%s object", n.c_str());
+			throw bad_alloc();
+		}
+		return msg_dumper;
 	}
 
 	int register_class_size()const{return m_classes.size();}
@@ -73,7 +83,6 @@ MsgDumperMgr::MsgDumperMgr() :
 MsgDumperMgr::~MsgDumperMgr()
 {
 }
-
 
 bool MsgDumperMgr::can_ignore(unsigned short severity)const
 {

@@ -31,7 +31,7 @@ int main()
 
 	WRITE_DEBUG_SYSLOG("Start the MsgDumper daemon...");
 	ret = daemon_init();
-	if (CHECK_MSG_DUMPER_FAILURE(ret))
+	if (CHECK_FAILURE(ret))
 		exit(EXIT_SUCCESS);
 
 	int server_sockfd;

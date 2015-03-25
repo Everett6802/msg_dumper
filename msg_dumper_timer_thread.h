@@ -7,10 +7,11 @@
 #include <signal.h>
 #include <errno.h>
 #include <assert.h>
+#include <vector>
 #include "common.h"
-#include "msg_dumper_base.h"
 
 
+	class MsgDumperBase;
 class MsgDumperTimerThread
 {
 private:
@@ -27,8 +28,8 @@ private:
 	unsigned short msg_dumper_thread_handler_internal();
 
 protected:
-	vector<PMSG_CFG> buffer_vector;
-	vector<PMSG_CFG> write_vector;
+	std::vector<PMSG_CFG> buffer_vector;
+	std::vector<PMSG_CFG> write_vector;
 	char worker_thread_name[MSG_DUMPER_SHORT_STRING_SIZE];
 
 	pthread_t get_pid()const{return pid;}
@@ -37,9 +38,9 @@ public:
 	MsgDumperTimerThread(MsgDumperBase* msg_dumper_obj);
 	~MsgDumperTimerThread();
 
-	virtual unsigned short initialize(const char* conf_path, void* config=NULL);
-	virtual unsigned short deinitialize();
-	virtual unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg);
+	unsigned short initialize(const char* conf_path, void* config=NULL);
+	unsigned short deinitialize();
+	unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg);
 };
 
 #endif

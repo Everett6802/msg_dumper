@@ -1,10 +1,12 @@
 #include <unistd.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "msg_dumper.h"
+#include "msg_dumper_base.h"
 #include "msg_dumper_timer_thread.h"
 
+
+using namespace std;
 
 MsgDumperTimerThread::MsgDumperTimerThread(MsgDumperBase* msg_dumper_obj) :
 	pid(0),

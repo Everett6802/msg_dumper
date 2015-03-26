@@ -9,6 +9,7 @@
 
 
 static MsgDumperMgr msg_dumepr_mgr;
+static unsigned short last_error = MSG_DUMPER_SUCCESS;
 
 unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned char& minor_version)
 {
@@ -22,37 +23,43 @@ unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned cha
 unsigned short msg_dumper_initialize()
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.initialize();
+	last_error = msg_dumepr_mgr.initialize();
+	return last_error;
 }
 
 unsigned short msg_dumper_set_severity(unsigned short severity, unsigned short single_facility)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.set_severity(severity, single_facility);
+	last_error = msg_dumepr_mgr.set_severity(severity, single_facility);
+	return last_error;
 }
 
 unsigned short msg_dumper_set_severity_all(unsigned short severity)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.set_severity_all(severity);
+	last_error = msg_dumepr_mgr.set_severity_all(severity);
+	return last_error;
 }
 
 unsigned short msg_dumper_set_facility(unsigned short facility)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.set_facility(facility);
+	last_error = msg_dumepr_mgr.set_facility(facility);
+	return last_error;
 }
 
 unsigned short msg_dumper_get_severity(unsigned short single_facility)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.get_severity(single_facility);
+	last_error = msg_dumepr_mgr.get_severity(single_facility);
+	return last_error;
 }
 
 unsigned short msg_dumper_get_facility()
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.get_facility();
+	last_error = msg_dumepr_mgr.get_facility();
+	return last_error;
 }
 
 unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg)
@@ -60,9 +67,10 @@ unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg)
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 
 	if (msg_dumepr_mgr.can_ignore(severity))
-		return MSG_DUMPER_SUCCESS;
-
-	return msg_dumepr_mgr.write_msg(severity, msg);
+		last_error = MSG_DUMPER_SUCCESS;
+	else
+		last_error = msg_dumepr_mgr.write_msg(severity, msg);
+	return last_error;
 }
 
 unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* fmt, ...)
@@ -74,74 +82,84 @@ unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* 
 	static const int fmtbuf_len = 16;
 	static char fmtbuf[fmtbuf_len];
 
-	if (msg_dumepr_mgr.can_ignore(severity))
-		return MSG_DUMPER_SUCCESS;
-
 	if (fmt == NULL)
 	{
 		WRITE_ERR_SYSLOG("Invalid pointer: format");
-		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+		last_error = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+		return last_error;
 	}
 
-	va_list arg_list;
-	va_start(arg_list, fmt);
-
-// Parse the string format, and generate the string
-	char* arg_str = NULL;
-	int arg_str_len = 0;
-	int fmtmsg_index = 0;
-	bool out = false;
-	for(const char* p = fmt; *p != '\0' && fmtmsg_index < fmtmsg_len ; p++)
+	if (msg_dumepr_mgr.can_ignore(severity))
+		last_error = MSG_DUMPER_SUCCESS;
+	else
 	{
-		if (*p == '%')
-		{
-			switch (*++p)
-			{
-				case 'd':
-				{
-// itoa is not ansi C standard and you should probably avoid it. Here are some roll-your-own implementations if you really want to use it anyway:
-//				fputs(itoa(value, fmtmsg, 10), stdout);
-					snprintf(fmtbuf, fmtbuf_len, "%d", va_arg(arg_list, int));
-					arg_str = fmtbuf;
-				}
-				break;
-				case 's':
-				{
-					arg_str = va_arg(arg_list, char*);
-				}
-				break;
-				default:
-				{
-					assert(0 && "Unsupported format");
-					return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
-				}
-				break;
-			}
-			arg_str_len = strlen(arg_str);
-			if (fmtmsg_index + arg_str_len >= fmtmsg_len - 1)
-			{
-				arg_str_len = fmtmsg_len - fmtmsg_index - 1;
-				out = true;
-			}
-			memcpy(&fmtmsg[fmtmsg_index], arg_str, sizeof(char) * arg_str_len);
-			fmtmsg_index += arg_str_len;
-	//		fputs(arg_str, stdout);
-		}
-		else
-		{
-//			putchar(*p);
-			fmtmsg[fmtmsg_index++] = *p;
-		}
-	}
-	fmtmsg[fmtmsg_index] = '\0';
-	va_end(arg_list);
+		va_list arg_list;
+		va_start(arg_list, fmt);
 
-	return msg_dumepr_mgr.write_msg(severity, fmtmsg);
+	// Parse the string format, and generate the string
+		char* arg_str = NULL;
+		int arg_str_len = 0;
+		int fmtmsg_index = 0;
+		bool out = false;
+		for(const char* p = fmt; *p != '\0' && fmtmsg_index < fmtmsg_len ; p++)
+		{
+			if (*p == '%')
+			{
+				switch (*++p)
+				{
+					case 'd':
+					{
+	// itoa is not ansi C standard and you should probably avoid it. Here are some roll-your-own implementations if you really want to use it anyway:
+	//				fputs(itoa(value, fmtmsg, 10), stdout);
+						snprintf(fmtbuf, fmtbuf_len, "%d", va_arg(arg_list, int));
+						arg_str = fmtbuf;
+					}
+					break;
+					case 's':
+					{
+						arg_str = va_arg(arg_list, char*);
+					}
+					break;
+					default:
+					{
+						assert(0 && "Unsupported format");
+						return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+					}
+					break;
+				}
+				arg_str_len = strlen(arg_str);
+				if (fmtmsg_index + arg_str_len >= fmtmsg_len - 1)
+				{
+					arg_str_len = fmtmsg_len - fmtmsg_index - 1;
+					out = true;
+				}
+				memcpy(&fmtmsg[fmtmsg_index], arg_str, sizeof(char) * arg_str_len);
+				fmtmsg_index += arg_str_len;
+		//		fputs(arg_str, stdout);
+			}
+			else
+			{
+	//			putchar(*p);
+				fmtmsg[fmtmsg_index++] = *p;
+			}
+		}
+		fmtmsg[fmtmsg_index] = '\0';
+		va_end(arg_list);
+
+		last_error = msg_dumepr_mgr.write_msg(severity, fmtmsg);
+	}
+
+	return last_error;
 }
 
 unsigned short msg_dumper_deinitialize()
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	return msg_dumepr_mgr.deinitialize();
+	last_error = msg_dumepr_mgr.deinitialize();
+	return last_error;
 }
 
+const char* msg_dumper_get_error_description()
+{
+	return error_description[last_error];
+}

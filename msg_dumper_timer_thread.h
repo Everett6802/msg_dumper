@@ -7,11 +7,10 @@
 #include <signal.h>
 #include <errno.h>
 #include <assert.h>
-#include <vector>
 #include "common.h"
+#include "msg_dumper_base.h"
 
 
-	class MsgDumperBase;
 class MsgDumperTimerThread
 {
 private:

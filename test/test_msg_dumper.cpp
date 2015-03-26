@@ -17,6 +17,7 @@ FP_msg_dumper_get_facility fp_msg_dumper_get_facility;
 FP_msg_dumper_write_msg fp_msg_dumper_write_msg;
 FP_msg_dumper_write_format_msg fp_msg_dumper_write_format_msg;
 FP_msg_dumper_deinitialize fp_msg_dumper_deinitialize;
+FP_msg_dumper_get_error_description fp_msg_dumper_get_error_description;
 
 bool export_api(void* handle);
 int get_device_type_amount();
@@ -65,7 +66,7 @@ int main()
 			ret = fp_msg_dumper_set_severity(severity_arr[severity_cnt], flags);
 			if (CHECK_FAILURE(ret))
 			{
-				fprintf(stderr, "fp_msg_dumper_set_severity() fails, due to %d\n", ret);
+				fprintf(stderr, "fp_msg_dumper_set_severity() fails, due to %d, resaon: %s\n", ret, fp_msg_dumper_get_error_description());
 				goto EXIT;
 			}
 			severity_cnt++;
@@ -78,7 +79,7 @@ int main()
 	ret = fp_msg_dumper_set_facility(facility);
 	if (CHECK_FAILURE(ret))
 	{
-		fprintf(stderr, "fp_msg_dumper_set_facility() fails, due to %d\n", ret);
+		fprintf(stderr, "fp_msg_dumper_set_facility() fails, due to %d, resaon: %s\n", ret, fp_msg_dumper_get_error_description());
 		goto EXIT;
 	}
 
@@ -87,7 +88,7 @@ int main()
 	ret = fp_msg_dumper_initialize();
 	if (CHECK_FAILURE(ret))
 	{
-		fprintf(stderr, "fp_msg_dumper_initialize() fails, due to %d\n", ret);
+		fprintf(stderr, "fp_msg_dumper_initialize() fails, due to %d, resaon: %s\n", ret, fp_msg_dumper_get_error_description());
 		goto EXIT1;
 	}
 
@@ -100,7 +101,7 @@ int main()
 //	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVIRITY_ERROR, "This is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: ErrorThis is a test: Error");
 	if (CHECK_FAILURE(ret))
 	{
-		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, resaon: %s\n", ret, fp_msg_dumper_get_error_description());
 		goto EXIT1;
 	}
 
@@ -110,7 +111,7 @@ int main()
 	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVIRITY_WARN, "This is a format test: %s, %d", "Warn", MSG_DUMPER_SEVIRITY_WARN);
 	if (CHECK_FAILURE(ret))
 	{
-		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, resaon: %s\n", ret, fp_msg_dumper_get_error_description());
 		goto EXIT1;
 	}
 
@@ -120,7 +121,7 @@ int main()
 	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVIRITY_INFO, "This is a format test: %s, %d", "Info", MSG_DUMPER_SEVIRITY_INFO);
 	if (CHECK_FAILURE(ret))
 	{
-		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, resaon: %s\n", ret, fp_msg_dumper_get_error_description());
 		goto EXIT1;
 	}
 
@@ -130,7 +131,7 @@ int main()
 	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVIRITY_DEBUG, "This is a format test: %s, %d", "Debug", MSG_DUMPER_SEVIRITY_DEBUG);
 	if (CHECK_FAILURE(ret))
 	{
-		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d\n", ret);
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, resaon: %s\n", ret, fp_msg_dumper_get_error_description());
 		goto EXIT1;
 	}
 
@@ -235,6 +236,13 @@ bool export_api(void* handle)
 	if (fp_msg_dumper_deinitialize == NULL)
 	{
 		fprintf(stderr, "dlsym() fails when exporting msg_dumper_deinitialize() due to %s\n", dlerror());
+		return false;
+	}
+
+	fp_msg_dumper_get_error_description = (FP_msg_dumper_get_error_description)dlsym(handle, "msg_dumper_get_error_description");
+	if (fp_msg_dumper_get_error_description == NULL)
+	{
+		fprintf(stderr, "dlsym() fails when exporting msg_dumper_get_error_description() due to %s\n", dlerror());
 		return false;
 	}
 

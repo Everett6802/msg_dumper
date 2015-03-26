@@ -25,6 +25,22 @@ static const unsigned short MSG_DUMPER_EX_LONG_STRING_SIZE = MSG_DUMPER_LONG_STR
 static const unsigned short SERVER_PORT_NO = 6802;
 static const unsigned short MAX_CONNECTED_CLIENT = 5;
 
+static const char* error_description[] =
+{
+	"Success",
+	"Failure Unknown",
+	"Failure Invalid Argument",
+	"Failure Invalid Pointer",
+	"Failure Insufficient Memory",
+	"Failure Open File",
+	"Failure Not Found",
+	"Failure Incorrect Config",
+	"Failure Incorrect Operation",
+	"Failure COM Port",
+	"Failure MySQL",
+	"Failure Socket"
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Enumeration
 enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_REMOTE, FACILITY_SYSLOG, FACILITY_SIZE};

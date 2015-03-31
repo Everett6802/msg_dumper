@@ -10,8 +10,8 @@ class MsgDumperLog : public MsgDumperBase
 {
 private:
 	static char* DEF_LOG_FOLDER;
-	char log_folder[MSG_DUMPER_STRING_SIZE];
 
+	char log_folder[MSG_DUMPER_STRING_SIZE];
 	char* log_filename;
 	char* log_filepath;
 	FILE* fp_log;

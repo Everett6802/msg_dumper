@@ -19,7 +19,6 @@ private:
 	unsigned short severity;
 
 protected:
-	bool device_handle_exist;
 	char facility_name[MSG_DUMPER_SHORT_STRING_SIZE];
 
 	unsigned short generate_current_time_string(char* current_time_string);

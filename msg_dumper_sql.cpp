@@ -214,7 +214,6 @@ unsigned short MsgDumperSql::initialize(const char* config_path, void* config)
 
 	if (CHECK_FAILURE(ret))
 		return ret;
-	device_handle_exist = true;
 
 	return MSG_DUMPER_SUCCESS;
 }

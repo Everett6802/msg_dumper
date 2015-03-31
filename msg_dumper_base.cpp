@@ -7,7 +7,6 @@ using namespace std;
 const char* MsgDumperBase::CONF_FOLDER_NAME = "conf";
 
 MsgDumperBase::MsgDumperBase() :
-	device_handle_exist(false),
 	severity(MSG_DUMPER_SEVIRITY_DEBUG)
 {
 	memset(facility_name, 0x0, MSG_DUMPER_SHORT_STRING_SIZE);

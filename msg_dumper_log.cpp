@@ -113,7 +113,6 @@ unsigned short MsgDumperLog::parse_config_param(const char* param_title, const c
 	}
 
 	return ret;
-
 }
 
 unsigned short MsgDumperLog::open_device()

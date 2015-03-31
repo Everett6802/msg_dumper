@@ -16,8 +16,11 @@ private:
 	int fd_com;
 	char port_name[MSG_DUMPER_STRING_SIZE];
 	char port_speed[MSG_DUMPER_STRING_SIZE];
+	speed_t com_port_speed;
+	struct termios tty_new;
+	struct termios tty_original;
 
-	unsigned short try_open_comport(int& fd_com)const;
+	unsigned short try_open_comport();
 	unsigned short transform_com_port_speed(speed_t& com_port_speed)const;
 
 protected:

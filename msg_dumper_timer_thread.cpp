@@ -80,7 +80,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 			ret = msg_dumper->open_device();
 			if (CHECK_FAILURE(ret))
 				break;
-// Write the message into the log file
+// Write the message into the device
 			for (int i = 0 ; i < write_vector_size ; i++)
 			{
 				ret = msg_dumper->write_msg(write_vector[i]);
@@ -137,8 +137,6 @@ unsigned short MsgDumperTimerThread::initialize(const char* config_path, void* c
 
 unsigned short MsgDumperTimerThread::write_msg(const time_t& timep, unsigned short severity, const char* msg)
 {
-	unsigned short ret = MSG_DUMPER_SUCCESS;
-
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [severity: %d, message: %s]", severity, msg);
 	PMSG_CFG new_msg = new MsgCfg(timep, severity, msg);
 

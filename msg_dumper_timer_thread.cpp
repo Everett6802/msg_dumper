@@ -62,7 +62,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 		{
 			for (int i = 0 ; i < buffer_vector_size ; i++)
 			{
-				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Move the message[%s] to another buffer", worker_thread_name, buffer_vector[i]->data);
+//				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Move the message[%s] to another buffer", worker_thread_name, buffer_vector[i]->data);
 				PMSG_CFG elem =  buffer_vector[i];
 				buffer_vector[i] = NULL;
 				write_vector.push_back(elem);

@@ -137,7 +137,7 @@ unsigned short MsgDumperTimerThread::initialize(const char* config_path, void* c
 
 unsigned short MsgDumperTimerThread::write_msg(const time_t& timep, unsigned short severity, const char* msg)
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [severity: %d, message: %s]", severity, msg);
+//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [severity: %d, message: %s]", severity, msg);
 	PMSG_CFG new_msg = new MsgCfg(timep, severity, msg);
 
 	pthread_mutex_lock(&mut);

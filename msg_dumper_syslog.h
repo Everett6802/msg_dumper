@@ -10,8 +10,8 @@
 class MsgDumperSyslog : public MsgDumperBase
 {
 private:
-	static char* MSG_DUMPER_TITLE;
-	static char* DEF_SYSLOG_FACILITY_NAME;
+	static const char* MSG_DUMPER_TITLE;
+	static const char* DEF_SYSLOG_FACILITY_NAME;
 
 	char title[64];
 	char syslog_buf[MSG_DUMPER_EX_LONG_STRING_SIZE];

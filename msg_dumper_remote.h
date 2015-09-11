@@ -13,7 +13,7 @@
 class MsgDumperRemote : public MsgDumperBase
 {
 private:
-	static char* DEF_SERVER_PORT;
+	static const char* DEF_SERVER_PORT;
 
 	class RemoteServerCfg;
 	typedef RemoteServerCfg* PREMOTESERVERCFG;

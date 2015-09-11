@@ -34,7 +34,7 @@ public:
 	}
 };
 
-char* MsgDumperRemote::DEF_SERVER_PORT = "6802";
+const char* MsgDumperRemote::DEF_SERVER_PORT = "6802";
 
 MsgDumperRemote::MsgDumperRemote()
 {
@@ -56,7 +56,7 @@ unsigned short MsgDumperRemote::parse_config_param(const char* param_title, cons
 		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
-	static char* title[] = {"server_list", "server_port"};
+	static const char* title[] = {"server_list", "server_port"};
 	static int title_len = sizeof title / sizeof title[0];
 
 	unsigned short ret = MSG_DUMPER_SUCCESS;
@@ -141,7 +141,7 @@ unsigned short MsgDumperRemote::initialize(const char* config_path, void* config
 
 // Connect
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Client connect to server[%s]", pRemoteServerCfg->ip);
-		int client_len;
+//		int client_len;
 		struct sockaddr_in client_address;
 		memset(&client_address, 0x0, sizeof(struct sockaddr_in));
 		client_address.sin_family = AF_INET;

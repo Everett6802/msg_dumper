@@ -8,7 +8,7 @@
 
 using namespace std;
 
-int MsgDumperMgr::facility_name_size = sizeof(MSG_DUMPER_FACILITY_DESC) / sizeof(MSG_DUMPER_FACILITY_DESC[0]);
+//int MsgDumperMgr::facility_name_size = sizeof(MSG_DUMPER_FACILITY_DESC) / sizeof(MSG_DUMPER_FACILITY_DESC[0]);
 short MsgDumperMgr::facility_flag[] = {MSG_DUMPER_FACILITY_LOG, MSG_DUMPER_FACILITY_COM, MSG_DUMPER_FACILITY_SQL, MSG_DUMPER_FACILITY_REMOTE, MSG_DUMPER_FACILITY_SYSLOG};
 int MsgDumperMgr::facility_flag_size = sizeof(facility_flag) / sizeof(facility_flag[0]);
 
@@ -64,7 +64,7 @@ MsgDumperMgr::MsgDumperMgr() :
 	REGISTER_CLASS(MsgDumperSyslog);
 // Check the parameter setting is correct
 	assert((facility_factory->register_class_size() == FACILITY_SIZE) && "The facility size is NOT identical");
-	assert((facility_name_size == FACILITY_SIZE) && "The facility name size is NOT identical");
+	assert((MSG_DUMPER_FACILITY_DESC_LEN == FACILITY_SIZE) && "The facility name size is NOT identical");
 	assert((facility_flag_size == FACILITY_SIZE) && "The facility flag size is NOT identical");
 
 	memset(current_working_directory, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);

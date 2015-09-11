@@ -9,37 +9,33 @@
 #include <assert.h>
 #include <errno.h>
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Marcos
+#define MSG_DUMPER_SHORT_STRING_SIZE			32U
+#define MSG_DUMPER_STRING_SIZE 					64U
+#define MSG_DUMPER_LONG_STRING_SIZE 			256U
+#define MSG_DUMPER_EX_LONG_STRING_SIZE 			(MSG_DUMPER_LONG_STRING_SIZE * 2)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constants
-static char* MODULE_NAME = "MSG_DUMPER";
-static unsigned char MAJOR_VERSION = 1;
-static unsigned char MINOR_VERSION = 0;
-static char* MSG_DUMPER_SEVERITY_DESC[] = {"Error", "Warn", "Info", "Debug"};
-static char* MSG_DUMPER_FACILITY_DESC[] = {"Log", "Com", "Sql", "Remote", "Syslog"};
+extern const char* MODULE_NAME;
+extern const unsigned char MAJOR_VERSION;
+extern const unsigned char MINOR_VERSION;
+extern const char* MSG_DUMPER_SEVERITY_DESC[];
+extern const int MSG_DUMPER_SEVERITY_DESC_LEN;
+extern const char* MSG_DUMPER_FACILITY_DESC[];
+extern const int MSG_DUMPER_FACILITY_DESC_LEN;
 
-static const unsigned short MSG_DUMPER_SHORT_STRING_SIZE = 32;
-static const unsigned short MSG_DUMPER_STRING_SIZE = 64;
-static const unsigned short MSG_DUMPER_LONG_STRING_SIZE = 256;
-static const unsigned short MSG_DUMPER_EX_LONG_STRING_SIZE = MSG_DUMPER_LONG_STRING_SIZE * 2;
+//extern const unsigned short MSG_DUMPER_SHORT_STRING_SIZE;
+//extern const unsigned short MSG_DUMPER_STRING_SIZE;
+//extern const unsigned short MSG_DUMPER_LONG_STRING_SIZE;
+//extern const unsigned short MSG_DUMPER_EX_LONG_STRING_SIZE;
 
-static const unsigned short SERVER_PORT_NO = 6802;
-static const unsigned short MAX_CONNECTED_CLIENT = 5;
+extern const unsigned short SERVER_PORT_NO;
+extern const unsigned short MAX_CONNECTED_CLIENT;
 
-static const char* error_description[] =
-{
-	"Success",
-	"Failure Unknown",
-	"Failure Invalid Argument",
-	"Failure Invalid Pointer",
-	"Failure Insufficient Memory",
-	"Failure Open File",
-	"Failure Not Found",
-	"Failure Incorrect Config",
-	"Failure Incorrect Operation",
-	"Failure COM Port",
-	"Failure MySQL",
-	"Failure Socket"
-};
+extern const char* error_description[];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Enumeration
@@ -48,7 +44,7 @@ enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_SQL, FACILITY_REMO
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Macro
 
-#define SHOW_SYSLOG
+//#define SHOW_SYSLOG
 
 #define WRITE_SYSLOG_BEGIN()\
 do{\

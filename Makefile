@@ -1,6 +1,6 @@
 CC := g++
 
-CXXFLAGS := -g -Wall -fPIC
+CXXFLAGS := -g -Wall -fPIC -std=c++0x
 #INCLUDE_PATH := ../include
 
 SOURCES := common.cpp msg_dumper.cpp msg_dumper_mgr.cpp msg_dumper_base.cpp msg_dumper_timer_thread.cpp msg_dumper_log.cpp msg_dumper_com.cpp msg_dumper_sql.cpp msg_dumper_remote.cpp msg_dumper_syslog.cpp

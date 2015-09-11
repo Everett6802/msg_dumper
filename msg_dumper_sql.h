@@ -10,14 +10,14 @@
 class MsgDumperSql : public MsgDumperBase
 {
 private:
-	static char* DEF_SERVER;
-	static char* DEF_USERNAME;
-	static char* DEF_PASSWORD;
-	static char* DEF_DATABASE;
+	static const char* DEF_SERVER;
+	static const char* DEF_USERNAME;
+	static const char* DEF_PASSWORD;
+	static const char* DEF_DATABASE;
 
-	static char* format_cmd_create_database;
-	static char* format_cmd_create_table;
-	static char* format_cmd_insert_into_table;
+	static const char* format_cmd_create_database;
+	static const char* format_cmd_create_table;
+	static const char* format_cmd_insert_into_table;
 
 	MYSQL* connection;
 	char cmd_buf[MSG_DUMPER_LONG_STRING_SIZE];

@@ -6,8 +6,8 @@
 #include "msg_dumper_syslog.h"
 
 
-char* MsgDumperSyslog::MSG_DUMPER_TITLE = "MsgDumper";
-char* MsgDumperSyslog::DEF_SYSLOG_FACILITY_NAME = "daemon";
+const char* MsgDumperSyslog::MSG_DUMPER_TITLE = "MsgDumper";
+const char* MsgDumperSyslog::DEF_SYSLOG_FACILITY_NAME = "daemon";
 
 MsgDumperSyslog::MsgDumperSyslog()
 {
@@ -23,7 +23,7 @@ MsgDumperSyslog::~MsgDumperSyslog()
 
 unsigned short MsgDumperSyslog::get_facility_number()
 {
-	static char* syslog_facility_name_array[] = {
+	static const char* syslog_facility_name_array[] = {
 		"kern", "user", "mail", "daemon", "auth", "syslog", "lpr", "News", "Uucp", "cron", "authpriv", "ftp",
 		"local0", "local1", "local2", "local3", "local4", "local5", "local6", "local7"
 	};
@@ -53,7 +53,7 @@ unsigned short MsgDumperSyslog::parse_config_param(const char* param_title, cons
 		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
-	static char* title[] = {"facility_name"};
+	static const char* title[] = {"facility_name"};
 	static int title_len = sizeof title / sizeof title[0];
 
 	unsigned short ret = MSG_DUMPER_SUCCESS;
@@ -139,7 +139,7 @@ unsigned short MsgDumperSyslog::write_msg(PMSG_CFG msg_cfg)
 	openlog(title, /*LOG_PID |*/ LOG_CONS, facility_number);
 
 //	snprintf(syslog_buf, MSG_DUMPER_EX_LONG_STRING_SIZE, "%s%s", MSG_DUMPER_TITLE, msg);
-	syslog(SyslogLevel[msg_cfg->severity], msg_cfg->data);
+	syslog(SyslogLevel[msg_cfg->severity], "%s", msg_cfg->data);
 
 // Close the syslog
 	closelog();

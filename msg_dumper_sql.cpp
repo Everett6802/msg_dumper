@@ -8,13 +8,13 @@
  * http://docstore.mik.ua/orelly/linux/sql/ch19_01.htm
  */
 
-char* MsgDumperSql::DEF_SERVER = "localhost";
-char* MsgDumperSql::DEF_USERNAME = "root";
-char* MsgDumperSql::DEF_PASSWORD = "lab4man1";
-char* MsgDumperSql::DEF_DATABASE = "msg_dumper";
-char* MsgDumperSql::format_cmd_create_database = "CREATE DATABASE %s";
-char* MsgDumperSql::format_cmd_create_table = "CREATE TABLE sql%s (date VARCHAR(16), time VARCHAR(16), severity INT, data VARCHAR(512))";
-char* MsgDumperSql::format_cmd_insert_into_table = "INSERT INTO sql%s VALUES(\"%s\", \"%s\", %d, \"%s\")";
+const char* MsgDumperSql::DEF_SERVER = "localhost";
+const char* MsgDumperSql::DEF_USERNAME = "root";
+const char* MsgDumperSql::DEF_PASSWORD = "lab4man1";
+const char* MsgDumperSql::DEF_DATABASE = "msg_dumper";
+const char* MsgDumperSql::format_cmd_create_database = "CREATE DATABASE %s";
+const char* MsgDumperSql::format_cmd_create_table = "CREATE TABLE sql%s (date VARCHAR(16), time VARCHAR(16), severity INT, data VARCHAR(512))";
+const char* MsgDumperSql::format_cmd_insert_into_table = "INSERT INTO sql%s VALUES(\"%s\", \"%s\", %d, \"%s\")";
 
 MsgDumperSql::MsgDumperSql() :
 	connection(NULL),
@@ -63,7 +63,7 @@ unsigned short MsgDumperSql::try_connect_mysql()
 
 		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_create_database, database);
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to create database[%s] by command: %s", database, cmd_buf);
-		if(mysql_query(connection, cmd_buf) != NULL)
+		if(mysql_query(connection, cmd_buf) != 0)
 		{
 			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "mysql_query() fails, due to: %s", mysql_error(connection));
 			return MSG_DUMPER_FAILURE_MYSQL;
@@ -89,7 +89,7 @@ unsigned short MsgDumperSql::parse_config_param(const char* param_title, const c
 		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
-	static char* title[] = {"server", "username", "password", "database"};
+	static const char* title[] = {"server", "username", "password", "database"};
 	static int title_len = sizeof title / sizeof title[0];
 
 	unsigned short ret = MSG_DUMPER_SUCCESS;
@@ -171,7 +171,7 @@ unsigned short MsgDumperSql::open_device()
 // Create the table in the database...
 		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_create_table, current_time_string);
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to create table[sql%s] by command: %s", facility_name, current_time_string, cmd_buf);
-		if(mysql_query(connection, cmd_buf) != NULL)
+		if(mysql_query(connection, cmd_buf) != 0)
 		{
 			int error = mysql_errno(connection);
 			if (error != ER_TABLE_EXISTS_ERROR)
@@ -236,7 +236,7 @@ unsigned short MsgDumperSql::write_msg(PMSG_CFG msg_cfg)
 // Write the message into SQL database
 	snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_insert_into_table, current_time_string, msg_cfg->date_str, msg_cfg->time_str, msg_cfg->severity, msg_cfg->data);
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to Write the message[%s] to MySQL by command: %s", facility_name, msg_cfg->to_string(), cmd_buf);
-	if(mysql_query(connection, cmd_buf) != NULL)
+	if(mysql_query(connection, cmd_buf) != 0)
 	{
 		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %s", facility_name, mysql_error(connection));
 		return MSG_DUMPER_FAILURE_MYSQL;

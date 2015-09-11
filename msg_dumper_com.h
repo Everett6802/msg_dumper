@@ -10,8 +10,8 @@
 class MsgDumperCom : public MsgDumperBase
 {
 private:
-	static char* DEF_COM_PORT_NAME;
-	static char* DEF_COM_PORT_SPEED;
+	static const char* DEF_COM_PORT_NAME;
+	static const char* DEF_COM_PORT_SPEED;
 
 	int fd_com;
 	char port_name[MSG_DUMPER_STRING_SIZE];

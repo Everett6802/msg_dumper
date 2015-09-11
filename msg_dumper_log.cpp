@@ -5,7 +5,7 @@
 #include "msg_dumper_log.h"
 
 
-char* MsgDumperLog::DEF_LOG_FOLDER = "log";
+const char* MsgDumperLog::DEF_LOG_FOLDER = "log";
 
 MsgDumperLog::MsgDumperLog() :
 	log_filename(NULL),
@@ -72,7 +72,7 @@ unsigned short MsgDumperLog::parse_config_param(const char* param_title, const c
 		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
-	static char* title[] = {"log_folder"};
+	static const char* title[] = {"log_folder"};
 	static int title_len = sizeof title / sizeof title[0];
 
 	unsigned short ret = MSG_DUMPER_SUCCESS;

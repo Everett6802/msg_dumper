@@ -19,7 +19,7 @@ private:
 	typedef std::map<short, MSG_DUMPER_FACILITY> facility_map_type;
 	facility_map_type facility_mapping_table;
 
-	static int facility_name_size;
+//	static int facility_name_size;
 	static short facility_flag[];
 	static int facility_flag_size;
 

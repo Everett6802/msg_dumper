@@ -3,8 +3,8 @@
 #include "msg_dumper_com.h"
 
 
-char* MsgDumperCom::DEF_COM_PORT_NAME = "/dev/ttyUSB1";
-char* MsgDumperCom::DEF_COM_PORT_SPEED = "B115200";
+const char* MsgDumperCom::DEF_COM_PORT_NAME = "/dev/ttyUSB1";
+const char* MsgDumperCom::DEF_COM_PORT_SPEED = "B115200";
 
 MsgDumperCom::MsgDumperCom() :
 	fd_com(0)
@@ -69,7 +69,7 @@ unsigned short MsgDumperCom::try_open_comport()
 
 unsigned short MsgDumperCom::transform_com_port_speed(speed_t& com_port_speed)const
 {
-	static char* support_com_port_speed_string[] = {"9600", "115200"};
+	static const char* support_com_port_speed_string[] = {"9600", "115200"};
 	static speed_t support_com_port_speed[] = {B9600, B115200};
 	static const int support_com_port_speed_len = sizeof support_com_port_speed / sizeof support_com_port_speed[0];
 
@@ -93,7 +93,7 @@ unsigned short MsgDumperCom::parse_config_param(const char* param_title, const c
 		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
-	static char* title[] = {"port_name", "port_speed"};
+	static const char* title[] = {"port_name", "port_speed"};
 	static int title_len = sizeof title / sizeof title[0];
 
 	unsigned short ret = MSG_DUMPER_SUCCESS;

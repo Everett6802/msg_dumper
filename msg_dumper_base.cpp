@@ -39,7 +39,7 @@ unsigned short MsgDumperBase::parse_config(const char* conf_path, const char* de
 	}
 // Open the file
 	char conf_filepath[MSG_DUMPER_STRING_SIZE];
-	snprintf(conf_filepath, MSG_DUMPER_STRING_SIZE, "%s/%s/%s_param.conf", conf_path, CONF_FOLDER_NAME, dev_name);
+	snprintf(conf_filepath, MSG_DUMPER_STRING_SIZE, "%s/%s/dumper_param.conf", conf_path, CONF_FOLDER_NAME);
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to parse the conf file: %s", conf_filepath);
 	FILE* fp = fopen(conf_filepath, "r");
 	if (fp == NULL)
@@ -51,13 +51,30 @@ unsigned short MsgDumperBase::parse_config(const char* conf_path, const char* de
 // Parse the content of the config file
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	char buf[MSG_DUMPER_LONG_STRING_SIZE];
+	char start_flag[MSG_DUMPER_STRING_SIZE];
+	snprintf(start_flag, MSG_DUMPER_STRING_SIZE, "[%s]", dev_name);
+	int start_flag_len = strlen(start_flag);
+	const char* stop_flag = "[";
+	int stop_flag_len = strlen(stop_flag);
+	bool param_start = false;
 	while (fgets(buf, MSG_DUMPER_LONG_STRING_SIZE, fp) != NULL)
 	{
+		if (!param_start)
+		{
+			if (strncmp(buf, start_flag, start_flag_len) == 0)
+				param_start = true;
+			continue;
+		}
+		else
+		{
+			if (strncmp(buf, stop_flag, stop_flag_len) == 0)
+				break;
+		}
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Param content: %s", buf);
 		int new_line_pos = -1;
 		int split_pos = -1;
 // Get the config for each line
-		for (int i = 0 ; i < MSG_DUMPER_LONG_STRING_SIZE ; i++)
+		for (unsigned int i = 0 ; i < MSG_DUMPER_LONG_STRING_SIZE ; i++)
 		{
 			if (buf[i] == '\n')
 			{

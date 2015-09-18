@@ -17,6 +17,14 @@
 #define MSG_DUMPER_LONG_STRING_SIZE 			256U
 #define MSG_DUMPER_EX_LONG_STRING_SIZE 			(MSG_DUMPER_LONG_STRING_SIZE * 2)
 
+#ifndef CHECK_SUCCESS
+#define CHECK_SUCCESS(x) (x == MSG_DUMPER_SUCCESS ? true : false)
+#endif
+
+#ifndef CHECK_FAILURE
+#define CHECK_FAILURE(x) !CHECK_SUCCESS(x)
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constants
 extern const char* MODULE_NAME;

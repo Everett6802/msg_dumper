@@ -100,7 +100,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* 
 		char* arg_str = NULL;
 		int arg_str_len = 0;
 		int fmtmsg_index = 0;
-		bool out = false;
+//		bool out = false;
 		for(const char* p = fmt; *p != '\0' && fmtmsg_index < fmtmsg_len ; p++)
 		{
 			if (*p == '%')
@@ -131,7 +131,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* 
 				if (fmtmsg_index + arg_str_len >= fmtmsg_len - 1)
 				{
 					arg_str_len = fmtmsg_len - fmtmsg_index - 1;
-					out = true;
+//					out = true;
 				}
 				memcpy(&fmtmsg[fmtmsg_index], arg_str, sizeof(char) * arg_str_len);
 				fmtmsg_index += arg_str_len;

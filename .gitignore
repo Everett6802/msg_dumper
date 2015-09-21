@@ -4,4 +4,7 @@
 test_msg_dumper
 log/
 test/conf/
+test/msg_dumper.h
+test/msg_dumper_wrapper.h
+test/msg_dumper_wrapper.cpp
 

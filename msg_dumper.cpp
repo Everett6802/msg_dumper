@@ -11,11 +11,12 @@
 static MsgDumperMgr msg_dumper_mgr;
 static unsigned short last_error = MSG_DUMPER_SUCCESS;
 
-unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned char& minor_version)
+unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned char& minor_version, unsigned char& build_version)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 	major_version = MAJOR_VERSION;
 	minor_version = MINOR_VERSION;
+	build_version = BUILD_VERSION;
 
 	return MSG_DUMPER_SUCCESS;
 }

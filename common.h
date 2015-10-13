@@ -13,9 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Marcos
 #define MSG_DUMPER_SHORT_STRING_SIZE			32U
-#define MSG_DUMPER_STRING_SIZE 					64U
+#define MSG_DUMPER_STRING_SIZE 				64U
 #define MSG_DUMPER_LONG_STRING_SIZE 			256U
-#define MSG_DUMPER_EX_LONG_STRING_SIZE 			(MSG_DUMPER_LONG_STRING_SIZE * 2)
+#define MSG_DUMPER_EX_LONG_STRING_SIZE 		(MSG_DUMPER_LONG_STRING_SIZE * 2)
 
 #ifndef CHECK_SUCCESS
 #define CHECK_SUCCESS(x) (x == MSG_DUMPER_SUCCESS ? true : false)
@@ -30,6 +30,7 @@
 extern const char* MODULE_NAME;
 extern const unsigned char MAJOR_VERSION;
 extern const unsigned char MINOR_VERSION;
+extern const unsigned char BUILD_VERSION;
 extern const char* MSG_DUMPER_SEVERITY_DESC[];
 extern const int MSG_DUMPER_SEVERITY_DESC_LEN;
 extern const char* MSG_DUMPER_FACILITY_DESC[];

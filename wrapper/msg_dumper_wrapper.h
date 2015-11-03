@@ -1,6 +1,8 @@
 #ifndef MSG_DUMPER_WRAPPER_H
 #define MSG_DUMPER_WRAPPER_H
 
+#include <string.h>
+#include <syslog.h>
 #include "msg_dumper.h"
 
 

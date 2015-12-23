@@ -6,7 +6,7 @@
 const char* MODULE_NAME = "MSG_DUMPER";
 const unsigned char MAJOR_VERSION = 1;
 const unsigned char MINOR_VERSION = 1;
-const unsigned char BUILD_VERSION = 1;
+const unsigned char BUILD_VERSION = 2;
 const char* MSG_DUMPER_SEVERITY_DESC[] = {"Error", "Warn", "Info", "Debug"};
 const int MSG_DUMPER_SEVERITY_DESC_LEN = sizeof(MSG_DUMPER_SEVERITY_DESC) / sizeof(MSG_DUMPER_SEVERITY_DESC[0]);
 const char* MSG_DUMPER_FACILITY_DESC[] = {"Log", "Com", "Sql", "Remote", "Syslog"};

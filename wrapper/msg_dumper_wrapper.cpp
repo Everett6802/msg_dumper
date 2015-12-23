@@ -12,6 +12,7 @@
 using namespace std;
 
 #define CHECK_FAILURE(x) ((x != MSG_DUMPER_SUCCESS) ? true : false)
+//#define DO_DEBUG
 
 MsgDumperWrapper* MsgDumperWrapper::instance = NULL;
 const char* MsgDumperWrapper::MSG_DUMPER_ERROR_COLOR = "\x1B[31m";
@@ -106,7 +107,9 @@ unsigned short MsgDumperWrapper::initialize()
 	unsigned char minor_version;
 	unsigned char build_version;
 	fp_msg_dumper_get_version(major_version, minor_version, build_version);
+#ifdef DO_DEBUG
 	printf("API version: (%d.%d.%d)\n", major_version, minor_version, build_version);
+#endif
 
 // Parse the parameters from the config file
 //	printf("Parse the config file\n");
@@ -118,7 +121,9 @@ unsigned short MsgDumperWrapper::initialize()
 	}
 
 // Initialize the library
+#ifdef DO_DEBUG
 	printf("Initialize the library\n");
+#endif
 	ret = fp_msg_dumper_initialize();
 	if (CHECK_FAILURE(ret))
 	{
@@ -132,7 +137,9 @@ unsigned short MsgDumperWrapper::initialize()
 void MsgDumperWrapper::deinitialize()
 {
 // De-initialize the library
+#ifdef DO_DEBUG
 	printf("Close the library\n");
+#endif
 	fp_msg_dumper_deinitialize();
 
 // Close the handle
@@ -150,7 +157,9 @@ unsigned short MsgDumperWrapper::parse_config()
 	getcwd(current_working_directory, sizeof(current_working_directory));
 	char config_filename[BUF_SIZE];
 	snprintf(config_filename, BUF_SIZE, "%s/%s/%s", current_working_directory, CONF_FOLDER, CONF_FILENAME);
+#ifdef DO_DEBUG
 	printf("Parse the config file: %s\n", config_filename);
+#endif
 
 	FILE *fp = fopen(config_filename, "r");
 	if (fp == NULL)
@@ -200,8 +209,9 @@ unsigned short MsgDumperWrapper::parse_config()
 		snprintf(facility, 16, "%s", config.substr(0, split_pos).c_str());
 		char severity[16];
 		snprintf(severity, 16, "%s", config.substr(split_pos + 1).c_str());
+#ifdef DO_DEBUG
 		printf("***Config***\nfacility: %s, severity: %s\n", facility, severity);
-
+#endif
 //		unsigned short facility_flag;
 		int facility_index = -1;
 // Set facility
@@ -233,7 +243,9 @@ unsigned short MsgDumperWrapper::parse_config()
 					case MSG_DUMPER_SEVIRITY_INFO:
 					case MSG_DUMPER_SEVIRITY_DEBUG:
 					{
+#ifdef DO_DEBUG
 						printf("Set severity of facility[%s] to %s\n", FACILITY_NAME[facility_index], SEVERITY_NAME[i]);
+#endif
 						ret = fp_msg_dumper_set_severity(i, FACILITY_FLAG[facility_index]);
 						if (CHECK_FAILURE(ret))
 						{
@@ -253,7 +265,9 @@ unsigned short MsgDumperWrapper::parse_config()
 			}
 		}
 	}
+#ifdef DO_DEBUG
 	printf("Set facility to %d\n", total_facility_flag);
+#endif
 	ret = fp_msg_dumper_set_facility(total_facility_flag);
 	if (CHECK_FAILURE(ret))
 	{

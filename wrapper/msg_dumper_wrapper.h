@@ -19,6 +19,10 @@ static char __msg_dumper_message__[MSG_DUMPER_BUF_SIZE];
 #define IMPLEMENT_MSG_DUMPER()\
 msg_dumper = MsgDumperWrapper::get_instance();\
 
+// Can be used for functions
+#define DECLARE_AND_IMPLEMENT_STATIC_MSG_DUMPER()\
+static MsgDumperWrapper* msg_dumper = MsgDumperWrapper::get_instance();\
+
 #define RELEASE_MSG_DUMPER()\
 if (msg_dumper != NULL)\
 {\

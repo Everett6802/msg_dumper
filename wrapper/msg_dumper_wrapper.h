@@ -53,6 +53,22 @@ snprintf(&__msg_dumper_message__[__msg_dumper_title_len__], __msg_dumper_message
 msg_dumper->write(priority, __msg_dumper_message__);\
 WRITE_MSG_DUMPER_END()
 
+#define STATIC_WRITE_MSG_DUMPER(priority, message)\
+do{\
+DECLARE_AND_IMPLEMENT_STATIC_MSG_DUMPER();\
+DECLARE_MSG_DUMPER_PARAM();\
+WRITE_MSG_DUMPER(priority, message);\
+RELEASE_MSG_DUMPER();\
+}while(0);
+
+#define STATIC_WRITE_FORMAT_MSG_DUMPER(priority, message_format, ...)\
+do{\
+DECLARE_AND_IMPLEMENT_STATIC_MSG_DUMPER();\
+DECLARE_MSG_DUMPER_PARAM();\
+WRITE_FORMAT_MSG_DUMPER(priority, message_format, __VA_ARGS__);\
+RELEASE_MSG_DUMPER();\
+}while(0);
+
 #if defined SHOW_MSG_DUMPER
 
 #define WRITE_DEBUG(message) WRITE_MSG_DUMPER(LOG_DEBUG, message)
@@ -65,6 +81,16 @@ WRITE_MSG_DUMPER_END()
 #define WRITE_FORMAT_WARN(message_format, ...) WRITE_FORMAT_MSG_DUMPER(LOG_WARNING, message_format, __VA_ARGS__)
 #define WRITE_FORMAT_ERROR(message_format, ...) WRITE_FORMAT_MSG_DUMPER(LOG_ERR, message_format, __VA_ARGS__)
 
+#define STATIC_WRITE_DEBUG(message) STATIC_WRITE_MSG_DUMPER(LOG_DEBUG, message)
+#define STATIC_WRITE_INFO(message) STATIC_WRITE_MSG_DUMPER(LOG_INFO, message)
+#define STATIC_WRITE_WARN(message) STATIC_WRITE_MSG_DUMPER(LOG_WARNING, message)
+#define STATIC_WRITE_ERROR(message) STATIC_WRITE_MSG_DUMPER(LOG_ERR, message)
+
+#define STATIC_WRITE_FORMAT_DEBUG(message_format, ...) STATIC_WRITE_FORMAT_MSG_DUMPER(LOG_DEBUG, message_format, __VA_ARGS__)
+#define STATIC_WRITE_FORMAT_INFO(message_format, ...) STATIC_WRITE_FORMAT_MSG_DUMPER(LOG_INFO, message_format, __VA_ARGS__)
+#define STATIC_WRITE_FORMAT_WARN(message_format, ...) STATIC_WRITE_FORMAT_MSG_DUMPER(LOG_WARNING, message_format, __VA_ARGS__)
+#define STATIC_WRITE_FORMAT_ERROR(message_format, ...) STATIC_WRITE_FORMAT_MSG_DUMPER(LOG_ERR, message_format, __VA_ARGS__)
+
 #else
 
 #define WRITE_DEBUG(message)
@@ -76,6 +102,16 @@ WRITE_MSG_DUMPER_END()
 #define WRITE_FORMAT_INFO(message_format, ...)
 #define WRITE_FORMAT_WARN(message_format, ...)
 #define WRITE_FORMAT_ERROR(message_format, ...)
+
+#define STATIC_WRITE_DEBUG(message)
+#define STATIC_WRITE_INFO(message)
+#define STATIC_WRITE_WARN(message)
+#define STATIC_WRITE_ERROR(message)
+
+#define STATIC_WRITE_FORMAT_DEBUG(message_format, ...)
+#define STATIC_WRITE_FORMAT_INFO(message_format, ...)
+#define STATIC_WRITE_FORMAT_WARN(message_format, ...)
+#define STATIC_WRITE_FORMAT_ERROR(message_format, ...)
 
 #endif
 
@@ -127,3 +163,4 @@ public:
 };
 
 #endif
+

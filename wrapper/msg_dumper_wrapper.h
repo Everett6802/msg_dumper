@@ -135,6 +135,8 @@ private:
 	FP_msg_dumper_get_version fp_msg_dumper_get_version;
 	FP_msg_dumper_set_severity fp_msg_dumper_set_severity;
 	FP_msg_dumper_set_facility fp_msg_dumper_set_facility;
+	FP_msg_dumper_get_severity fp_msg_dumper_get_severity;
+	FP_msg_dumper_get_facility fp_msg_dumper_get_facility;
 	FP_msg_dumper_write_msg fp_msg_dumper_write_msg;
 	FP_msg_dumper_deinitialize fp_msg_dumper_deinitialize;
 	FP_msg_dumper_get_error_description fp_msg_dumper_get_error_description;
@@ -148,7 +150,13 @@ private:
 	unsigned short initialize();
 	void deinitialize();
 	bool export_api();
+	int get_severity_index(const char* severity)const;
+	int get_facility_index(const char* facility)const;
 	unsigned short parse_config();
+	unsigned short set_severity(unsigned short severity_index, unsigned short facility_flag);
+	unsigned short get_severity(unsigned short facility_flag)const;
+	unsigned short set_config(const char* config_name, const char* config_value);
+	unsigned short get_config(const char* config_name, char* config_value)const;
 
 public:
 	static const int STRING_BUF_SIZE;
@@ -157,6 +165,15 @@ public:
 	static MsgDumperWrapper* get_instance();
 	int addref();
 	int release();
+
+	unsigned short set_log_severity(unsigned short log_severity);
+	unsigned short set_syslog_severity(unsigned short syslog_severity);
+	unsigned short get_log_severity()const;
+	unsigned short get_syslog_severity()const;
+	unsigned short set_log_severity_config(unsigned short log_severity);
+	unsigned short set_syslog_severity_config(unsigned short syslog_severity);
+	unsigned short get_log_severity_config()const;
+	unsigned short get_syslog_severity_config()const;
 
 	unsigned short write(unsigned short syslog_priority, const char* msg);
 	const char* get_error_description()const;

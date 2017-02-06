@@ -11,11 +11,12 @@ static const unsigned short MSG_DUMPER_FAILURE_INVALID_POINTER = 3;
 static const unsigned short MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY = 4;
 static const unsigned short MSG_DUMPER_FAILURE_OPEN_FILE = 5;
 static const unsigned short MSG_DUMPER_FAILURE_NOT_FOUND = 6;
-static const unsigned short MSG_DUMPER_FAILURE_INCORRECT_CONFIG = 7;
-static const unsigned short MSG_DUMPER_FAILURE_INCORRECT_OPERATION = 8;
-static const unsigned short MSG_DUMPER_FAILURE_COM_PORT = 9;
-static const unsigned short MSG_DUMPER_FAILURE_MYSQL = 10;
-static const unsigned short MSG_DUMPER_FAILURE_SOCKET = 11;
+static const unsigned short MSG_DUMPER_FAILURE_OUT_OF_RANGE = 7;
+static const unsigned short MSG_DUMPER_FAILURE_INCORRECT_CONFIG = 8;
+static const unsigned short MSG_DUMPER_FAILURE_INCORRECT_OPERATION = 9;
+static const unsigned short MSG_DUMPER_FAILURE_COM_PORT = 10;
+static const unsigned short MSG_DUMPER_FAILURE_MYSQL = 11;
+static const unsigned short MSG_DUMPER_FAILURE_SOCKET = 12;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -24,6 +25,8 @@ static const unsigned short MSG_DUMPER_SEVIRITY_ERROR = 0;
 static const unsigned short MSG_DUMPER_SEVIRITY_WARN = 1;
 static const unsigned short MSG_DUMPER_SEVIRITY_INFO = 2;
 static const unsigned short MSG_DUMPER_SEVIRITY_DEBUG = 3;
+static const unsigned short MSG_DUMPER_SEVIRITY_LIST[] = {MSG_DUMPER_SEVIRITY_ERROR, MSG_DUMPER_SEVIRITY_WARN, MSG_DUMPER_SEVIRITY_INFO, MSG_DUMPER_SEVIRITY_DEBUG};
+static const unsigned short MSG_DUMPER_SEVIRITY_LIST_SIZE = sizeof(MSG_DUMPER_SEVIRITY_LIST) / sizeof(MSG_DUMPER_SEVIRITY_LIST[0]);
 
 static const unsigned short MSG_DUMPER_FACILITY_LOG = 0x1;
 static const unsigned short MSG_DUMPER_FACILITY_COM = 0x1 << 1;
@@ -31,6 +34,8 @@ static const unsigned short MSG_DUMPER_FACILITY_SQL = 0x1 << 2;
 static const unsigned short MSG_DUMPER_FACILITY_REMOTE = 0x1 << 3;
 static const unsigned short MSG_DUMPER_FACILITY_SYSLOG = 0x1 << 4;
 static const unsigned short MSG_DUMPER_FACILITY_ALL = (MSG_DUMPER_FACILITY_LOG | MSG_DUMPER_FACILITY_COM | MSG_DUMPER_FACILITY_SQL | MSG_DUMPER_FACILITY_REMOTE | MSG_DUMPER_FACILITY_SYSLOG);
+// static const unsigned short MSG_DUMPER_FACILITY_LIST[] = {MSG_DUMPER_FACILITY_LOG, MSG_DUMPER_FACILITY_COM, MSG_DUMPER_FACILITY_SQL, MSG_DUMPER_FACILITY_REMOTE, MSG_DUMPER_FACILITY_SYSLOG, MSG_DUMPER_FACILITY_ALL};
+// static const unsigned short MSG_DUMPER_FACILITY_LIST_SIZE = sizeof(MSG_DUMPER_FACILITY_LIST) / sizeof(MSG_DUMPER_FACILITY_LIST[0]);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

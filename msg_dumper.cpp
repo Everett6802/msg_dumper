@@ -8,6 +8,7 @@
 #include "msg_dumper_mgr.h"
 
 
+
 static MsgDumperMgr msg_dumper_mgr;
 static unsigned short last_error = MSG_DUMPER_SUCCESS;
 

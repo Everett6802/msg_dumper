@@ -77,6 +77,10 @@ int main()
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, reason: %s\n", ret, msg_dumper.get_error_description());
 		goto EXIT1;
 	}
+	// msg_dumper.set_log_severity_config(2);
+	// msg_dumper.set_syslog_severity_config(1);
+	printf("Get Log severity: %d\n", msg_dumper.get_log_severity_config());
+	printf("Get Syslog Severity: %d\n", msg_dumper.get_syslog_severity_config());
 
 	printf("Press any keyword to terminate the process...\n");
 	getchar();

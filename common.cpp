@@ -5,8 +5,8 @@
 // Constants
 const char* MODULE_NAME = "MSG_DUMPER";
 const unsigned char MAJOR_VERSION = 1;
-const unsigned char MINOR_VERSION = 1;
-const unsigned char BUILD_VERSION = 2;
+const unsigned char MINOR_VERSION = 2;
+const unsigned char BUILD_VERSION = 0;
 const char* MSG_DUMPER_SEVERITY_DESC[] = {"Error", "Warn", "Info", "Debug"};
 const int MSG_DUMPER_SEVERITY_DESC_LEN = sizeof(MSG_DUMPER_SEVERITY_DESC) / sizeof(MSG_DUMPER_SEVERITY_DESC[0]);
 const char* MSG_DUMPER_FACILITY_DESC[] = {"Log", "Com", "Sql", "Remote", "Syslog"};
@@ -29,6 +29,7 @@ const char* error_description[] =
 	"Failure Insufficient Memory",
 	"Failure Open File",
 	"Failure Not Found",
+	"Failure Out of Range",
 	"Failure Incorrect Config",
 	"Failure Incorrect Operation",
 	"Failure COM Port",
@@ -62,7 +63,7 @@ const char* MsgCfg::to_string()
 			assert(0 && "Fail to allocate the format_message");
 			return NULL;
 		}
-		snprintf(format_message, MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %s] %s\n", date_str, time_str, MSG_DUMPER_SEVERITY_DESC[severity], data);
+		snprintf(format_message, MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %d] %s\n", date_str, time_str, severity, data);
 	}
 	return format_message;
 }

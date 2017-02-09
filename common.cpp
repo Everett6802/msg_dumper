@@ -63,7 +63,7 @@ const char* MsgCfg::to_string()
 			assert(0 && "Fail to allocate the format_message");
 			return NULL;
 		}
-		snprintf(format_message, MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %d] %s\n", date_str, time_str, severity, data);
+		snprintf(format_message, MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %s] %s\n", date_str, time_str, MSG_DUMPER_SEVERITY_DESC[severity], data);
 	}
 	return format_message;
 }

@@ -41,6 +41,19 @@ __msg_dumper_message_len__ = MSG_DUMPER_BUF_SIZE - __msg_dumper_title_len__;
 #define WRITE_MSG_DUMPER_END()\
 }while(0)
 
+#define SET_SEVERITY_LEVEL(func_name, severity_level)\
+msg_dumper->func_name(severity_level);
+
+#define GET_SEVERITY_LEVEL(func_name)\
+msg_dumper->func_name();
+
+#define STATIC_SET_SEVERITY_LEVEL(func_name, severity_level)\
+do{\
+DECLARE_AND_IMPLEMENT_STATIC_MSG_DUMPER();\
+SET_SEVERITY_LEVEL(func_name, severity_level);\
+RELEASE_MSG_DUMPER();\
+}while(0);
+
 #define WRITE_MSG_DUMPER(priority, message)\
 WRITE_MSG_DUMPER_BEGIN()\
 snprintf(&__msg_dumper_message__[__msg_dumper_title_len__], __msg_dumper_message_len__, "%s", message);\
@@ -70,6 +83,22 @@ RELEASE_MSG_DUMPER();\
 }while(0);
 
 #if defined SHOW_MSG_DUMPER
+
+#define SET_LOG_SEVERITY(severity_level) SET_SEVERITY_LEVEL(set_log_severity, severity_level)
+#define SET_SYSLOG_SEVERITY(severity_level) SET_SEVERITY_LEVEL(set_syslog_severity, severity_level)
+#define GET_LOG_SEVERITY() GET_SEVERITY_LEVEL(get_log_severity)
+#define GET_SYSLOG_SEVERITY() GET_SEVERITY_LEVEL(get_syslog_severity)
+
+#define SET_LOG_SEVERITY_CONFIG(severity_level) SET_SEVERITY_LEVEL(set_log_severity_config, severity_level)
+#define SET_SYSLOG_SEVERITY_CONFIG(severity_level) SET_SEVERITY_LEVEL(set_syslog_severity_config, severity_level)
+#define GET_LOG_SEVERITY_CONFIG() GET_SEVERITY_LEVEL(get_log_severity_config)
+#define GET_SYSLOG_SEVERITY_CONFIG() GET_SEVERITY_LEVEL(get_syslog_severity_config)
+
+#define STATIC_SET_LOG_SEVERITY(severity_level) STATIC_SET_SEVERITY_LEVEL(set_log_severity, severity_level)
+#define STATIC_SET_SYSLOG_SEVERITY(severity_level) STATIC_SET_SEVERITY_LEVEL(set_syslog_severity, severity_level)
+
+#define STATIC_SET_LOG_SEVERITY_CONFIG(severity_level) STATIC_SET_SEVERITY_LEVEL(set_log_severity_config, severity_level)
+#define STATIC_SET_SYSLOG_SEVERITY_CONFIG(severity_level) STATIC_SET_SEVERITY_LEVEL(set_syslog_severity_config, severity_level)
 
 #define WRITE_DEBUG(message) WRITE_MSG_DUMPER(LOG_DEBUG, message)
 #define WRITE_INFO(message) WRITE_MSG_DUMPER(LOG_INFO, message)

@@ -27,18 +27,22 @@ const char* error_description[] =
 	"Failure Invalid Argument",
 	"Failure Invalid Pointer",
 	"Failure Insufficient Memory",
-	"Failure Open File",
+	"Failure System API",
 	"Failure Not Found",
 	"Failure Out of Range",
 	"Failure Incorrect Config",
 	"Failure Incorrect Operation",
 	"Failure COM Port",
 	"Failure MySQL",
-	"Failure Socket"
+	"Failure Socket",
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Functions
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Class
+
 MsgCfg::MsgCfg(const time_t& new_timep, unsigned short new_severity, const char* new_data)
 {
 	timep = new_timep;

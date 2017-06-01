@@ -67,7 +67,6 @@ unsigned short msg_dumper_get_facility()
 unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-
 	if (msg_dumper_mgr.can_ignore(severity))
 		last_error = MSG_DUMPER_SUCCESS;
 	else
@@ -78,7 +77,6 @@ unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg)
 unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* fmt, ...)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-
 	static char fmtmsg[MSG_DUMPER_EX_LONG_STRING_SIZE];
 	static const int fmtmsg_len = sizeof(fmtmsg) / sizeof(fmtmsg[0]);
 	static const int fmtbuf_len = 16;

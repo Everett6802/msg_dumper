@@ -196,12 +196,12 @@ unsigned short MsgDumperSql::close_device()
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperSql::initialize(const char* config_path, void* config)
+unsigned short MsgDumperSql::initialize(const char* current_working_directory, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperSql object......");
 
 // Parse the config file first
-	unsigned short ret = parse_config(config_path, "sql");
+	unsigned short ret = parse_config(current_working_directory, "sql");
 	if (CHECK_FAILURE(ret))
 		return ret;
 

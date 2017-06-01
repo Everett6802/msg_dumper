@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <syslog.h>
+#include <stdarg.h>
 #include "msg_dumper.h"
 
 
@@ -171,6 +172,8 @@ private:
 	FP_msg_dumper_get_error_description fp_msg_dumper_get_error_description;
 
 	unsigned short facility_flag;
+	char *fmt_msg_buf;
+	int fmt_msg_buf_size;
 
 	MsgDumperWrapper();
 	MsgDumperWrapper(const MsgDumperWrapper&);
@@ -205,6 +208,19 @@ public:
 	unsigned short get_syslog_severity_config()const;
 
 	unsigned short write(unsigned short syslog_priority, const char* msg);
+	unsigned short format_write_va(unsigned short syslog_priority, const char* msg_fmt, va_list ap);
+	unsigned short format_write(unsigned short syslog_priority, const char* msg_fmt, ...);
+
+	unsigned short error(const char* msg);
+	unsigned short format_error(const char* msg_fmt, ...);
+	unsigned short warn(const char* msg);
+	unsigned short format_warn(const char* msg_fmt, ...);
+	unsigned short info(const char* msg);
+	unsigned short format_info(const char* msg_fmt, ...);
+	unsigned short debug(const char* msg);
+	unsigned short format_debug(const char* msg_fmt, ...);
+
+
 	const char* get_error_description()const;
 };
 

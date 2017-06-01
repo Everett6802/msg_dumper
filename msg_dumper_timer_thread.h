@@ -37,7 +37,7 @@ public:
 	MsgDumperTimerThread(MsgDumperBase* msg_dumper_obj);
 	~MsgDumperTimerThread();
 
-	unsigned short initialize(const char* conf_path, void* config=NULL);
+	unsigned short initialize(const char* current_working_directory, void* config=NULL);
 	unsigned short deinitialize();
 	unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg);
 };

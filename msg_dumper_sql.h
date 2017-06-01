@@ -40,7 +40,7 @@ public:
 	virtual unsigned short open_device();
 	virtual unsigned short close_device();
 
-	virtual unsigned short initialize(const char* config_path, void* config=NULL);
+	virtual unsigned short initialize(const char* current_working_directory, void* config=NULL);
 	virtual unsigned short deinitialize();
 	virtual unsigned short write_msg(PMSG_CFG msg_cfg);
 };

@@ -171,12 +171,12 @@ unsigned short MsgDumperCom::close_device()
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperCom::initialize(const char* config_path, void* config)
+unsigned short MsgDumperCom::initialize(const char* current_working_directory, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperCom object......");
 
 // Parse the config file first
-	unsigned short ret = parse_config(config_path, "com");
+	unsigned short ret = parse_config(current_working_directory, "com");
 	if (CHECK_FAILURE(ret))
 		return ret;
 

@@ -102,6 +102,14 @@ bool MsgDumperWrapper::export_api()
 
 unsigned short MsgDumperWrapper::initialize()
 {
+// Initialize the buffer for the format string
+	fmt_msg_buf_size = MSG_DUMPER_BUF_SIZE;
+	if ((fmt_msg_buf = (char*)malloc(fmt_msg_buf_size)) == NULL)
+	{
+		fprintf(stderr, "%sFails to allocate the memory: fmt_msg_buf\n", MSG_DUMPER_ERROR_COLOR);
+		return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
+	}
+
 // Load library
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	api_handle = dlopen("libmsg_dumper.so", RTLD_NOW);
@@ -157,6 +165,11 @@ void MsgDumperWrapper::deinitialize()
 #endif
 	fp_msg_dumper_deinitialize();
 
+	if (fmt_msg_buf != NULL)
+	{
+		free(fmt_msg_buf);
+		fmt_msg_buf = NULL;
+	}
 // Close the handle
 	if (api_handle != NULL)
 	{
@@ -224,7 +237,7 @@ unsigned short MsgDumperWrapper::parse_config()
 	if (fp == NULL)
 	{
 		fprintf(stderr, "%sfopen() fails, reason: %s\n", MSG_DUMPER_ERROR_COLOR, strerror(errno));
-		return MSG_DUMPER_FAILURE_OPEN_FILE;
+		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 
 	unsigned short total_facility_flag = 0x0;
@@ -455,7 +468,7 @@ unsigned short MsgDumperWrapper::set_config(const char* config_name, const char*
 	if (fp_set == NULL)
 	{
 		fprintf(stderr, "%spopen() fails, due to: %s\n", MSG_DUMPER_ERROR_COLOR, strerror(errno));
-		return MSG_DUMPER_FAILURE_OPEN_FILE;
+		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 	pclose(fp_set);
 	return MSG_DUMPER_SUCCESS;
@@ -480,7 +493,7 @@ unsigned short MsgDumperWrapper::get_config(const char* config_name, char* confi
 	if (fp_get == NULL)
 	{
 		fprintf(stderr, "%spopen() fails, due to: %s\n", MSG_DUMPER_ERROR_COLOR, strerror(errno));
-		return MSG_DUMPER_FAILURE_OPEN_FILE;
+		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	char line[LINE_SIZE];
@@ -589,16 +602,103 @@ unsigned short MsgDumperWrapper::write(unsigned short syslog_priority, const cha
 	case LOG_NOTICE:
 		msg_severity = MSG_DUMPER_SEVIRITY_WARN;
 		break;
-	default:
+	case LOG_EMERG:
+	case LOG_ALERT:
+	case LOG_CRIT:
+	case LOG_ERR:
 		msg_severity = MSG_DUMPER_SEVIRITY_ERROR;
 		break;
+	default:
+		{
+			fprintf(stderr, "%sUnknown syslog priority: %d\n", MSG_DUMPER_ERROR_COLOR, syslog_priority);
+			return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+		}
+		break;
 	}
-
+	// fprintf(stderr, "fp_msg_dumper_write_msg [syslog_priority: %d, severity: %d, message: %s]\n", syslog_priority, msg_severity, msg);
 	unsigned short ret = fp_msg_dumper_write_msg(msg_severity, msg);
 	if (CHECK_FAILURE(ret))
 		fprintf(stderr, "%sfp_msg_dumper_write_msg() fails, resaon: %s\n", MSG_DUMPER_ERROR_COLOR, fp_msg_dumper_get_error_description());
 
 	return ret;
+}
+
+unsigned short MsgDumperWrapper::format_write_va(unsigned short syslog_priority, const char* msg_fmt, va_list ap)
+{
+    int n;
+    va_list cp;
+   	while (true) 
+   	{
+        va_copy(cp, ap);
+        n = vsnprintf(fmt_msg_buf, fmt_msg_buf_size, msg_fmt, cp);
+        va_end(cp);
+/* Check error code */
+       	if (n < 0)
+       	{
+			fprintf(stderr, "%svsnprintf() fails, due to: %s", MSG_DUMPER_ERROR_COLOR, strerror(errno));
+			return MSG_DUMPER_FAILURE_SYSTEM_API;
+        }
+/* If that worked, return the string */
+       	if (n < fmt_msg_buf_size)
+            break;
+/* Else try again with more space */
+       	fmt_msg_buf_size <<= 1;       
+/* Precisely what is needed */
+    	char *fmt_msg_buf_old = fmt_msg_buf;
+       	if ((fmt_msg_buf = (char*)realloc(fmt_msg_buf_old, fmt_msg_buf_size)) == NULL) 
+       	{
+			fprintf(stderr, "%sFails to allocate the memory: fmt_msg_buf\n", MSG_DUMPER_ERROR_COLOR);
+			return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
+        }
+    }
+    return write(syslog_priority, fmt_msg_buf);
+}
+
+#define FORMAT_WRITE(priority, fmt)\
+do{\
+va_list ap;\
+va_start(ap, msg_fmt);\
+ret = format_write_va(priority, fmt, ap);\
+va_end(ap);\
+}while(0)
+
+unsigned short MsgDumperWrapper::format_write(unsigned short syslog_priority, const char* msg_fmt, ...)
+{
+	static unsigned short ret = MSG_DUMPER_SUCCESS;
+    FORMAT_WRITE(syslog_priority,  msg_fmt);
+    return ret;
+}
+
+unsigned short MsgDumperWrapper::error(const char* msg){return write(LOG_ERR, msg);}
+unsigned short MsgDumperWrapper::format_error(const char* msg_fmt, ...)
+{
+	static unsigned short ret = MSG_DUMPER_SUCCESS;
+    FORMAT_WRITE(LOG_ERR, msg_fmt);
+    return ret;
+}
+
+unsigned short MsgDumperWrapper::warn(const char* msg){return write(LOG_WARNING, msg);}
+unsigned short MsgDumperWrapper::format_warn(const char* msg_fmt, ...)
+{
+	static unsigned short ret = MSG_DUMPER_SUCCESS;
+    FORMAT_WRITE(LOG_WARNING, msg_fmt);
+    return ret;
+}
+
+unsigned short MsgDumperWrapper::info(const char* msg){return write(LOG_INFO, msg);}
+unsigned short MsgDumperWrapper::format_info(const char* msg_fmt, ...)
+{
+	static unsigned short ret = MSG_DUMPER_SUCCESS;
+    FORMAT_WRITE(LOG_INFO, msg_fmt);
+    return ret;
+}
+
+unsigned short MsgDumperWrapper::debug(const char* msg){return write(LOG_DEBUG, msg);}
+unsigned short MsgDumperWrapper::format_debug(const char* msg_fmt, ...)
+{
+	static unsigned short ret = MSG_DUMPER_SUCCESS;
+    FORMAT_WRITE(LOG_DEBUG, msg_fmt);
+    return ret;
 }
 
 const char* MsgDumperWrapper::get_error_description()const

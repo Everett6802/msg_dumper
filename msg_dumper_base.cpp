@@ -1,3 +1,4 @@
+#include <sys/stat.h>
 #include "msg_dumper_base.h"
 #include "msg_dumper.h"
 
@@ -30,22 +31,22 @@ unsigned short MsgDumperBase::generate_current_time_string(char* current_time_st
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperBase::parse_config(const char* conf_path, const char* dev_name)
+unsigned short MsgDumperBase::parse_config(const char* current_working_directory, const char* dev_name)
 {
-	if (conf_path == NULL || dev_name == NULL)
+	if (current_working_directory == NULL || dev_name == NULL)
 	{
-		WRITE_ERR_SYSLOG("Invalid argument: conf_path/dev_name");
+		WRITE_ERR_SYSLOG("Invalid argument: current_working_directory/dev_name");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 // Open the file
 	char conf_filepath[MSG_DUMPER_STRING_SIZE];
-	snprintf(conf_filepath, MSG_DUMPER_STRING_SIZE, "%s/%s/dumper_param.conf", conf_path, CONF_FOLDER_NAME);
+	snprintf(conf_filepath, MSG_DUMPER_STRING_SIZE, "%s/%s/dumper_param.conf", current_working_directory, CONF_FOLDER_NAME);
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to parse the conf file: %s", conf_filepath);
 	FILE* fp = fopen(conf_filepath, "r");
 	if (fp == NULL)
 	{
 		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to open the conf file: %s", conf_filepath);
-		return MSG_DUMPER_FAILURE_OPEN_FILE;
+		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 
 // Parse the content of the config file

@@ -22,7 +22,7 @@ protected:
 	char facility_name[MSG_DUMPER_SHORT_STRING_SIZE];
 
 	unsigned short generate_current_time_string(char* current_time_string);
-	unsigned short parse_config(const char* conf_path, const char* dev_name);
+	unsigned short parse_config(const char* current_working_directory, const char* dev_name);
 
 	unsigned short set_severity(unsigned short new_severity);
 	unsigned short get_severity()const;
@@ -38,7 +38,7 @@ public:
 	virtual unsigned short open_device()=0;
 	virtual unsigned short close_device()=0;
 
-	virtual unsigned short initialize(const char* config_path, void* config=NULL)=0;
+	virtual unsigned short initialize(const char* current_working_directory, void* config=NULL)=0;
 	virtual unsigned short deinitialize()=0;
 	virtual unsigned short write_msg(PMSG_CFG msg_cfg)=0;
 };

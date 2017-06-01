@@ -113,12 +113,12 @@ unsigned short MsgDumperRemote::close_device()
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperRemote::initialize(const char* config_path, void* config)
+unsigned short MsgDumperRemote::initialize(const char* current_working_directory, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperRemote object......");
 
 // Parse the config file first
-	unsigned short ret = parse_config(config_path, "remote");
+	unsigned short ret = parse_config(current_working_directory, "remote");
 	if (CHECK_FAILURE(ret))
 		return ret;
 

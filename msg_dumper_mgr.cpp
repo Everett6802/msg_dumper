@@ -243,9 +243,10 @@ unsigned short MsgDumperMgr::write_msg(unsigned short severity, const char* msg)
 
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 	{
+		// fprintf(stderr, "MsgDumperMgr::write_msg [severity: %d, message: %s]\n", severity, msg);
 		if (msg_dumper_thread[i] && severity <= dumper_severity_arr[i])
 		{
-			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [%s] to %s", msg, MSG_DUMPER_FACILITY_DESC[i]);
+			// WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [%s] to %s", msg, MSG_DUMPER_FACILITY_DESC[i]);
 			ret = msg_dumper_thread[i]->write_msg(timep, severity, msg);
 			if (CHECK_FAILURE(ret))
 				return ret;

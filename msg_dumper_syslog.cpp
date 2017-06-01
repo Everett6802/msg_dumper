@@ -106,12 +106,12 @@ unsigned short MsgDumperSyslog::close_device()
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperSyslog::initialize(const char* config_path, void* config)
+unsigned short MsgDumperSyslog::initialize(const char* current_working_directory, void* config)
 {
 	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperSyslog object......");
 
 // Parse the config file first
-	unsigned short ret = parse_config(config_path, "syslog");
+	unsigned short ret = parse_config(current_working_directory, "syslog");
 	if (CHECK_FAILURE(ret))
 		return ret;
 

@@ -84,7 +84,6 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 			for (int i = 0 ; i < write_vector_size ; i++)
 			{
 				ret = msg_dumper->write_msg(write_vector[i]);
-
 // Remove the old message
 				delete write_vector[i];
 				write_vector[i] = NULL;
@@ -106,10 +105,10 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 	return ret;
 }
 
-unsigned short MsgDumperTimerThread::initialize(const char* config_path, void* config)
+unsigned short MsgDumperTimerThread::initialize(const char* current_working_directory, void* config)
 {
 // Initialize the msg_dumper object
-	unsigned short ret = msg_dumper->initialize(config_path, config);
+	unsigned short ret = msg_dumper->initialize(current_working_directory, config);
 	if (CHECK_FAILURE(ret))
 	{
 		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to initialize the MsgDumper%s object", msg_dumper->get_facility_name());
@@ -137,7 +136,8 @@ unsigned short MsgDumperTimerThread::initialize(const char* config_path, void* c
 
 unsigned short MsgDumperTimerThread::write_msg(const time_t& timep, unsigned short severity, const char* msg)
 {
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [severity: %d, message: %s]", severity, msg);
+	// WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [severity: %d, message: %s]", severity, msg);
+	// fprintf(stderr, "Write message [severity: %d, message: %s]\n", severity, msg);
 	PMSG_CFG new_msg = new MsgCfg(timep, severity, msg);
 
 	pthread_mutex_lock(&mut);

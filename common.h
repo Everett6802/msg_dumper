@@ -8,6 +8,7 @@
 #include <time.h>
 #include <assert.h>
 #include <errno.h>
+#include "msg_dumper.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,6 +32,7 @@ extern const char* MODULE_NAME;
 extern const unsigned char MAJOR_VERSION;
 extern const unsigned char MINOR_VERSION;
 extern const unsigned char BUILD_VERSION;
+extern const char* MSG_DUMPER_ERROR_COLOR;
 extern const char* MSG_DUMPER_SEVERITY_DESC[];
 extern const int MSG_DUMPER_SEVERITY_DESC_LEN;
 extern const char* MSG_DUMPER_FACILITY_DESC[];
@@ -121,6 +123,8 @@ WRITE_SYSLOG(LOG_ERR, message)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Function
+unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity);
+unsigned short transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Class

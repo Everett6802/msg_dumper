@@ -84,11 +84,11 @@ MsgDumperMgr::~MsgDumperMgr()
 {
 }
 
-bool MsgDumperMgr::can_ignore(unsigned short severity)const
+bool MsgDumperMgr::can_ignore(unsigned short msg_dumper_severity)const
 {
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 	{
-		if (msg_dumper_thread[i] && severity <= dumper_severity_arr[i])
+		if (msg_dumper_thread[i] && msg_dumper_severity <= dumper_severity_arr[i])
 			return false;
 	}
 	return true;
@@ -166,7 +166,7 @@ int MsgDumperMgr::get_facility_index(unsigned short msg_dumper_facility_flag)con
 	return (int)facility_mapping_table.find(msg_dumper_facility_flag)->second;
 }
 
-unsigned short MsgDumperMgr::set_severity(unsigned short severity, unsigned short single_facility)
+unsigned short MsgDumperMgr::set_severity(unsigned short facility, unsigned short single_msg_dumper_severity)
 {
 	if (is_init)
 	{
@@ -174,14 +174,14 @@ unsigned short MsgDumperMgr::set_severity(unsigned short severity, unsigned shor
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
 
-	int facility_index = (int)get_facility_index(single_facility);
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%d] to facility[%s]", severity, MSG_DUMPER_FACILITY_DESC[facility_index]);
-	dumper_severity_arr[facility_index] = severity;
+	int facility_index = (int)get_facility_index(facility);
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%d] to facility[%s]", single_msg_dumper_severity, MSG_DUMPER_FACILITY_DESC[facility_index]);
+	dumper_severity_arr[facility_index] = single_msg_dumper_severity;
 
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperMgr::set_severity_all(unsigned short severity)
+unsigned short MsgDumperMgr::set_severity_all(unsigned short msg_dumper_severity)
 {
 	if (is_init)
 	{
@@ -189,9 +189,9 @@ unsigned short MsgDumperMgr::set_severity_all(unsigned short severity)
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
 
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%d] to all facilities", severity);
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%d] to all facilities", msg_dumper_severity);
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
-		dumper_severity_arr[i] = severity;
+		dumper_severity_arr[i] = msg_dumper_severity;
 
 	return MSG_DUMPER_SUCCESS;
 }
@@ -212,9 +212,9 @@ unsigned short MsgDumperMgr::set_facility(unsigned short facility)
 unsigned short MsgDumperMgr::get_severity(unsigned short single_facility)const
 {
 	int facility_index = (int)get_facility_index(single_facility);
-	unsigned short severity = dumper_severity_arr[facility_index];
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Get the severity of facility[%s]: %d", MSG_DUMPER_FACILITY_DESC[facility_index], severity);
-	return severity;
+	unsigned short msg_dumper_severity = dumper_severity_arr[facility_index];
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Get the severity of facility[%s]: %d", MSG_DUMPER_FACILITY_DESC[facility_index], msg_dumper_severity);
+	return msg_dumper_severity;
 }
 
 unsigned short MsgDumperMgr::get_facility()const
@@ -222,7 +222,7 @@ unsigned short MsgDumperMgr::get_facility()const
 	return dumper_facility;
 }
 
-unsigned short MsgDumperMgr::write_msg(unsigned short severity, const char* msg)
+unsigned short MsgDumperMgr::write_msg(unsigned short msg_dumper_severity, const char* msg)
 {
 	if (!is_init)
 	{
@@ -244,10 +244,10 @@ unsigned short MsgDumperMgr::write_msg(unsigned short severity, const char* msg)
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 	{
 		// fprintf(stderr, "MsgDumperMgr::write_msg [severity: %d, message: %s]\n", severity, msg);
-		if (msg_dumper_thread[i] && severity <= dumper_severity_arr[i])
+		if (msg_dumper_thread[i] && msg_dumper_severity <= dumper_severity_arr[i])
 		{
 			// WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [%s] to %s", msg, MSG_DUMPER_FACILITY_DESC[i]);
-			ret = msg_dumper_thread[i]->write_msg(timep, severity, msg);
+			ret = msg_dumper_thread[i]->write_msg(timep, msg_dumper_severity, msg);
 			if (CHECK_FAILURE(ret))
 				return ret;
 		}

@@ -46,13 +46,13 @@ extern "C"
 
 unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned char& minor_version, unsigned char& build_version);
 unsigned short msg_dumper_initialize();
-unsigned short msg_dumper_set_severity(unsigned short severity, unsigned short single_facility);
-unsigned short msg_dumper_set_severity_all(unsigned short severity);
+unsigned short msg_dumper_set_severity(unsigned short linux_severity, unsigned short single_facility);
+unsigned short msg_dumper_set_severity_all(unsigned short linux_severity);
 unsigned short msg_dumper_set_facility(unsigned short facility);
 unsigned short msg_dumper_get_severity(unsigned short single_facility);
 unsigned short msg_dumper_get_facility();
-unsigned short msg_dumper_write_msg(unsigned short severity, const char* msg);
-unsigned short msg_dumper_write_format_msg(unsigned short severity, const char* fmt, ...);
+unsigned short msg_dumper_write_msg(unsigned short linux_severity, const char* msg);
+unsigned short msg_dumper_write_format_msg(unsigned short linux_severity, const char* fmt, ...);
 unsigned short msg_dumper_deinitialize();
 const char* msg_dumper_get_error_description();
 

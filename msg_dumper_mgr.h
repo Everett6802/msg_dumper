@@ -36,15 +36,15 @@ public:
 	MsgDumperMgr();
 	~MsgDumperMgr();
 
-	bool can_ignore(unsigned short severity)const;
+	bool can_ignore(unsigned short msg_dumper_severity)const;
 
 	unsigned short initialize();
-	unsigned short set_severity(unsigned short facility, unsigned short single_severity);
-	unsigned short set_severity_all(unsigned short facility);
+	unsigned short set_severity(unsigned short facility, unsigned short single_msg_dumper_severity);
+	unsigned short set_severity_all(unsigned short msg_dumper_severity);
 	unsigned short set_facility(unsigned short facility);
 	unsigned short get_severity(unsigned short single_facility)const;
 	unsigned short get_facility()const;
-	unsigned short write_msg(unsigned short severity, const char* msg);
+	unsigned short write_msg(unsigned short msg_dumper_severity, const char* msg);
 	unsigned short deinitialize();
 };
 

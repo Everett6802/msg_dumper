@@ -155,39 +155,38 @@ EXIT:
 	return ret;
 }
 
-int MsgDumperMgr::get_facility_index(unsigned short msg_dumper_facility_flag)const
+int MsgDumperMgr::get_facility_index(unsigned short facility_flag)const
 {
-	if (!(MSG_DUMPER_FACILITY_ALL & msg_dumper_facility_flag))
+	if (!(MSG_DUMPER_FACILITY_ALL & facility_flag))
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect facility flag: %d", msg_dumper_facility_flag);
+		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect facility flag: %d", facility_flag);
 		throw invalid_argument("Incorrect facility flag");
 	}
-
-	return (int)facility_mapping_table.find(msg_dumper_facility_flag)->second;
+	return (int)facility_mapping_table.find(facility_flag)->second;
 }
 
-unsigned short MsgDumperMgr::set_severity(unsigned short facility, unsigned short single_msg_dumper_severity)
+unsigned short MsgDumperMgr::set_severity(unsigned short msg_dumper_severity, unsigned short facility)
 {
-	if (is_init)
-	{
-		WRITE_ERR_SYSLOG("Library has been initialized");
-		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
-	}
+	// if (is_init)
+	// {
+	// 	WRITE_ERR_SYSLOG("Library has been initialized");
+	// 	return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
+	// }
 
 	int facility_index = (int)get_facility_index(facility);
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%d] to facility[%s]", single_msg_dumper_severity, MSG_DUMPER_FACILITY_DESC[facility_index]);
-	dumper_severity_arr[facility_index] = single_msg_dumper_severity;
+	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%s] to facility[%s]", MSG_DUMPER_SEVERITY_DESC[msg_dumper_severity], MSG_DUMPER_FACILITY_DESC[facility_index]);
+	dumper_severity_arr[facility_index] = msg_dumper_severity;
 
 	return MSG_DUMPER_SUCCESS;
 }
 
 unsigned short MsgDumperMgr::set_severity_all(unsigned short msg_dumper_severity)
 {
-	if (is_init)
-	{
-		WRITE_ERR_SYSLOG("Library has been initialized");
-		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
-	}
+	// if (is_init)
+	// {
+	// 	WRITE_ERR_SYSLOG("Library has been initialized");
+	// 	return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
+	// }
 
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%d] to all facilities", msg_dumper_severity);
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
@@ -198,20 +197,20 @@ unsigned short MsgDumperMgr::set_severity_all(unsigned short msg_dumper_severity
 
 unsigned short MsgDumperMgr::set_facility(unsigned short facility)
 {
-	if (is_init)
-	{
-		WRITE_ERR_SYSLOG("Library has been initialized");
-		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
-	}
+	// if (is_init)
+	// {
+	// 	WRITE_ERR_SYSLOG("Library has been initialized");
+	// 	return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
+	// }
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the facility to %d", facility);
 	dumper_facility = facility;
 
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperMgr::get_severity(unsigned short single_facility)const
+unsigned short MsgDumperMgr::get_severity(unsigned short facility)const
 {
-	int facility_index = (int)get_facility_index(single_facility);
+	int facility_index = (int)get_facility_index(facility);
 	unsigned short msg_dumper_severity = dumper_severity_arr[facility_index];
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Get the severity of facility[%s]: %d", MSG_DUMPER_FACILITY_DESC[facility_index], msg_dumper_severity);
 	return msg_dumper_severity;
@@ -243,7 +242,7 @@ unsigned short MsgDumperMgr::write_msg(unsigned short msg_dumper_severity, const
 
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 	{
-		// fprintf(stderr, "MsgDumperMgr::write_msg [severity: %d, message: %s]\n", severity, msg);
+		// fprintf(stderr, "MsgDumperMgr::write_msg [msg_dumper_severity: %d, message: %s]\n", msg_dumper_severity, msg);
 		if (msg_dumper_thread[i] && msg_dumper_severity <= dumper_severity_arr[i])
 		{
 			// WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [%s] to %s", msg, MSG_DUMPER_FACILITY_DESC[i]);

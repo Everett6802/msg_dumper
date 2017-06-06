@@ -82,6 +82,7 @@ unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short li
 		}
 		break;
 	}
+	// fprintf(stderr, "transform_linux_severity_to_msg_dumper_severity linux_severity: %d, msg_dumper_severity: %d\n", linux_severity, msg_dumper_severity);
 	return msg_dumper_severity;
 }
 
@@ -121,14 +122,14 @@ static const unsigned short MSG_DUMPER_SEVIRITY_DEBUG = 3;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Class
 
-MsgCfg::MsgCfg(const time_t& new_timep, unsigned short new_severity, const char* new_data)
+MsgCfg::MsgCfg(const time_t& new_timep, unsigned short new_msg_dumper_severity, const char* new_data)
 {
 	timep = new_timep;
 	p = localtime(&timep);
 	snprintf(date_str, MSG_DUMPER_SHORT_STRING_SIZE, "%02d/%02d/%02d", (1900 + p->tm_year) % 2000, p->tm_mon + 1, p->tm_mday);
 	snprintf(time_str, MSG_DUMPER_SHORT_STRING_SIZE, "%02d:%02d:%02d", p->tm_hour, p->tm_min, p->tm_sec);
 
-	severity = new_severity;
+	msg_dumper_severity = new_msg_dumper_severity;
 	memset(data, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
 	snprintf(data, MSG_DUMPER_LONG_STRING_SIZE, "%s", new_data);
 
@@ -145,7 +146,7 @@ const char* MsgCfg::to_string()
 			assert(0 && "Fail to allocate the format_message");
 			return NULL;
 		}
-		snprintf(format_message, MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %s] %s\n", date_str, time_str, MSG_DUMPER_SEVERITY_DESC[severity], data);
+		snprintf(format_message, MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %s] %s\n", date_str, time_str, MSG_DUMPER_SEVERITY_DESC[msg_dumper_severity], data);
 	}
 	return format_message;
 }

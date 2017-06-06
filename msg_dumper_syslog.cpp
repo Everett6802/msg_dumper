@@ -135,11 +135,11 @@ unsigned short MsgDumperSyslog::write_msg(PMSG_CFG msg_cfg)
 	static int SyslogLevel[] = {LOG_ERR, LOG_WARNING, LOG_INFO, LOG_DEBUG};
 
 // Connect to syslog server
-	snprintf(title, 64, "[%s:%s]", MSG_DUMPER_TITLE, MSG_DUMPER_SEVERITY_DESC[msg_cfg->severity]);
+	snprintf(title, 64, "[%s:%s]", MSG_DUMPER_TITLE, MSG_DUMPER_SEVERITY_DESC[msg_cfg->msg_dumper_severity]);
 	openlog(title, /*LOG_PID |*/ LOG_CONS, facility_number);
 
 //	snprintf(syslog_buf, MSG_DUMPER_EX_LONG_STRING_SIZE, "%s%s", MSG_DUMPER_TITLE, msg);
-	syslog(SyslogLevel[msg_cfg->severity], "%s", msg_cfg->data);
+	syslog(SyslogLevel[msg_cfg->msg_dumper_severity], "%s", msg_cfg->data);
 
 // Close the syslog
 	closelog();

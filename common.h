@@ -138,10 +138,10 @@ private:
 public:
 	char date_str[MSG_DUMPER_SHORT_STRING_SIZE];
 	char time_str[MSG_DUMPER_SHORT_STRING_SIZE];
-	unsigned short severity;
+	unsigned short msg_dumper_severity;
 	char data[MSG_DUMPER_LONG_STRING_SIZE];
 
-	MsgCfg(const time_t& new_timep, unsigned short new_severity, const char* new_data);
+	MsgCfg(const time_t& new_timep, unsigned short new_msg_dumper_severity, const char* new_data);
 	const char* to_string();
 };
 typedef MsgCfg* PMSG_CFG;

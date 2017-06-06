@@ -39,7 +39,7 @@ public:
 
 	unsigned short initialize(const char* current_working_directory, void* config=NULL);
 	unsigned short deinitialize();
-	unsigned short write_msg(const time_t& timep, unsigned short severity, const char* msg);
+	unsigned short write_msg(const time_t& timep, unsigned short msg_dumper_severity, const char* msg);
 };
 
 #endif

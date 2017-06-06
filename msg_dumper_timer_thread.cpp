@@ -134,11 +134,11 @@ unsigned short MsgDumperTimerThread::initialize(const char* current_working_dire
 	return MSG_DUMPER_SUCCESS;
 }
 
-unsigned short MsgDumperTimerThread::write_msg(const time_t& timep, unsigned short severity, const char* msg)
+unsigned short MsgDumperTimerThread::write_msg(const time_t& timep, unsigned short msg_dumper_severity, const char* msg)
 {
 	// WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [severity: %d, message: %s]", severity, msg);
-	// fprintf(stderr, "Write message [severity: %d, message: %s]\n", severity, msg);
-	PMSG_CFG new_msg = new MsgCfg(timep, severity, msg);
+	// fprintf(stderr, "MsgDumperTimerThread::write_msg [msg_dumper_severity: %d, message: %s]\n", msg_dumper_severity, msg);
+	PMSG_CFG new_msg = new MsgCfg(timep, msg_dumper_severity, msg);
 
 	pthread_mutex_lock(&mut);
 	buffer_vector.push_back(new_msg);

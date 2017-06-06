@@ -17,6 +17,10 @@ int main()
 {
 	MsgDumperWrapper& msg_dumper = *MsgDumperWrapper::get_instance();
 	unsigned short ret = MSG_DUMPER_SUCCESS;
+	unsigned short old_log_severity;
+	unsigned short new_log_severity;
+
+	printf("Get Log severity config: %d\n", msg_dumper.get_log_severity_config());
 
 // Write the message
 	printf("Write the ERROR message\n");
@@ -29,7 +33,7 @@ int main()
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, reason: %s\n", ret, msg_dumper.get_error_description());
 		goto EXIT1;
 	}
-	sleep(3);
+	sleep(1);
 // Write the message
 	printf("Write the WARN message\n");
 	// ret = msg_dumper.write(LOG_WARNING, "This is a test: Warn");
@@ -41,7 +45,7 @@ int main()
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, reason: %s\n", ret, msg_dumper.get_error_description());
 		goto EXIT1;
 	}
-	sleep(3);
+	sleep(1);
 // Write the message
 	printf("Write the INFO message\n");
 	// ret = msg_dumper.write(LOG_INFO, "This is a test: Info");
@@ -53,13 +57,54 @@ int main()
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, reason: %s\n", ret, msg_dumper.get_error_description());
 		goto EXIT1;
 	}
-	sleep(3);
+	sleep(1);
 // Write the message
 	printf("Write the DEBUG message\n");
 	// ret = msg_dumper.write(LOG_DEBUG, "This is a test: Debug");
 	// ret = msg_dumper.format_write(LOG_DEBUG, "This is a format test: %s, %d", "Debug", LOG_DEBUG);
 	ret = msg_dumper.debug("This is a test: Debug");
 	ret = msg_dumper.format_debug("This is a format test: %s, %d", "Debug", LOG_DEBUG);
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, reason: %s\n", ret, msg_dumper.get_error_description());
+		goto EXIT1;
+	}
+// Try different serverity
+	old_log_severity = msg_dumper.get_log_severity();
+	new_log_severity = LOG_WARNING;
+	msg_dumper.set_log_severity(new_log_severity);
+	printf("Switch Log severity from [%d] to [%d]\n", old_log_severity, msg_dumper.get_log_severity_config());
+
+// Write the message after switch log severity
+	printf("Write another ERROR message\n");
+	ret = msg_dumper.format_error("This is another format test: %s, %d", "Error", LOG_ERR);
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, reason: %s\n", ret, msg_dumper.get_error_description());
+		goto EXIT1;
+	}
+	sleep(1);
+// Write the message
+	printf("Write another WARN message\n");
+	ret = msg_dumper.format_warn("This is another format test: %s, %d", "Warn", LOG_WARNING);
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, reason: %s\n", ret, msg_dumper.get_error_description());
+		goto EXIT1;
+	}
+	sleep(1);
+// Write the message
+	printf("Write another INFO message\n");
+	ret = msg_dumper.format_info("This is another format test: %s, %d", "Info", LOG_INFO);
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, reason: %s\n", ret, msg_dumper.get_error_description());
+		goto EXIT1;
+	}
+	sleep(1);
+// Write the message
+	printf("Write another DEBUG message\n");
+	ret = msg_dumper.format_debug("This is another format test: %s, %d", "Debug", LOG_DEBUG);
 	if (CHECK_FAILURE(ret))
 	{
 		fprintf(stderr, "fp_msg_dumper_write_msg() fails, due to %d, reason: %s\n", ret, msg_dumper.get_error_description());

@@ -234,7 +234,7 @@ unsigned short MsgDumperSql::deinitialize()
 unsigned short MsgDumperSql::write_msg(PMSG_CFG msg_cfg)
 {
 // Write the message into SQL database
-	snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_insert_into_table, current_time_string, msg_cfg->date_str, msg_cfg->time_str, msg_cfg->severity, msg_cfg->data);
+	snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_insert_into_table, current_time_string, msg_cfg->date_str, msg_cfg->time_str, msg_cfg->msg_dumper_severity, msg_cfg->data);
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to Write the message[%s] to MySQL by command: %s", facility_name, msg_cfg->to_string(), cmd_buf);
 	if(mysql_query(connection, cmd_buf) != 0)
 	{

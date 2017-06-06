@@ -69,7 +69,9 @@ unsigned short msg_dumper_get_facility()
 unsigned short msg_dumper_write_msg(unsigned short linux_severity, const char* msg)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+	// fprintf(stderr, "msg_dumper_write_msg linux_severity: %d\n", linux_severity);
 	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
+	// fprintf(stderr, "msg_dumper_write_msg msg_dumper_severity: %d\n", msg_dumper_severity);
 	if (msg_dumper_mgr.can_ignore(msg_dumper_severity))
 		last_error = MSG_DUMPER_SUCCESS;
 	else

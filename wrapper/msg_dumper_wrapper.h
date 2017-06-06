@@ -171,7 +171,7 @@ private:
 	FP_msg_dumper_deinitialize fp_msg_dumper_deinitialize;
 	FP_msg_dumper_get_error_description fp_msg_dumper_get_error_description;
 
-	unsigned short facility_flag;
+	unsigned short facility;
 	char *fmt_msg_buf;
 	int fmt_msg_buf_size;
 
@@ -182,34 +182,40 @@ private:
 	unsigned short initialize();
 	void deinitialize();
 	bool export_api();
-	int get_severity_index(const char* severity)const;
-	int get_facility_index(const char* facility)const;
+	unsigned short get_msg_dumper_severity_from_string(const char* severity_string)const;
+	unsigned short get_linux_severity_from_string(const char* severity_string)const;
+	unsigned short get_facility_index_from_string(const char* facility_string)const;
+	unsigned short get_facility_from_string(const char* facility_string)const;
+	unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity)const;
+	unsigned short transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity)const;
 	unsigned short parse_config();
-	unsigned short set_severity(unsigned short severity_index, unsigned short facility_flag);
-	unsigned short get_severity(unsigned short facility_flag)const;
+	unsigned short set_severity(unsigned short linux_severity, unsigned short facility);
+	unsigned short get_severity(unsigned short facility)const;
 	unsigned short set_config(const char* config_name, const char* config_value);
 	unsigned short get_config(const char* config_name, char* config_value)const;
 
 public:
 	static const int STRING_BUF_SIZE;
-	~MsgDumperWrapper(){deinitialize();}
 
 	static MsgDumperWrapper* get_instance();
+
+	~MsgDumperWrapper(){deinitialize();}
+
 	int addref();
 	int release();
 
-	unsigned short set_log_severity(unsigned short log_severity);
-	unsigned short set_syslog_severity(unsigned short syslog_severity);
+	unsigned short set_log_severity(unsigned short linux_severity);
+	unsigned short set_syslog_severity(unsigned short linux_severity);
 	unsigned short get_log_severity()const;
 	unsigned short get_syslog_severity()const;
-	unsigned short set_log_severity_config(unsigned short log_severity);
-	unsigned short set_syslog_severity_config(unsigned short syslog_severity);
+	unsigned short set_log_severity_config(unsigned short linux_severity);
+	unsigned short set_syslog_severity_config(unsigned short linux_severity);
 	unsigned short get_log_severity_config()const;
 	unsigned short get_syslog_severity_config()const;
 
-	unsigned short write(unsigned short syslog_priority, const char* msg);
-	unsigned short format_write_va(unsigned short syslog_priority, const char* msg_fmt, va_list ap);
-	unsigned short format_write(unsigned short syslog_priority, const char* msg_fmt, ...);
+	unsigned short write(unsigned short linux_severity, const char* msg);
+	unsigned short format_write_va(unsigned short linux_severity, const char* msg_fmt, va_list ap);
+	unsigned short format_write(unsigned short linux_severity, const char* msg_fmt, ...);
 
 	unsigned short error(const char* msg);
 	unsigned short format_error(const char* msg_fmt, ...);
@@ -219,7 +225,6 @@ public:
 	unsigned short format_info(const char* msg_fmt, ...);
 	unsigned short debug(const char* msg);
 	unsigned short format_debug(const char* msg_fmt, ...);
-
 
 	const char* get_error_description()const;
 };

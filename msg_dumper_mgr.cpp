@@ -172,7 +172,6 @@ unsigned short MsgDumperMgr::set_severity(unsigned short msg_dumper_severity, un
 	// 	WRITE_ERR_SYSLOG("Library has been initialized");
 	// 	return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	// }
-
 	int facility_index = (int)get_facility_index(facility);
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%s] to facility[%s]", MSG_DUMPER_SEVERITY_DESC[msg_dumper_severity], MSG_DUMPER_FACILITY_DESC[facility_index]);
 	dumper_severity_arr[facility_index] = msg_dumper_severity;
@@ -187,7 +186,6 @@ unsigned short MsgDumperMgr::set_severity_all(unsigned short msg_dumper_severity
 	// 	WRITE_ERR_SYSLOG("Library has been initialized");
 	// 	return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	// }
-
 	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Set the severity[%d] to all facilities", msg_dumper_severity);
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 		dumper_severity_arr[i] = msg_dumper_severity;

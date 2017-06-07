@@ -16,11 +16,29 @@ using namespace std;
 int main()
 {
 	MsgDumperWrapper& msg_dumper = *MsgDumperWrapper::get_instance();
+
+	int severity_size;
+	const char** severity_name_list = msg_dumper.get_severity_name_list(severity_size);
+	printf("Severity Name: ");
+	for (int i = 0 ; i < severity_size ; i++)
+		printf("%s ", severity_name_list[i]);
+	printf("\n");
+	int facility_size;
+	const char** facility_name_list = msg_dumper.get_facility_name_list(facility_size);
+	printf("Facility Name: ");
+	for (int i = 0 ; i < facility_size ; i++)
+		printf("%s ", facility_name_list[i]);
+	printf("\n");
+
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	unsigned short old_log_severity;
 	unsigned short new_log_severity;
 
 	printf("Get Log severity config: %d\n", msg_dumper.get_log_severity_config());
+	printf("Get Syslog severity config: %d\n", msg_dumper.get_syslog_severity_config());
+
+	printf("Get Log severity: %d, %s\n", msg_dumper.get_log_severity(), msg_dumper.get_log_severity_by_name());
+	printf("Get Syslog severity: %d, %s\n", msg_dumper.get_syslog_severity(), msg_dumper.get_syslog_severity_by_name());
 
 // Write the message
 	printf("Write the ERROR message\n");
@@ -73,7 +91,7 @@ int main()
 	old_log_severity = msg_dumper.get_log_severity();
 	new_log_severity = LOG_WARNING;
 	msg_dumper.set_log_severity(new_log_severity);
-	printf("Switch Log severity from [%d] to [%d]\n", old_log_severity, msg_dumper.get_log_severity_config());
+	printf("Switch Log severity from [%d] to [%d]\n", old_log_severity, msg_dumper.get_log_severity());
 
 // Write the message after switch log severity
 	printf("Write another ERROR message\n");

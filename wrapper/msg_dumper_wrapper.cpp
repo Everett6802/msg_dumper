@@ -203,17 +203,17 @@ void MsgDumperWrapper::deinitialize()
 	}
 }
 
-unsigned short MsgDumperWrapper::get_msg_dumper_severity_from_string(const char* severity_string)const
+unsigned short MsgDumperWrapper::get_msg_dumper_severity_from_string(const char* severity_name)const
 {
-	assert(severity_string != NULL && "severity_string should NOT be NULL");
+	assert(severity_name != NULL && "severity_name should NOT be NULL");
 	unsigned short msg_dumper_severity;
 	bool found = false;
 	for (int i = 0 ; i < SEVERITY_NAME_SIZE ; i++)
 	{
 // #ifdef DO_DEBUG
-// 		fprintf(stderr, "%s, %s, %d\n", severity_string, SEVERITY_NAME[i], strcmp(severity_string, SEVERITY_NAME[i]));
+// 		fprintf(stderr, "%s, %s, %d\n", severity_name, SEVERITY_NAME[i], strcmp(severity_name, SEVERITY_NAME[i]));
 // #endif
-		if (strcmp(severity_string, SEVERITY_NAME[i]) == 0)
+		if (strcmp(severity_name, SEVERITY_NAME[i]) == 0)
 		{
 			msg_dumper_severity = (unsigned short)i;
 			found = true;
@@ -223,23 +223,23 @@ unsigned short MsgDumperWrapper::get_msg_dumper_severity_from_string(const char*
 	if (!found)
 	{
 		char exception[64];
-		snprintf(exception, 64, "Unknown severity: %s", severity_string);
+		snprintf(exception, 64, "Unknown severity: %s", severity_name);
 		throw invalid_argument(string(exception));
 	}
 	return msg_dumper_severity;
 }
 
-unsigned short MsgDumperWrapper::get_linux_severity_from_string(const char* severity_string)const
+unsigned short MsgDumperWrapper::get_linux_severity_from_string(const char* severity_name)const
 {
-	assert(severity_string != NULL && "severity_string should NOT be NULL");
+	assert(severity_name != NULL && "severity_name should NOT be NULL");
 	unsigned short msg_dumper_severity;
 	bool found = false;
 	for (int i = 0 ; i < SEVERITY_NAME_SIZE ; i++)
 	{
 // #ifdef DO_DEBUG
-// 		fprintf(stderr, "%s, %s, %d\n", severity_string, SEVERITY_NAME[i], strcmp(severity_string, SEVERITY_NAME[i]));
+// 		fprintf(stderr, "%s, %s, %d\n", severity_name, SEVERITY_NAME[i], strcmp(severity_name, SEVERITY_NAME[i]));
 // #endif
-		if (strcmp(severity_string, SEVERITY_NAME[i]) == 0)
+		if (strcmp(severity_name, SEVERITY_NAME[i]) == 0)
 		{
 			msg_dumper_severity = (unsigned short)i;
 			found = true;
@@ -249,7 +249,7 @@ unsigned short MsgDumperWrapper::get_linux_severity_from_string(const char* seve
 	if (!found)
 	{
 		char exception[64];
-		snprintf(exception, 64, "Unknown severity: %s", severity_string);
+		snprintf(exception, 64, "Unknown severity: %s", severity_name);
 		throw invalid_argument(string(exception));
 	}
 #if 0
@@ -283,17 +283,17 @@ static const unsigned short MSG_DUMPER_SEVIRITY_DEBUG = 3;
 	return linux_severity;
 }
 
-unsigned short MsgDumperWrapper::get_facility_index_from_string(const char* facility_string)const
+unsigned short MsgDumperWrapper::get_facility_index_from_string(const char* facility_name)const
 {
-	assert(facility_string != NULL && "facility_string should NOT be NULL");
+	assert(facility_name != NULL && "facility_name should NOT be NULL");
 	unsigned short facility;
 	bool found = false;
 	for (int i = 0 ; i < FACILITY_NAME_SIZE ; i++)
 	{
 // #ifdef DO_DEBUG
-// 		fprintf(stderr, "%s, %s, %d\n", facility_string, FACILITY_NAME[i], strcmp(facility_string, FACILITY_NAME[i]));
+// 		fprintf(stderr, "%s, %s, %d\n", facility_name, FACILITY_NAME[i], strcmp(facility_name, FACILITY_NAME[i]));
 // #endif
-		if (strcmp(facility_string, FACILITY_NAME[i]) == 0)
+		if (strcmp(facility_name, FACILITY_NAME[i]) == 0)
 		{
 			facility = i;
 			found = true;
@@ -303,15 +303,15 @@ unsigned short MsgDumperWrapper::get_facility_index_from_string(const char* faci
 	if (!found)
 	{
 		char exception[64];
-		snprintf(exception, 64, "Unknown facility: %s", facility_string);
+		snprintf(exception, 64, "Unknown facility: %s", facility_name);
 		throw invalid_argument(string(exception));
 	}
 	return facility;
 }
 
-unsigned short MsgDumperWrapper::get_facility_from_string(const char* facility_string)const
+unsigned short MsgDumperWrapper::get_facility_from_string(const char* facility_name)const
 {
-	return FACILITY_FLAG[get_facility_from_string(facility_string)];
+	return FACILITY_FLAG[get_facility_from_string(facility_name)];
 }
 
 unsigned short MsgDumperWrapper::transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity)const
@@ -433,20 +433,20 @@ unsigned short MsgDumperWrapper::parse_config()
 		}
 		string config(buf);
 //		WRITE_DEBUG_FORMAT_LOGGING(STRING_SIZE, "***Config*** content: %s, split pos: %d", config.c_str(), split_pos);
-		char facility_string[16];
-		snprintf(facility_string, 16, "%s", config.substr(0, split_pos).c_str());
-		char severity_string[16];
-		snprintf(severity_string, 16, "%s", config.substr(split_pos + 1).c_str());
+		char facility_name[16];
+		snprintf(facility_name, 16, "%s", config.substr(0, split_pos).c_str());
+		char severity_name[16];
+		snprintf(severity_name, 16, "%s", config.substr(split_pos + 1).c_str());
 #ifdef DO_DEBUG
-		fprintf(stderr, "***Config*** facility: %s, severity: %s\n", facility_string, severity_string);
+		fprintf(stderr, "***Config*** facility: %s, severity: %s\n", facility_name, severity_name);
 #endif
 // Set facility and severity
-		unsigned short facility_index = get_facility_index_from_string(facility_string);
+		unsigned short facility_index = get_facility_index_from_string(facility_name);
 		total_facility_flag |= FACILITY_FLAG[facility_index];
 // Set severity
-		unsigned short linux_severity = get_linux_severity_from_string(severity_string);
+		unsigned short linux_severity = get_linux_severity_from_string(severity_name);
 #ifdef DO_DEBUG
-		fprintf(stderr, "Set severity of facility[%s] to %s\n", FACILITY_NAME[facility_index], SEVERITY_NAME[get_msg_dumper_severity_from_string(severity_string)]);
+		fprintf(stderr, "Set severity of facility[%s] to %s\n", FACILITY_NAME[facility_index], SEVERITY_NAME[get_msg_dumper_severity_from_string(severity_name)]);
 #endif
 		ret = fp_msg_dumper_set_severity(linux_severity, FACILITY_FLAG[facility_index]);
 		if (CHECK_FAILURE(ret))
@@ -503,6 +503,31 @@ unsigned short MsgDumperWrapper::get_severity(unsigned short facility)const
 	return fp_msg_dumper_get_severity(facility);
 }
 
+unsigned short MsgDumperWrapper::set_severity_by_name(const char* severity_name, const char* facility_name)
+{
+	unsigned short linux_severity = get_linux_severity_from_string(severity_name);
+	unsigned short facility = get_facility_from_string(facility_name);
+	return set_severity(linux_severity, facility);
+}
+
+unsigned short MsgDumperWrapper::get_severity_by_name(const char* facility_name)const
+{
+	unsigned short facility = get_facility_from_string(facility_name);
+	return get_severity(facility);
+}
+
+const char** MsgDumperWrapper::get_severity_name_list(int& severity_size)const
+{
+	severity_size = SEVERITY_NAME_SIZE;
+	return SEVERITY_NAME;
+}
+
+const char** MsgDumperWrapper::get_facility_name_list(int& facility_size)const
+{
+	facility_size = FACILITY_NAME_SIZE;
+	return FACILITY_NAME;
+}
+
 unsigned short MsgDumperWrapper::set_log_severity(unsigned short linux_severity)
 {
 	return set_severity(linux_severity, MSG_DUMPER_FACILITY_LOG);
@@ -521,6 +546,32 @@ unsigned short MsgDumperWrapper::get_log_severity()const
 unsigned short MsgDumperWrapper::get_syslog_severity()const
 {
 	return get_severity(MSG_DUMPER_FACILITY_SYSLOG);
+}
+
+unsigned short MsgDumperWrapper::set_log_severity_by_name(const char* severity_name)
+{
+	unsigned short linux_severity = get_linux_severity_from_string(severity_name);
+	return set_log_severity(linux_severity);
+}
+
+unsigned short MsgDumperWrapper::set_syslog_severity_by_name(const char* severity_name)
+{
+	unsigned short linux_severity = get_linux_severity_from_string(severity_name);
+	return set_syslog_severity(linux_severity);
+}
+
+const char* MsgDumperWrapper::get_log_severity_by_name()const
+{
+	unsigned short linux_severity = get_log_severity();
+	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
+	return SEVERITY_NAME[msg_dumper_severity];
+}
+
+const char* MsgDumperWrapper::get_syslog_severity_by_name()const
+{
+	unsigned short linux_severity = get_syslog_severity();
+	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
+	return SEVERITY_NAME[msg_dumper_severity];
 }
 
 unsigned short MsgDumperWrapper::set_config(const char* config_name, const char* config_value)
@@ -609,22 +660,22 @@ unsigned short MsgDumperWrapper::set_syslog_severity_config(unsigned short linux
 unsigned short MsgDumperWrapper::get_log_severity_config()const
 {
 	static const int SEVERITY_STRING_SIZE = 16;
-	static char severity_string[SEVERITY_STRING_SIZE];
-	unsigned short ret = get_config("Log", severity_string);
+	static char severity_name[SEVERITY_STRING_SIZE];
+	unsigned short ret = get_config("Log", severity_name);
 	if (CHECK_FAILURE(ret))
 		return ret;
-	unsigned short linux_severity = get_linux_severity_from_string(severity_string);
+	unsigned short linux_severity = get_linux_severity_from_string(severity_name);
 	return linux_severity;
 }
 
 unsigned short MsgDumperWrapper::get_syslog_severity_config()const
 {
 	static const int SEVERITY_STRING_SIZE = 16;
-	static char severity_string[SEVERITY_STRING_SIZE];
-	unsigned short ret = get_config("Syslog", severity_string);
+	static char severity_name[SEVERITY_STRING_SIZE];
+	unsigned short ret = get_config("Syslog", severity_name);
 	if (CHECK_FAILURE(ret))
 		return ret;
-	unsigned short linux_severity = get_linux_severity_from_string(severity_string);
+	unsigned short linux_severity = get_linux_severity_from_string(severity_name);
 	return linux_severity;
 }
 

@@ -182,15 +182,17 @@ private:
 	unsigned short initialize();
 	void deinitialize();
 	bool export_api();
-	unsigned short get_msg_dumper_severity_from_string(const char* severity_string)const;
-	unsigned short get_linux_severity_from_string(const char* severity_string)const;
-	unsigned short get_facility_index_from_string(const char* facility_string)const;
-	unsigned short get_facility_from_string(const char* facility_string)const;
+	unsigned short get_msg_dumper_severity_from_string(const char* severity_name)const;
+	unsigned short get_linux_severity_from_string(const char* severity_name)const;
+	unsigned short get_facility_index_from_string(const char* facility_name)const;
+	unsigned short get_facility_from_string(const char* facility_name)const;
 	unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity)const;
 	unsigned short transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity)const;
 	unsigned short parse_config();
 	unsigned short set_severity(unsigned short linux_severity, unsigned short facility);
 	unsigned short get_severity(unsigned short facility)const;
+	unsigned short set_severity_by_name(const char* severity_name, const char* facility_name);
+	unsigned short get_severity_by_name(const char* facility_name)const;
 	unsigned short set_config(const char* config_name, const char* config_value);
 	unsigned short get_config(const char* config_name, char* config_value)const;
 
@@ -204,10 +206,17 @@ public:
 	int addref();
 	int release();
 
+	const char** get_severity_name_list(int& severity_size)const;
+	const char** get_facility_name_list(int& facility_size)const;
+
 	unsigned short set_log_severity(unsigned short linux_severity);
 	unsigned short set_syslog_severity(unsigned short linux_severity);
 	unsigned short get_log_severity()const;
 	unsigned short get_syslog_severity()const;
+	unsigned short set_log_severity_by_name(const char* severity_name);
+	unsigned short set_syslog_severity_by_name(const char* severity_name);
+	const char* get_log_severity_by_name()const;
+	const char* get_syslog_severity_by_name()const;
 	unsigned short set_log_severity_config(unsigned short linux_severity);
 	unsigned short set_syslog_severity_config(unsigned short linux_severity);
 	unsigned short get_log_severity_config()const;

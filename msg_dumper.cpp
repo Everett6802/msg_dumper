@@ -29,11 +29,11 @@ unsigned short msg_dumper_initialize()
 	return last_error;
 }
 
-unsigned short msg_dumper_set_severity(unsigned short linux_severity, unsigned short single_facility)
+unsigned short msg_dumper_set_severity(unsigned short linux_severity, unsigned short facility)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
 	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
-	last_error = msg_dumper_mgr.set_severity(msg_dumper_severity, single_facility);
+	last_error = msg_dumper_mgr.set_severity(msg_dumper_severity, facility);
 	return last_error;
 }
 
@@ -52,18 +52,21 @@ unsigned short msg_dumper_set_facility(unsigned short facility)
 	return last_error;
 }
 
-unsigned short msg_dumper_get_severity(unsigned short single_facility)
+unsigned short msg_dumper_get_severity(unsigned short facility)
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	last_error = msg_dumper_mgr.get_severity(single_facility);
-	return last_error;
+	unsigned short msg_dumper_severity = msg_dumper_mgr.get_severity(facility);
+	unsigned short linux_severity = transform_msg_dumper_severity_to_linux_severity(msg_dumper_severity);
+	last_error = MSG_DUMPER_SUCCESS;
+	return linux_severity;
 }
 
 unsigned short msg_dumper_get_facility()
 {
 //	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	last_error = msg_dumper_mgr.get_facility();
-	return last_error;
+	unsigned short facility = msg_dumper_mgr.get_facility();
+	last_error = MSG_DUMPER_SUCCESS;
+	return facility;
 }
 
 unsigned short msg_dumper_write_msg(unsigned short linux_severity, const char* msg)

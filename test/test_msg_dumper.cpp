@@ -15,21 +15,20 @@ using namespace std;
 
 int main()
 {
-	MsgDumperWrapper& msg_dumper = *MsgDumperWrapper::get_instance();
-
 	int severity_size;
-	const char** severity_name_list = msg_dumper.get_severity_name_list(severity_size);
+	const char** severity_name_list = MsgDumperWrapper::get_severity_name_list(severity_size);
 	printf("Severity Name: ");
 	for (int i = 0 ; i < severity_size ; i++)
 		printf("%s ", severity_name_list[i]);
 	printf("\n");
 	int facility_size;
-	const char** facility_name_list = msg_dumper.get_facility_name_list(facility_size);
+	const char** facility_name_list = MsgDumperWrapper::get_facility_name_list(facility_size);
 	printf("Facility Name: ");
 	for (int i = 0 ; i < facility_size ; i++)
 		printf("%s ", facility_name_list[i]);
 	printf("\n");
 
+	MsgDumperWrapper& msg_dumper = *MsgDumperWrapper::get_instance();
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	unsigned short old_log_severity;
 	unsigned short new_log_severity;

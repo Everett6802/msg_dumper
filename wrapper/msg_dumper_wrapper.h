@@ -42,16 +42,16 @@ __msg_dumper_message_len__ = MSG_DUMPER_BUF_SIZE - __msg_dumper_title_len__;
 #define WRITE_MSG_DUMPER_END()\
 }while(0)
 
-#define SET_SEVERITY_LEVEL(func_name, severity_level)\
-msg_dumper->func_name(severity_level);
+#define SET_SEVERITY(func_name, func_value)\
+msg_dumper->func_name(func_value);
 
-#define GET_SEVERITY_LEVEL(func_name)\
+#define GET_SEVERITY(func_name)\
 msg_dumper->func_name();
 
-#define STATIC_SET_SEVERITY_LEVEL(func_name, severity_level)\
+#define STATIC_SET_SEVERITY(func_name, func_value)\
 do{\
 DECLARE_AND_IMPLEMENT_STATIC_MSG_DUMPER();\
-SET_SEVERITY_LEVEL(func_name, severity_level);\
+SET_SEVERITY(func_name, func_value);\
 RELEASE_MSG_DUMPER();\
 }while(0);
 
@@ -85,21 +85,29 @@ RELEASE_MSG_DUMPER();\
 
 #if defined SHOW_MSG_DUMPER
 
-#define SET_LOG_SEVERITY(severity_level) SET_SEVERITY_LEVEL(set_log_severity, severity_level)
-#define SET_SYSLOG_SEVERITY(severity_level) SET_SEVERITY_LEVEL(set_syslog_severity, severity_level)
-#define GET_LOG_SEVERITY() GET_SEVERITY_LEVEL(get_log_severity)
-#define GET_SYSLOG_SEVERITY() GET_SEVERITY_LEVEL(get_syslog_severity)
+#define SET_LOG_SEVERITY(linux_severity) SET_SEVERITY(set_log_severity, linux_severity)
+#define SET_SYSLOG_SEVERITY(linux_severity) SET_SEVERITY(set_syslog_severity, linux_severity)
+#define GET_LOG_SEVERITY() GET_SEVERITY(get_log_severity)
+#define GET_SYSLOG_SEVERITY() GET_SEVERITY(get_syslog_severity)
 
-#define SET_LOG_SEVERITY_CONFIG(severity_level) SET_SEVERITY_LEVEL(set_log_severity_config, severity_level)
-#define SET_SYSLOG_SEVERITY_CONFIG(severity_level) SET_SEVERITY_LEVEL(set_syslog_severity_config, severity_level)
-#define GET_LOG_SEVERITY_CONFIG() GET_SEVERITY_LEVEL(get_log_severity_config)
-#define GET_SYSLOG_SEVERITY_CONFIG() GET_SEVERITY_LEVEL(get_syslog_severity_config)
+#define SET_LOG_SEVERITY_BY_NAME(severity_name) SET_SEVERITY(set_log_severity_by_name, severity_name)
+#define SET_SYSLOG_SEVERITY_BY_NAME(severity_name) SET_SEVERITY(set_syslog_severity_by_name, severity_name)
+#define GET_LOG_SEVERITY_BY_NAME() GET_SEVERITY(get_log_severity_by_name)
+#define GET_SYSLOG_SEVERITY_BY_NAME() GET_SEVERITY(get_syslog_severity_by_name)
 
-#define STATIC_SET_LOG_SEVERITY(severity_level) STATIC_SET_SEVERITY_LEVEL(set_log_severity, severity_level)
-#define STATIC_SET_SYSLOG_SEVERITY(severity_level) STATIC_SET_SEVERITY_LEVEL(set_syslog_severity, severity_level)
+#define SET_LOG_SEVERITY_CONFIG(linux_severity) SET_SEVERITY(set_log_severity_config, linux_severity)
+#define SET_SYSLOG_SEVERITY_CONFIG(linux_severity) SET_SEVERITY(set_syslog_severity_config, linux_severity)
+#define GET_LOG_SEVERITY_CONFIG() GET_SEVERITY(get_log_severity_config)
+#define GET_SYSLOG_SEVERITY_CONFIG() GET_SEVERITY(get_syslog_severity_config)
 
-#define STATIC_SET_LOG_SEVERITY_CONFIG(severity_level) STATIC_SET_SEVERITY_LEVEL(set_log_severity_config, severity_level)
-#define STATIC_SET_SYSLOG_SEVERITY_CONFIG(severity_level) STATIC_SET_SEVERITY_LEVEL(set_syslog_severity_config, severity_level)
+#define STATIC_SET_LOG_SEVERITY(linux_severity) STATIC_SET_SEVERITY(set_log_severity, linux_severity)
+#define STATIC_SET_SYSLOG_SEVERITY(linux_severity) STATIC_SET_SEVERITY(set_syslog_severity, linux_severity)
+
+#define STATIC_SET_LOG_SEVERITY_BY_NAME(severity_name) STATIC_SET_SEVERITY(set_log_severity_by_name, severity_name)
+#define STATIC_SET_SYSLOG_SEVERITY_BY_NAME(severity_name) STATIC_SET_SEVERITY(set_syslog_severity_by_name, severity_name)
+
+#define STATIC_SET_LOG_SEVERITY_CONFIG(linux_severity) STATIC_SET_SEVERITY(set_log_severity_config, linux_severity)
+#define STATIC_SET_SYSLOG_SEVERITY_CONFIG(linux_severity) STATIC_SET_SEVERITY(set_syslog_severity_config, linux_severity)
 
 #define WRITE_DEBUG(message) WRITE_MSG_DUMPER(LOG_DEBUG, message)
 #define WRITE_INFO(message) WRITE_MSG_DUMPER(LOG_INFO, message)
@@ -175,6 +183,13 @@ private:
 	char *fmt_msg_buf;
 	int fmt_msg_buf_size;
 
+	static unsigned short get_msg_dumper_severity_from_string(const char* severity_name);
+	static unsigned short get_linux_severity_from_string(const char* severity_name);
+	static unsigned short get_facility_index_from_string(const char* facility_name);
+	static unsigned short get_facility_from_string(const char* facility_name);
+	static unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity);
+	static unsigned short transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity);
+
 	MsgDumperWrapper();
 	MsgDumperWrapper(const MsgDumperWrapper&);
 	MsgDumperWrapper& operator=(const MsgDumperWrapper&);
@@ -182,12 +197,6 @@ private:
 	unsigned short initialize();
 	void deinitialize();
 	bool export_api();
-	unsigned short get_msg_dumper_severity_from_string(const char* severity_name)const;
-	unsigned short get_linux_severity_from_string(const char* severity_name)const;
-	unsigned short get_facility_index_from_string(const char* facility_name)const;
-	unsigned short get_facility_from_string(const char* facility_name)const;
-	unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity)const;
-	unsigned short transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity)const;
 	unsigned short parse_config();
 	unsigned short set_severity(unsigned short linux_severity, unsigned short facility);
 	unsigned short get_severity(unsigned short facility)const;
@@ -206,8 +215,10 @@ public:
 	int addref();
 	int release();
 
-	const char** get_severity_name_list(int& severity_size)const;
-	const char** get_facility_name_list(int& facility_size)const;
+	static const char** get_severity_name_list(int& severity_size);
+	static const char** get_facility_name_list(int& facility_size);
+	static unsigned short check_severity_name(const char* severity_name);
+	static unsigned short check_facility_name(const char* facility_name);
 
 	unsigned short set_log_severity(unsigned short linux_severity);
 	unsigned short set_syslog_severity(unsigned short linux_severity);

@@ -212,6 +212,45 @@ static const unsigned short MSG_DUMPER_SEVIRITY_DEBUG = 3;
 	return linux_severity;
 }
 
+const char* MsgDumperWrapper::get_code_pos_str(const char* file_name, unsigned long line_no)
+{
+	static const int CODE_POS_STR_SIZE = 256;
+	static char code_pos_str[CODE_POS_STR_SIZE];
+	snprintf(code_pos_str, CODE_POS_STR_SIZE,MSG_DUMPER_CODE_POS_FORMAT, file_name, line_no);
+	return code_pos_str;
+}
+
+const char* MsgDumperWrapper::get_format_str_va(const char* msg_fmt, va_list ap)
+{
+    int n;
+    va_list cp;
+   	while (true) 
+   	{
+        va_copy(cp, ap);
+        n = vsnprintf(fmt_msg_buf, fmt_msg_buf_size, msg_fmt, cp);
+        va_end(cp);
+/* Check error code */
+       	if (n < 0)
+       	{
+			fprintf(stderr, "%svsnprintf() fails, due to: %s", MSG_DUMPER_ERROR_COLOR, strerror(errno));
+			throw runtime_error("vsnprintf() fails");
+        }
+/* If that worked, return the string */
+       	if (n < fmt_msg_buf_size)
+            break;
+/* Else try again with more space */
+       	fmt_msg_buf_size <<= 1;       
+/* Precisely what is needed */
+    	char *fmt_msg_buf_old = fmt_msg_buf;
+       	if ((fmt_msg_buf = (char*)realloc(fmt_msg_buf_old, fmt_msg_buf_size)) == NULL) 
+       	{
+			fprintf(stderr, "%sFails to allocate the memory: fmt_msg_buf\n", MSG_DUMPER_ERROR_COLOR);
+			throw bad_alloc();
+        }
+    }
+    return fmt_msg_buf;
+}
+
 MsgDumperWrapper* MsgDumperWrapper::get_instance()
 {
 	if (instance == NULL)
@@ -342,7 +381,6 @@ unsigned short MsgDumperWrapper::initialize()
 		fprintf(stderr, "%sFails to allocate the memory: fmt_msg_buf\n", MSG_DUMPER_ERROR_COLOR);
 		return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
 	}
-
 // Load library
 	unsigned short ret = MSG_DUMPER_SUCCESS;
 	api_handle = dlopen("libmsg_dumper.so", RTLD_NOW);
@@ -386,7 +424,7 @@ unsigned short MsgDumperWrapper::initialize()
 		fprintf(stderr, "%sfp_msg_dumper_initialize() fails, due to %d\n", MSG_DUMPER_ERROR_COLOR, ret);
 		return ret;
 	}
-
+	write_msg_mut = PTHREAD_MUTEX_INITIALIZER;
 	return ret;
 }
 
@@ -396,6 +434,7 @@ void MsgDumperWrapper::deinitialize()
 #ifdef DO_DEBUG
 	printf("Close the library\n");
 #endif
+	pthread_mutex_destroy(&write_msg_mut);
 	fp_msg_dumper_deinitialize();
 
 	if (fmt_msg_buf != NULL)
@@ -689,92 +728,85 @@ unsigned short MsgDumperWrapper::get_syslog_severity_config()const
 	return linux_severity;
 }
 
-unsigned short MsgDumperWrapper::write(unsigned short linux_severity, const char* msg)
+unsigned short MsgDumperWrapper::write(const char* file_name, unsigned long line_no, unsigned short linux_severity, const char* msg)
 {
 	// fprintf(stderr, "MsgDumperWrapper::write [linux_severity: %d, message: %s]\n", linux_severity, msg);
-	unsigned short ret = fp_msg_dumper_write_msg(linux_severity, msg);
+	unsigned short ret = MSG_DUMPER_SUCCESS;
+	pthread_mutex_lock(&write_msg_mut);
+	string msg_title(get_code_pos_str(file_name, line_no));
+	string msg_body(msg);
+	string msg_whole = msg_title + msg_body;
+	ret = fp_msg_dumper_write_msg(linux_severity, msg_whole.c_str());
+	pthread_mutex_unlock(&write_msg_mut);
 	if (CHECK_FAILURE(ret))
 		fprintf(stderr, "%sfp_msg_dumper_write_msg() fails, resaon: %s\n", MSG_DUMPER_ERROR_COLOR, fp_msg_dumper_get_error_description());
 	return ret;
 }
 
-unsigned short MsgDumperWrapper::format_write_va(unsigned short linux_severity, const char* msg_fmt, va_list ap)
+unsigned short MsgDumperWrapper::format_write(const char* file_name, unsigned long line_no, unsigned short linux_severity, const char* msg_fmt, ...)
 {
-    int n;
-    va_list cp;
-   	while (true) 
-   	{
-        va_copy(cp, ap);
-        n = vsnprintf(fmt_msg_buf, fmt_msg_buf_size, msg_fmt, cp);
-        va_end(cp);
-/* Check error code */
-       	if (n < 0)
-       	{
-			fprintf(stderr, "%svsnprintf() fails, due to: %s", MSG_DUMPER_ERROR_COLOR, strerror(errno));
-			return MSG_DUMPER_FAILURE_SYSTEM_API;
-        }
-/* If that worked, return the string */
-       	if (n < fmt_msg_buf_size)
-            break;
-/* Else try again with more space */
-       	fmt_msg_buf_size <<= 1;       
-/* Precisely what is needed */
-    	char *fmt_msg_buf_old = fmt_msg_buf;
-       	if ((fmt_msg_buf = (char*)realloc(fmt_msg_buf_old, fmt_msg_buf_size)) == NULL) 
-       	{
-			fprintf(stderr, "%sFails to allocate the memory: fmt_msg_buf\n", MSG_DUMPER_ERROR_COLOR);
-			return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
-        }
-    }
-    return write(linux_severity, fmt_msg_buf);
+	unsigned short ret = MSG_DUMPER_SUCCESS;
+	pthread_mutex_lock(&write_msg_mut);
+	string msg_title(get_code_pos_str(file_name, line_no));
+	va_list ap;
+	va_start(ap, msg_fmt);
+	string msg_body(get_format_str_va(msg_fmt, ap));
+	va_end(ap);
+    // FORMAT_WRITE(linux_severity, msg_fmt);
+    string msg_whole = msg_title + msg_body;
+	ret = fp_msg_dumper_write_msg(linux_severity, msg_whole.c_str());
+	pthread_mutex_unlock(&write_msg_mut);
+	if (CHECK_FAILURE(ret))
+		fprintf(stderr, "%sfp_msg_dumper_write_msg() fails, resaon: %s\n", MSG_DUMPER_ERROR_COLOR, fp_msg_dumper_get_error_description());
+	return ret;
 }
 
-#define FORMAT_WRITE(priority, fmt)\
-do{\
-va_list ap;\
-va_start(ap, msg_fmt);\
-ret = format_write_va(priority, fmt, ap);\
-va_end(ap);\
-}while(0)
+// #define FORMAT_WRITE_EX(priority, fmt)\
+// do{\
+// va_list ap;\
+// va_start(ap, msg_fmt);\
+// ret = format_write_va(priority, fmt, ap);\
+// va_end(ap);\
+// }while(0)
 
-unsigned short MsgDumperWrapper::format_write(unsigned short linux_severity, const char* msg_fmt, ...)
-{
-	static unsigned short ret = MSG_DUMPER_SUCCESS;
-    FORMAT_WRITE(linux_severity,  msg_fmt);
-    return ret;
-}
+// unsigned short MsgDumperWrapper::format_write_ex(unsigned short linux_severity, const char* msg_fmt, ...)
+// {
+// 	static unsigned short ret = MSG_DUMPER_SUCCESS;
+//     FORMAT_WRITE_EX(linux_severity, msg_fmt);
+//     return ret;
+// }
 
-unsigned short MsgDumperWrapper::error(const char* msg){return write(LOG_ERR, msg);}
-unsigned short MsgDumperWrapper::format_error(const char* msg_fmt, ...)
-{
-	static unsigned short ret = MSG_DUMPER_SUCCESS;
-    FORMAT_WRITE(LOG_ERR, msg_fmt);
-    return ret;
-}
+// unsigned short MsgDumperWrapper::error(const char* msg){return write(LOG_ERR, msg);}
+// unsigned short MsgDumperWrapper::format_error(const char* msg_fmt, ...)
+// {
+// 	static unsigned short ret = MSG_DUMPER_SUCCESS;
+//     FORMAT_WRITE(LOG_ERR, msg_fmt);
+//     return ret;
+// }
 
-unsigned short MsgDumperWrapper::warn(const char* msg){return write(LOG_WARNING, msg);}
-unsigned short MsgDumperWrapper::format_warn(const char* msg_fmt, ...)
-{
-	static unsigned short ret = MSG_DUMPER_SUCCESS;
-    FORMAT_WRITE(LOG_WARNING, msg_fmt);
-    return ret;
-}
+// unsigned short MsgDumperWrapper::warn(const char* msg){return write(LOG_WARNING, msg);}
+// unsigned short MsgDumperWrapper::format_warn(const char* msg_fmt, ...)
+// {
+// 	static unsigned short ret = MSG_DUMPER_SUCCESS;
+//     FORMAT_WRITE(LOG_WARNING, msg_fmt);
+//     return ret;
+// }
 
-unsigned short MsgDumperWrapper::info(const char* msg){return write(LOG_INFO, msg);}
-unsigned short MsgDumperWrapper::format_info(const char* msg_fmt, ...)
-{
-	static unsigned short ret = MSG_DUMPER_SUCCESS;
-    FORMAT_WRITE(LOG_INFO, msg_fmt);
-    return ret;
-}
+// unsigned short MsgDumperWrapper::info(const char* msg){return write(LOG_INFO, msg);}
+// unsigned short MsgDumperWrapper::format_info(const char* msg_fmt, ...)
+// {
+// 	static unsigned short ret = MSG_DUMPER_SUCCESS;
+//     FORMAT_WRITE(LOG_INFO, msg_fmt);
+//     return ret;
+// }
 
-unsigned short MsgDumperWrapper::debug(const char* msg){return write(LOG_DEBUG, msg);}
-unsigned short MsgDumperWrapper::format_debug(const char* msg_fmt, ...)
-{
-	static unsigned short ret = MSG_DUMPER_SUCCESS;
-    FORMAT_WRITE(LOG_DEBUG, msg_fmt);
-    return ret;
-}
+// unsigned short MsgDumperWrapper::debug(const char* msg){return write(LOG_DEBUG, msg);}
+// unsigned short MsgDumperWrapper::format_debug(const char* msg_fmt, ...)
+// {
+// 	static unsigned short ret = MSG_DUMPER_SUCCESS;
+//     FORMAT_WRITE(LOG_DEBUG, msg_fmt);
+//     return ret;
+// }
 
 const char* MsgDumperWrapper::get_error_description()const
 {

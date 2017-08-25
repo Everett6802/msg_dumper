@@ -4,18 +4,15 @@
 #include <string.h>
 #include <syslog.h>
 #include <stdarg.h>
+#include <pthread.h>
 #include "msg_dumper.h"
 
 
 #define MSG_DUMPER_BUF_SIZE 512
+#define MSG_DUMPER_CODE_POS_FORMAT "(%s:%ld) "
 
 #define DECLARE_MSG_DUMPER()\
 MsgDumperWrapper* msg_dumper;
-
-#define DECLARE_MSG_DUMPER_PARAM()\
-static int __msg_dumper_title_len__;\
-static int __msg_dumper_message_len__;\
-static char __msg_dumper_message__[MSG_DUMPER_BUF_SIZE];
 
 #define IMPLEMENT_MSG_DUMPER()\
 msg_dumper = MsgDumperWrapper::get_instance();\
@@ -31,17 +28,6 @@ if (msg_dumper != NULL)\
 	msg_dumper = NULL;\
 }
 
-#define SHOW_MSG_DUMPER
-
-#define WRITE_MSG_DUMPER_BEGIN()\
-do{\
-snprintf(__msg_dumper_message__, MSG_DUMPER_BUF_SIZE, "(%s:%d) ", __FILE__, __LINE__);\
-__msg_dumper_title_len__ = strlen(__msg_dumper_message__);\
-__msg_dumper_message_len__ = MSG_DUMPER_BUF_SIZE - __msg_dumper_title_len__;
-
-#define WRITE_MSG_DUMPER_END()\
-}while(0)
-
 #define SET_SEVERITY(func_name, func_value)\
 msg_dumper->func_name(func_value);
 
@@ -56,21 +42,14 @@ RELEASE_MSG_DUMPER();\
 }while(0);
 
 #define WRITE_MSG_DUMPER(priority, message)\
-WRITE_MSG_DUMPER_BEGIN()\
-snprintf(&__msg_dumper_message__[__msg_dumper_title_len__], __msg_dumper_message_len__, "%s", message);\
-msg_dumper->write(priority, __msg_dumper_message__);\
-WRITE_MSG_DUMPER_END()
+msg_dumper->write(__FILE__, __LINE__, priority, message);
 
 #define WRITE_FORMAT_MSG_DUMPER(priority, message_format, ...)\
-WRITE_MSG_DUMPER_BEGIN()\
-snprintf(&__msg_dumper_message__[__msg_dumper_title_len__], __msg_dumper_message_len__, message_format, __VA_ARGS__);\
-msg_dumper->write(priority, __msg_dumper_message__);\
-WRITE_MSG_DUMPER_END()
+msg_dumper->format_write(__FILE__, __LINE__, priority, message_format, __VA_ARGS__);
 
 #define STATIC_WRITE_MSG_DUMPER(priority, message)\
 do{\
 DECLARE_AND_IMPLEMENT_STATIC_MSG_DUMPER();\
-DECLARE_MSG_DUMPER_PARAM();\
 WRITE_MSG_DUMPER(priority, message);\
 RELEASE_MSG_DUMPER();\
 }while(0);
@@ -78,10 +57,11 @@ RELEASE_MSG_DUMPER();\
 #define STATIC_WRITE_FORMAT_MSG_DUMPER(priority, message_format, ...)\
 do{\
 DECLARE_AND_IMPLEMENT_STATIC_MSG_DUMPER();\
-DECLARE_MSG_DUMPER_PARAM();\
 WRITE_FORMAT_MSG_DUMPER(priority, message_format, __VA_ARGS__);\
 RELEASE_MSG_DUMPER();\
 }while(0);
+
+#define SHOW_MSG_DUMPER
 
 #if defined SHOW_MSG_DUMPER
 
@@ -131,6 +111,30 @@ RELEASE_MSG_DUMPER();\
 
 #else
 
+#define SET_LOG_SEVERITY(linux_severity) 
+#define SET_SYSLOG_SEVERITY(linux_severity) 
+#define GET_LOG_SEVERITY() 
+#define GET_SYSLOG_SEVERITY()
+
+#define SET_LOG_SEVERITY_BY_NAME(severity_name)
+#define SET_SYSLOG_SEVERITY_BY_NAME(severity_name)
+#define GET_LOG_SEVERITY_BY_NAME()
+#define GET_SYSLOG_SEVERITY_BY_NAME()
+
+#define SET_LOG_SEVERITY_CONFIG(linux_severity)
+#define SET_SYSLOG_SEVERITY_CONFIG(linux_severity)
+#define GET_LOG_SEVERITY_CONFIG()
+#define GET_SYSLOG_SEVERITY_CONFIG()
+
+#define STATIC_SET_LOG_SEVERITY(linux_severity)
+#define STATIC_SET_SYSLOG_SEVERITY(linux_severity)
+
+#define STATIC_SET_LOG_SEVERITY_BY_NAME(severity_name)
+#define STATIC_SET_SYSLOG_SEVERITY_BY_NAME(severity_name)
+
+#define STATIC_SET_LOG_SEVERITY_CONFIG(linux_severity)
+#define STATIC_SET_SYSLOG_SEVERITY_CONFIG(linux_severity)
+
 #define WRITE_DEBUG(message)
 #define WRITE_INFO(message)
 #define WRITE_WARN(message)
@@ -179,6 +183,7 @@ private:
 	FP_msg_dumper_deinitialize fp_msg_dumper_deinitialize;
 	FP_msg_dumper_get_error_description fp_msg_dumper_get_error_description;
 
+	pthread_mutex_t write_msg_mut;
 	unsigned short facility;
 	char *fmt_msg_buf;
 	int fmt_msg_buf_size;
@@ -204,6 +209,10 @@ private:
 	unsigned short get_severity_by_name(const char* facility_name)const;
 	unsigned short set_config(const char* config_name, const char* config_value);
 	unsigned short get_config(const char* config_name, char* config_value)const;
+	// unsigned short format_write_va(unsigned short linux_severity, const char* msg_fmt, va_list ap);
+// Not thread-safe
+	const char* get_code_pos_str(const char* file_name, unsigned long line_no);
+	const char* get_format_str_va(const char* msg_fmt, va_list ap);
 
 public:
 	static const int STRING_BUF_SIZE;
@@ -233,18 +242,18 @@ public:
 	unsigned short get_log_severity_config()const;
 	unsigned short get_syslog_severity_config()const;
 
-	unsigned short write(unsigned short linux_severity, const char* msg);
-	unsigned short format_write_va(unsigned short linux_severity, const char* msg_fmt, va_list ap);
-	unsigned short format_write(unsigned short linux_severity, const char* msg_fmt, ...);
+	unsigned short write(const char* file_name, unsigned long line_no, unsigned short linux_severity, const char* msg);
+	unsigned short format_write(const char* file_name, unsigned long line_no, unsigned short linux_severity, const char* msg_fmt, ...);
+	// unsigned short format_write_ex(unsigned short linux_severity, const char* msg_fmt, ...);
 
-	unsigned short error(const char* msg);
-	unsigned short format_error(const char* msg_fmt, ...);
-	unsigned short warn(const char* msg);
-	unsigned short format_warn(const char* msg_fmt, ...);
-	unsigned short info(const char* msg);
-	unsigned short format_info(const char* msg_fmt, ...);
-	unsigned short debug(const char* msg);
-	unsigned short format_debug(const char* msg_fmt, ...);
+	// unsigned short error(const char* msg);
+	// unsigned short format_error(const char* msg_fmt, ...);
+	// unsigned short warn(const char* msg);
+	// unsigned short format_warn(const char* msg_fmt, ...);
+	// unsigned short info(const char* msg);
+	// unsigned short format_info(const char* msg_fmt, ...);
+	// unsigned short debug(const char* msg);
+	// unsigned short format_debug(const char* msg_fmt, ...);
 
 	const char* get_error_description()const;
 };

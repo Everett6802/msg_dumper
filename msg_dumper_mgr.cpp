@@ -226,7 +226,6 @@ unsigned short MsgDumperMgr::write_msg(unsigned short msg_dumper_severity, const
 		WRITE_ERR_SYSLOG("Library is Not initialized");
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
-
 	if (msg == NULL)
 	{
 		WRITE_ERR_SYSLOG("Invalid pointer: msg");
@@ -237,7 +236,6 @@ unsigned short MsgDumperMgr::write_msg(unsigned short msg_dumper_severity, const
 // Mark the time that the message is generated
 	time_t timep;
 	time(&timep);
-
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 	{
 		// fprintf(stderr, "MsgDumperMgr::write_msg [msg_dumper_severity: %d, message: %s]\n", msg_dumper_severity, msg);
@@ -249,7 +247,6 @@ unsigned short MsgDumperMgr::write_msg(unsigned short msg_dumper_severity, const
 				return ret;
 		}
 	}
-
 	return ret;
 }
 

@@ -1,6 +1,6 @@
 CC := g++
 
-CXXFLAGS := -g -Wall -fPIC
+CXXFLAGS := -g -Wall -fPIC -std=c++0x
 
 SOURCES := msg_dumper_wrapper.cpp test_msg_dumper.cpp
 OBJS := $(SOURCES:.cpp=.o)

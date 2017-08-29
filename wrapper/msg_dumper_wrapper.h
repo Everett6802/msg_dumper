@@ -42,10 +42,10 @@ RELEASE_MSG_DUMPER();\
 }while(0);
 
 #define WRITE_MSG_DUMPER(priority, message)\
-msg_dumper->write(__FILE__, __LINE__, priority, message);
+msg_dumper->write(__FILE__, __LINE__, priority, message)
 
 #define WRITE_FORMAT_MSG_DUMPER(priority, message_format, ...)\
-msg_dumper->format_write(__FILE__, __LINE__, priority, message_format, __VA_ARGS__);
+msg_dumper->format_write(__FILE__, __LINE__, priority, message_format, __VA_ARGS__)
 
 #define STATIC_WRITE_MSG_DUMPER(priority, message)\
 do{\

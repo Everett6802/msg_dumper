@@ -445,7 +445,7 @@ void MsgDumperWrapper::deinitialize()
 // Close the handle
 	if (api_handle != NULL)
 	{
-         instance = NULL;
+        instance = NULL;
 		dlclose(api_handle);
 		api_handle = NULL;
 	}

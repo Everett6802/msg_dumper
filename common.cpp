@@ -9,7 +9,7 @@ using namespace std;
 const char* MODULE_NAME = "MSG_DUMPER";
 const unsigned char MAJOR_VERSION = 1;
 const unsigned char MINOR_VERSION = 3;
-const unsigned char BUILD_VERSION = 2;
+const unsigned char BUILD_VERSION = 3;
 const char* MSG_DUMPER_ERROR_COLOR = "\x1B[31m";
 const char* MSG_DUMPER_SEVERITY_DESC[] = {"Error", "Warn", "Info", "Debug"};
 const int MSG_DUMPER_SEVERITY_DESC_LEN = sizeof(MSG_DUMPER_SEVERITY_DESC) / sizeof(MSG_DUMPER_SEVERITY_DESC[0]);

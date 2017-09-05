@@ -312,6 +312,8 @@ MsgDumperWrapper::MsgDumperWrapper() :
 {
 }
 
+MsgDumperWrapper::~MsgDumperWrapper(){deinitialize();}
+
 bool MsgDumperWrapper::export_api()
 {
 	fp_msg_dumper_get_version = (FP_msg_dumper_get_version)dlsym(api_handle, "msg_dumper_get_version");
@@ -445,10 +447,11 @@ void MsgDumperWrapper::deinitialize()
 // Close the handle
 	if (api_handle != NULL)
 	{
-        instance = NULL;
 		dlclose(api_handle);
 		api_handle = NULL;
 	}
+	if (instance != NULL)
+		instance = NULL;
 }
 
 unsigned short MsgDumperWrapper::parse_config()

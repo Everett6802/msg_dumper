@@ -155,7 +155,7 @@ bool test_macro()
 	bool test_pass = false;
 	DECLARE_MSG_DUMPER()
 	IMPLEMENT_MSG_DUMPER()
-	unsigned short ret = MSG_DUMPER_SUCCESS;
+	// unsigned short ret = MSG_DUMPER_SUCCESS;
 // Write the message
 	printf("Write the ERROR message through Macro\n");
 	WRITE_ERROR("This is a test through Macro: Error");

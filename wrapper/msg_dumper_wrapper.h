@@ -198,6 +198,7 @@ private:
 	MsgDumperWrapper();
 	MsgDumperWrapper(const MsgDumperWrapper&);
 	MsgDumperWrapper& operator=(const MsgDumperWrapper&);
+	~MsgDumperWrapper();
 
 	unsigned short initialize();
 	void deinitialize();
@@ -218,8 +219,6 @@ public:
 	static const int STRING_BUF_SIZE;
 
 	static MsgDumperWrapper* get_instance();
-
-	~MsgDumperWrapper(){deinitialize();}
 
 	int addref();
 	int release();

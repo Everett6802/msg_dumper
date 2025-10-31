@@ -125,7 +125,6 @@ unsigned short MsgDumperMgr::initialize()
 				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to allocate the %s object", facility_class_name);
 				return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
 			}
-
 			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Initialize the %s object", facility_class_name);
 			ret = msg_dumper_thread[i]->initialize(current_working_directory);
 			if (CHECK_FAILURE(ret))
@@ -135,7 +134,6 @@ unsigned short MsgDumperMgr::initialize()
 			}
 		}
 	}
-
 	is_init = true;
 
 EXIT:

@@ -79,6 +79,8 @@ unsigned short MsgDumperBase::parse_config(const char* current_working_directory
 		{
 			if (buf[i] == '\n')
 			{
+				if (i >= 1 && buf[i - 1] == '\r')
+					i--;
 				buf[i] = '\0';
 				new_line_pos = i;
 				break;

@@ -33,9 +33,9 @@ unsigned short MsgDumperWrapper::get_msg_dumper_severity_from_string(const char*
 	bool found = false;
 	for (int i = 0 ; i < SEVERITY_NAME_SIZE ; i++)
 	{
-// #ifdef DO_DEBUG
-// 		fprintf(stderr, "%s, %s, %d\n", severity_name, SEVERITY_NAME[i], strcmp(severity_name, SEVERITY_NAME[i]));
-// #endif
+#ifdef DO_DEBUG
+		fprintf(stderr, "%s, %s, %d\n", severity_name, SEVERITY_NAME[i], strcmp(severity_name, SEVERITY_NAME[i]));
+#endif
 		if (strcmp(severity_name, SEVERITY_NAME[i]) == 0)
 		{
 			msg_dumper_severity = (unsigned short)i;
@@ -59,9 +59,9 @@ unsigned short MsgDumperWrapper::get_linux_severity_from_string(const char* seve
 	bool found = false;
 	for (int i = 0 ; i < SEVERITY_NAME_SIZE ; i++)
 	{
-// #ifdef DO_DEBUG
-// 		fprintf(stderr, "%s, %s, %d\n", severity_name, SEVERITY_NAME[i], strcmp(severity_name, SEVERITY_NAME[i]));
-// #endif
+#ifdef DO_DEBUG
+		fprintf(stderr, "Test: %s, %s, %d\n", severity_name, SEVERITY_NAME[i], strcmp(severity_name, SEVERITY_NAME[i]));
+#endif
 		if (strcmp(severity_name, SEVERITY_NAME[i]) == 0)
 		{
 			msg_dumper_severity = (unsigned short)i;
@@ -113,9 +113,9 @@ unsigned short MsgDumperWrapper::get_facility_index_from_string(const char* faci
 	bool found = false;
 	for (int i = 0 ; i < FACILITY_NAME_SIZE ; i++)
 	{
-// #ifdef DO_DEBUG
-// 		fprintf(stderr, "%s, %s, %d\n", facility_name, FACILITY_NAME[i], strcmp(facility_name, FACILITY_NAME[i]));
-// #endif
+#ifdef DO_DEBUG
+		fprintf(stderr, "%s, %s, %d\n", facility_name, FACILITY_NAME[i], strcmp(facility_name, FACILITY_NAME[i]));
+#endif
 		if (strcmp(facility_name, FACILITY_NAME[i]) == 0)
 		{
 			facility = i;
@@ -494,6 +494,8 @@ unsigned short MsgDumperWrapper::parse_config()
 		if (ech != NULL)
 		{
 			int end_pos = ech - buf;
+			if (buf[end_pos - 1] == '\r')
+				end_pos--;
 			buf[end_pos] = '\0';
 		}
 		string config(buf);

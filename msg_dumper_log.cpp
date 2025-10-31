@@ -153,7 +153,9 @@ unsigned short MsgDumperLog::initialize(const char* current_working_directory, v
 		return ret;
 // Modify the member variables after parsing the config
 	snprintf(log_folderpath, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", current_working_directory, log_foldername);
+	// printf("log_folderpath: %s, %d\n", log_folderpath, strlen(log_folderpath));
 	snprintf(log_filepath, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", log_folderpath, DEF_LOG_FILENAME);
+	// printf("log_filepath: %s, %d\n", log_filepath, strlen(log_filepath));
 	snprintf(log_tar_filepath_format, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", log_folderpath, DEF_LOG_TAR_FILENAME_FORMAT);
 	snprintf(log_tar_file_count_cmd, MSG_DUMPER_LONG_STRING_SIZE, "ls -al %s | grep tar.gz | wc -l", log_folderpath);
 // Create the log folder

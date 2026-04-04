@@ -12,66 +12,130 @@
 static MsgDumperMgr msg_dumper_mgr;
 static unsigned short last_error = MSG_DUMPER_SUCCESS;
 
-unsigned short msg_dumper_get_version(unsigned char& major_version, unsigned char& minor_version, unsigned char& build_version)
+unsigned short msg_dumper_get_version(unsigned char* major_version, unsigned char* minor_version, unsigned char* build_version)
 {
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	major_version = MAJOR_VERSION;
-	minor_version = MINOR_VERSION;
-	build_version = BUILD_VERSION;
+//	WRITE_DEBUG("%s() called", __func__);
+	if (major_version == NULL || minor_version == NULL || build_version == NULL)
+	{
+		WRITE_ERROR("Invalid pointer: major_version, minor_version or build_version");
+		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+	}
+	*major_version = MAJOR_VERSION;
+	*minor_version = MINOR_VERSION;
+	*build_version = BUILD_VERSION;
 
 	return MSG_DUMPER_SUCCESS;
 }
 
+// unsigned short msg_dumper_set_severity(unsigned short linux_severity, unsigned short facility)
+// {
+// //	WRITE_DEBUG("%s() called", __func__);
+// 	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
+// 	last_error = msg_dumper_mgr.set_severity(msg_dumper_severity, facility);
+// 	return last_error;
+// }
+
+// unsigned short msg_dumper_set_severity_all(unsigned short linux_severity)
+// {
+// //	WRITE_DEBUG("%s() called", __func__);
+// 	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
+// 	last_error = msg_dumper_mgr.set_severity_all(msg_dumper_severity);
+// 	return last_error;
+// }
+
+// unsigned short msg_dumper_set_facility(unsigned short facility)
+// {
+// //	WRITE_DEBUG("%s() called", __func__);
+// 	last_error = msg_dumper_mgr.set_facility(facility);
+// 	return last_error;
+// }
+
+// unsigned short msg_dumper_get_severity(unsigned short facility)
+// {
+// //	WRITE_DEBUG("%s() called", __func__);
+// 	unsigned short msg_dumper_severity = msg_dumper_mgr.get_severity(facility);
+// 	unsigned short linux_severity = transform_msg_dumper_severity_to_linux_severity(msg_dumper_severity);
+// 	last_error = MSG_DUMPER_SUCCESS;
+// 	return linux_severity;
+// }
+
+// unsigned short msg_dumper_get_facility()
+// {
+// //	WRITE_DEBUG("%s() called", __func__);
+// 	unsigned short facility = msg_dumper_mgr.get_facility();
+// 	last_error = MSG_DUMPER_SUCCESS;
+// 	return facility;
+// }
+
+unsigned short msg_dumper_set_severity(const char* facility, const char* severity)
+{
+// //	WRITE_DEBUG("%s() called", __func__);
+// 	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
+	if (facility == NULL || severity == NULL)
+	{
+		WRITE_ERROR("Invalid pointer: facility or severity");
+		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+	}
+	int facility_index, severity_index;
+	facility_index = get_facility_index_from_string(facility);
+	if (facility_index == -1)
+	{
+		WRITE_ERROR("Undefined facility: %s", facility);
+		last_error = MSG_DUMPER_FAILURE_INCORRECT_CONFIG;
+		goto OUT;
+	}
+	severity_index = get_severity_index_from_string(severity);
+	if (severity_index == -1)
+	{
+		WRITE_ERROR("Undefined severity: %s", severity);
+		last_error = MSG_DUMPER_FAILURE_INCORRECT_CONFIG;
+		goto OUT;
+	}
+	last_error = msg_dumper_mgr.set_severity(severity_index, facility_index);
+OUT:
+	return last_error;
+}
+
+unsigned short msg_dumper_get_severity(const char* facility, char** severity)
+{
+// //	WRITE_DEBUG("%s() called", __func__);
+// 	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
+	int facility_index;
+	unsigned short severity_index;
+	char* severity_tmp = NULL;
+	if (facility == NULL || severity == NULL)
+	{
+		WRITE_ERROR("Invalid pointer: facility or severity");
+		last_error = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+		goto OUT;
+	}
+	facility_index = get_facility_index_from_string(facility);
+	if (facility_index == -1)
+	{
+		WRITE_ERROR("Undefined facility: %s", facility);
+		last_error = MSG_DUMPER_FAILURE_INCORRECT_CONFIG;
+		goto OUT;
+	}
+	last_error = msg_dumper_mgr.get_severity(facility_index, severity_index);
+	if (severity_index == MSG_DUMPER_SEVERITY_NOSET)
+		severity_tmp = strdup(MSG_DUMPER_SEVERITY_DESC_NOSET);
+	else
+		severity_tmp = strdup(MSG_DUMPER_SEVERITY_DESC[severity_index]);
+	*severity = severity_tmp;
+OUT:
+	return last_error;
+}
+
 unsigned short msg_dumper_initialize()
 {
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG("%s() called", __func__);
 	last_error = msg_dumper_mgr.initialize();
 	return last_error;
 }
 
-unsigned short msg_dumper_set_severity(unsigned short linux_severity, unsigned short facility)
-{
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
-	last_error = msg_dumper_mgr.set_severity(msg_dumper_severity, facility);
-	return last_error;
-}
-
-unsigned short msg_dumper_set_severity_all(unsigned short linux_severity)
-{
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
-	last_error = msg_dumper_mgr.set_severity_all(msg_dumper_severity);
-	return last_error;
-}
-
-unsigned short msg_dumper_set_facility(unsigned short facility)
-{
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	last_error = msg_dumper_mgr.set_facility(facility);
-	return last_error;
-}
-
-unsigned short msg_dumper_get_severity(unsigned short facility)
-{
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	unsigned short msg_dumper_severity = msg_dumper_mgr.get_severity(facility);
-	unsigned short linux_severity = transform_msg_dumper_severity_to_linux_severity(msg_dumper_severity);
-	last_error = MSG_DUMPER_SUCCESS;
-	return linux_severity;
-}
-
-unsigned short msg_dumper_get_facility()
-{
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
-	unsigned short facility = msg_dumper_mgr.get_facility();
-	last_error = MSG_DUMPER_SUCCESS;
-	return facility;
-}
-
 unsigned short msg_dumper_write_msg(unsigned short linux_severity, const char* msg)
 {
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG("%s() called", __func__);
 	// fprintf(stderr, "msg_dumper_write_msg linux_severity: %d\n", linux_severity);
 	unsigned short msg_dumper_severity = transform_linux_severity_to_msg_dumper_severity(linux_severity);
 	// fprintf(stderr, "msg_dumper_write_msg msg_dumper_severity: %d\n", msg_dumper_severity);
@@ -84,7 +148,7 @@ unsigned short msg_dumper_write_msg(unsigned short linux_severity, const char* m
 
 unsigned short msg_dumper_write_format_msg(unsigned short linux_severity, const char* fmt, ...)
 {
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG("%s() called", __func__);
 	static char fmtmsg[MSG_DUMPER_EX_LONG_STRING_SIZE];
 	static const int fmtmsg_len = sizeof(fmtmsg) / sizeof(fmtmsg[0]);
 	static const int fmtbuf_len = 16;
@@ -92,7 +156,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short linux_severity, const 
 
 	if (fmt == NULL)
 	{
-		WRITE_ERR_SYSLOG("Invalid pointer: format");
+		WRITE_ERROR("Invalid pointer: format");
 		last_error = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 		return last_error;
 	}
@@ -163,7 +227,7 @@ unsigned short msg_dumper_write_format_msg(unsigned short linux_severity, const 
 
 unsigned short msg_dumper_deinitialize()
 {
-//	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "%s() called", __func__);
+//	WRITE_DEBUG("%s() called", __func__);
 	last_error = msg_dumper_mgr.deinitialize();
 	return last_error;
 }

@@ -46,23 +46,23 @@ void* MsgDumperTimerThread::msg_dumper_thread_handler(void* void_ptr)
 unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 {
 	unsigned short ret = MSG_DUMPER_SUCCESS;
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The worker thread is running", worker_thread_name);
+	WRITE_DEBUG("Thread[%s]=> The worker thread is running", worker_thread_name);
 	while (!exit)
 	{
 		pthread_mutex_lock(&mut);
 //wait for the signal with cond as condition variable
 		if (!new_data_trigger)
 			pthread_cond_wait(&cond, &mut);
-//		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The worker thread to write the data......", worker_thread_name);
+//		WRITE_DEBUG("Thread[%s]=> The worker thread to write the data......", worker_thread_name);
 
 // Move the message
 		int buffer_vector_size = buffer_vector.size();
-//		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> There are totally %d data in the queue", worker_thread_name, buffer_vector_size);
+//		WRITE_DEBUG("Thread[%s]=> There are totally %d data in the queue", worker_thread_name, buffer_vector_size);
 		if (buffer_vector_size > 0)
 		{
 			for (int i = 0 ; i < buffer_vector_size ; i++)
 			{
-//				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Move the message[%s] to another buffer", worker_thread_name, buffer_vector[i]->data);
+//				WRITE_DEBUG("Thread[%s]=> Move the message[%s] to another buffer", worker_thread_name, buffer_vector[i]->data);
 				PMSG_CFG elem =  buffer_vector[i];
 				buffer_vector[i] = NULL;
 				write_vector.push_back(elem);
@@ -89,7 +89,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 				write_vector[i] = NULL;
 				if (CHECK_FAILURE(ret))
 				{
-					WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> Fail to write message, due to %d", worker_thread_name, ret);
+					WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> Fail to write message, due to %d", worker_thread_name, ret);
 					break;
 				}
 			}
@@ -101,7 +101,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 		}
 	}
 
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The worker thread of writing message is going to die", worker_thread_name);
+	WRITE_DEBUG("Thread[%s]=> The worker thread of writing message is going to die", worker_thread_name);
 	return ret;
 }
 
@@ -111,7 +111,7 @@ unsigned short MsgDumperTimerThread::initialize(const char* current_working_dire
 	unsigned short ret = msg_dumper->initialize(current_working_directory, config);
 	if (CHECK_FAILURE(ret))
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to initialize the MsgDumper%s object", msg_dumper->get_facility_name());
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Fail to initialize the MsgDumper%s object", msg_dumper->get_facility_name());
 		return ret;
 	}
 
@@ -120,12 +120,12 @@ unsigned short MsgDumperTimerThread::initialize(const char* current_working_dire
 	mut = PTHREAD_MUTEX_INITIALIZER;
 	cond = PTHREAD_COND_INITIALIZER;
 
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Create a worker thread for %s......", msg_dumper->get_facility_name());
+	WRITE_DEBUG("Create a worker thread for %s......", msg_dumper->get_facility_name());
 // Create the worker thread
 	api_ret = pthread_create(&pid, NULL, msg_dumper_thread_handler, this);
 	if (api_ret != 0)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "pthread_create() failed, due to: %d", api_ret);
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "pthread_create() failed, due to: %d", api_ret);
 		return MSG_DUMPER_FAILURE_UNKNOWN;
 	}
 	else
@@ -136,7 +136,7 @@ unsigned short MsgDumperTimerThread::initialize(const char* current_working_dire
 
 unsigned short MsgDumperTimerThread::write_msg(const time_t& timep, unsigned short msg_dumper_severity, const char* msg)
 {
-	// WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write message [severity: %d, message: %s]", severity, msg);
+	// WRITE_DEBUG("Write message [severity: %d, message: %s]", severity, msg);
 	// fprintf(stderr, "MsgDumperTimerThread::write_msg [msg_dumper_severity: %d, message: %s]\n", msg_dumper_severity, msg);
 	PMSG_CFG new_msg = new MsgCfg(timep, msg_dumper_severity, msg);
 
@@ -159,12 +159,12 @@ unsigned short MsgDumperTimerThread::deinitialize()
 // You should make sure the thread(pid) is created correctly before executing the pthread_kill() function. Otherwise, there are some errors dumped from the kernel
 		int kill_ret = pthread_kill(pid, 0);
 		if(kill_ret == ESRCH)
-			WRITE_ERR_SYSLOG("The worker thread in the MsgDumperTimerThread object did NOT exist......");
+			WRITE_ERROR("The worker thread in the MsgDumperTimerThread object did NOT exist......");
 		else if(kill_ret == EINVAL)
-			WRITE_ERR_SYSLOG("The signal in the MsgDumperTimerThread object is invalid");
+			WRITE_ERROR("The signal in the MsgDumperTimerThread object is invalid");
 		else
 		{
-			WRITE_DEBUG_SYSLOG("The worker thread in the MsgDumperTimerThread object is STILL alive");
+			WRITE_DEBUG("The worker thread in the MsgDumperTimerThread object is STILL alive");
 			__sync_lock_test_and_set(&exit, 1);
 
 	// Notify the worker thread to exit
@@ -177,11 +177,11 @@ unsigned short MsgDumperTimerThread::deinitialize()
 			api_ret = pthread_join(pid, (void**)&api_ret_desc);
 			if (api_ret != 0)
 			{
-				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "pthread_join() failed, due to: %s", api_ret_desc);
+				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "pthread_join() failed, due to: %s", api_ret_desc);
 				return MSG_DUMPER_FAILURE_UNKNOWN;
 			}
 			pid = 0;
-			WRITE_DEBUG_SYSLOG("The worker thread in the MsgDumperTimerThread object is dead");
+			WRITE_DEBUG("The worker thread in the MsgDumperTimerThread object is dead");
 		}
 		thread_is_running = false;
 	}
@@ -191,15 +191,15 @@ unsigned short MsgDumperTimerThread::deinitialize()
 
 // Check if there are some messages left in the Queue
 	if (buffer_vector.size() > 0)
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "#####   ERROR buffer vector is NOT empty: %d   #####", buffer_vector.size());
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "#####   ERROR buffer vector is NOT empty: %d   #####", buffer_vector.size());
 	if (write_vector.size() > 0)
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "#####   ERROR write vector is NOT empty: %d   #####", write_vector.size());
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "#####   ERROR write vector is NOT empty: %d   #####", write_vector.size());
 
 // De-initialize the msg_dumper object
 	unsigned short ret = msg_dumper->deinitialize();
 	if (CHECK_FAILURE(ret))
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to de-initialize the MsgDumper%s object", msg_dumper->get_facility_name());
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Fail to de-initialize the MsgDumper%s object", msg_dumper->get_facility_name());
 		return ret;
 	}
 

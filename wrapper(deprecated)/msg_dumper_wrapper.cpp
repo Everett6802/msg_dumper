@@ -76,24 +76,24 @@ unsigned short MsgDumperWrapper::get_linux_severity_from_string(const char* seve
 		throw invalid_argument(string(exception));
 	}
 #if 0
-static const unsigned short MSG_DUMPER_SEVIRITY_ERROR = 0;
-static const unsigned short MSG_DUMPER_SEVIRITY_WARN = 1;
-static const unsigned short MSG_DUMPER_SEVIRITY_INFO = 2;
-static const unsigned short MSG_DUMPER_SEVIRITY_DEBUG = 3;
+static const unsigned short MSG_DUMPER_SEVERITY_ERROR = 0;
+static const unsigned short MSG_DUMPER_SEVERITY_WARN = 1;
+static const unsigned short MSG_DUMPER_SEVERITY_INFO = 2;
+static const unsigned short MSG_DUMPER_SEVERITY_DEBUG = 3;
 #endif
 	unsigned short linux_severity;
 	switch(msg_dumper_severity)
 	{
-	case MSG_DUMPER_SEVIRITY_DEBUG:
+	case MSG_DUMPER_SEVERITY_DEBUG:
 		linux_severity = LOG_DEBUG;
 		break;
-	case MSG_DUMPER_SEVIRITY_INFO:
+	case MSG_DUMPER_SEVERITY_INFO:
 		linux_severity = LOG_INFO;
 		break;
-	case MSG_DUMPER_SEVIRITY_WARN:
+	case MSG_DUMPER_SEVERITY_WARN:
 		linux_severity = LOG_WARNING;
 		break;
-	case MSG_DUMPER_SEVIRITY_ERROR:
+	case MSG_DUMPER_SEVERITY_ERROR:
 		linux_severity = LOG_ERR;
 		break;
 	default:
@@ -154,20 +154,20 @@ unsigned short MsgDumperWrapper::transform_linux_severity_to_msg_dumper_severity
 	switch(linux_severity)
 	{
 	case LOG_DEBUG:
-		msg_dumper_severity = MSG_DUMPER_SEVIRITY_DEBUG;
+		msg_dumper_severity = MSG_DUMPER_SEVERITY_DEBUG;
 		break;
 	case LOG_INFO:
-		msg_dumper_severity = MSG_DUMPER_SEVIRITY_INFO;
+		msg_dumper_severity = MSG_DUMPER_SEVERITY_INFO;
 		break;
 	case LOG_WARNING:
 	case LOG_NOTICE:
-		msg_dumper_severity = MSG_DUMPER_SEVIRITY_WARN;
+		msg_dumper_severity = MSG_DUMPER_SEVERITY_WARN;
 		break;
 	case LOG_EMERG:
 	case LOG_ALERT:
 	case LOG_CRIT:
 	case LOG_ERR:
-		msg_dumper_severity = MSG_DUMPER_SEVIRITY_ERROR;
+		msg_dumper_severity = MSG_DUMPER_SEVERITY_ERROR;
 		break;
 	default:
 		{
@@ -183,24 +183,24 @@ unsigned short MsgDumperWrapper::transform_linux_severity_to_msg_dumper_severity
 unsigned short MsgDumperWrapper::transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity)
 {
 #if 0
-static const unsigned short MSG_DUMPER_SEVIRITY_ERROR = 0;
-static const unsigned short MSG_DUMPER_SEVIRITY_WARN = 1;
-static const unsigned short MSG_DUMPER_SEVIRITY_INFO = 2;
-static const unsigned short MSG_DUMPER_SEVIRITY_DEBUG = 3;
+static const unsigned short MSG_DUMPER_SEVERITY_ERROR = 0;
+static const unsigned short MSG_DUMPER_SEVERITY_WARN = 1;
+static const unsigned short MSG_DUMPER_SEVERITY_INFO = 2;
+static const unsigned short MSG_DUMPER_SEVERITY_DEBUG = 3;
 #endif
 	unsigned short linux_severity;
 	switch(msg_dumper_severity)
 	{
-	case MSG_DUMPER_SEVIRITY_DEBUG:
+	case MSG_DUMPER_SEVERITY_DEBUG:
 		linux_severity = LOG_DEBUG;
 		break;
-	case MSG_DUMPER_SEVIRITY_INFO:
+	case MSG_DUMPER_SEVERITY_INFO:
 		linux_severity = LOG_INFO;
 		break;
-	case MSG_DUMPER_SEVIRITY_WARN:
+	case MSG_DUMPER_SEVERITY_WARN:
 		linux_severity = LOG_WARNING;
 		break;
-	case MSG_DUMPER_SEVIRITY_ERROR:
+	case MSG_DUMPER_SEVERITY_ERROR:
 		linux_severity = LOG_ERR;
 		break;
 	default:
@@ -403,7 +403,7 @@ unsigned short MsgDumperWrapper::initialize()
 	unsigned char major_version;
 	unsigned char minor_version;
 	unsigned char build_version;
-	fp_msg_dumper_get_version(major_version, minor_version, build_version);
+	fp_msg_dumper_get_version(&major_version, &minor_version, &build_version);
 #ifdef DO_DEBUG
 	printf("API version: (%d.%d.%d)\n", major_version, minor_version, build_version);
 #endif

@@ -33,49 +33,49 @@ MsgDumperSql::MsgDumperSql() :
 
 MsgDumperSql::~MsgDumperSql()
 {
-	WRITE_DEBUG_SYSLOG("The destructor of MsgDumperSql is called...");
+	WRITE_DEBUG("The destructor of MsgDumperSql is called...");
 }
 
 unsigned short MsgDumperSql::try_connect_mysql()
 {
-	WRITE_DEBUG_SYSLOG("Initialize the parameters connected to the MySQL database server");
+	WRITE_DEBUG("Initialize the parameters connected to the MySQL database server");
 	connection = mysql_init(NULL); // 初始化数据库连接变量
 	if(connection == NULL)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "mysql_init() fails, due to: %s", mysql_error(connection));
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "mysql_init() fails, due to: %s", mysql_error(connection));
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 
-	WRITE_DEBUG_SYSLOG("Try to connect to the MySQL database server...");
+	WRITE_DEBUG("Try to connect to the MySQL database server...");
 // 函数mysql_real_connect建立一个数据库连接，成功返回MYSQL*连接句柄，失败返回NULL
 	if(mysql_real_connect(connection, server, username, password, database, 0, NULL, 0) == NULL)
 	{
 // The database does NOT exist !!! Try to create one
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The %s database does NOT exist, create a NEW one", database);
+		WRITE_DEBUG("The %s database does NOT exist, create a NEW one", database);
 // mysql_create_db() has been deprecated in the newer releases of MySQL. MySQL now supports the CREATE DATABASE SQL statement.
 // This should be used, via the mysql_query function, instead
 //		if(mysql_create_db(connection, database) != 0)
 		if(mysql_real_connect(connection, server, username, password, NULL, 0, NULL, 0) == NULL)
 		{
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "mysql_real_connect() fails, due to: %s", mysql_error(connection));
+			WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "mysql_real_connect() fails, due to: %s", mysql_error(connection));
 			return MSG_DUMPER_FAILURE_MYSQL;
 		}
 
 		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_create_database, database);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to create database[%s] by command: %s", database, cmd_buf);
+		WRITE_DEBUG(MSG_DUMPER_LONG_STRING_SIZE, "Try to create database[%s] by command: %s", database, cmd_buf);
 		if(mysql_query(connection, cmd_buf) != 0)
 		{
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "mysql_query() fails, due to: %s", mysql_error(connection));
+			WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "mysql_query() fails, due to: %s", mysql_error(connection));
 			return MSG_DUMPER_FAILURE_MYSQL;
 		}
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The %s database is created", database);
+		WRITE_DEBUG("The %s database is created", database);
 	}
-	WRITE_DEBUG_SYSLOG("Try to connect to the MySQL database server...... Successfully");
+	WRITE_DEBUG("Try to connect to the MySQL database server...... Successfully");
 
 // Select the database
 	if (mysql_select_db(connection, database))
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "mysql_select_db() fails, due to: %s", mysql_error(connection));
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "mysql_select_db() fails, due to: %s", mysql_error(connection));
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 
@@ -86,7 +86,7 @@ unsigned short MsgDumperSql::parse_config_param(const char* param_title, const c
 {
 	if (param_title == NULL || param_content == NULL)
 	{
-		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
+		WRITE_ERROR("Invalid argument: param_title/param_content");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 	static const char* title[] = {"server", "username", "password", "database"};
@@ -121,11 +121,11 @@ unsigned short MsgDumperSql::parse_config_param(const char* param_title, const c
 				memset(param_member_variable, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 				memcpy(param_member_variable, param_content, param_content_len);
 				found = true;
-				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Update parameter: %s=%s", param_title, param_content);
+				WRITE_DEBUG("Update parameter: %s=%s", param_title, param_content);
 			}
 			else
 			{
-				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter: %s=%s", param_title, param_content);
+				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter: %s=%s", param_title, param_content);
 				ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 			}
 			break;
@@ -134,7 +134,7 @@ unsigned short MsgDumperSql::parse_config_param(const char* param_title, const c
 // If the title is NOT found...
 	if (!found)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
 		ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 
@@ -146,7 +146,7 @@ unsigned short MsgDumperSql::open_device()
 // Check if the connection is established
 	if (connection == NULL)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT established", facility_name);
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT established", facility_name);
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 
@@ -154,11 +154,11 @@ unsigned short MsgDumperSql::open_device()
 // This function returns zero if the connection is alive and nonzero in the case of an error.
 	if (mysql_ping(connection))
 	{
-		WRITE_INFO_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT alive.Attempt to reconnect it......", facility_name);
+		WRITE_INFO("Thread[%s]=> The connection is NOT alive.Attempt to reconnect it......", facility_name);
 // Select the database
 		if (mysql_select_db(connection, database))
 		{
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_select_db() fails, due to: %s", facility_name, mysql_error(connection));
+			WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_select_db() fails, due to: %s", facility_name, mysql_error(connection));
 			return MSG_DUMPER_FAILURE_MYSQL;
 		}
 	}
@@ -170,17 +170,17 @@ unsigned short MsgDumperSql::open_device()
 
 // Create the table in the database...
 		snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_create_table, current_time_string);
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to create table[sql%s] by command: %s", facility_name, current_time_string, cmd_buf);
+		WRITE_DEBUG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to create table[sql%s] by command: %s", facility_name, current_time_string, cmd_buf);
 		if(mysql_query(connection, cmd_buf) != 0)
 		{
 			int error = mysql_errno(connection);
 			if (error != ER_TABLE_EXISTS_ERROR)
 			{
-				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %d, %s", facility_name, error, mysql_error(connection));
+				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %d, %s", facility_name, error, mysql_error(connection));
 				return MSG_DUMPER_FAILURE_MYSQL;
 			}
 			else
-				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The sql%s has already existed", facility_name, current_time_string);
+				WRITE_DEBUG("Thread[%s]=> The sql%s has already existed", facility_name, current_time_string);
 		}
 		table_created = true;
 	}
@@ -198,7 +198,7 @@ unsigned short MsgDumperSql::close_device()
 
 unsigned short MsgDumperSql::initialize(const char* current_working_directory, void* config)
 {
-	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperSql object......");
+	WRITE_DEBUG("Initialize the MsgDumperSql object......");
 
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "sql");
@@ -220,8 +220,8 @@ unsigned short MsgDumperSql::initialize(const char* current_working_directory, v
 
 unsigned short MsgDumperSql::deinitialize()
 {
-	WRITE_DEBUG_SYSLOG("DeInitialize the MsgDumperSql object......");
-	WRITE_DEBUG_SYSLOG("Release the parameters connected to the MySQL database server");
+	WRITE_DEBUG("DeInitialize the MsgDumperSql object......");
+	WRITE_DEBUG("Release the parameters connected to the MySQL database server");
 	if(connection != NULL)  // 关闭数据库连接
 	{
 		mysql_close(connection);
@@ -235,10 +235,10 @@ unsigned short MsgDumperSql::write_msg(PMSG_CFG msg_cfg)
 {
 // Write the message into SQL database
 	snprintf(cmd_buf, MSG_DUMPER_LONG_STRING_SIZE, format_cmd_insert_into_table, current_time_string, msg_cfg->date_str, msg_cfg->time_str, msg_cfg->msg_dumper_severity, msg_cfg->data);
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to Write the message[%s] to MySQL by command: %s", facility_name, msg_cfg->to_string(), cmd_buf);
+	WRITE_DEBUG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to Write the message[%s] to MySQL by command: %s", facility_name, msg_cfg->to_string(), cmd_buf);
 	if(mysql_query(connection, cmd_buf) != 0)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %s", facility_name, mysql_error(connection));
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %s", facility_name, mysql_error(connection));
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 

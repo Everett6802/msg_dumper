@@ -42,7 +42,7 @@ unsigned short MsgDumperSyslog::get_facility_number()
 		}
 	}
 
-	WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the facility number: %s", syslog_facility_name);
+	WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the facility number: %s", syslog_facility_name);
 	return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 }
 
@@ -50,7 +50,7 @@ unsigned short MsgDumperSyslog::parse_config_param(const char* param_title, cons
 {
 	if (param_title == NULL || param_content == NULL)
 	{
-		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
+		WRITE_ERROR("Invalid argument: param_title/param_content");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 	static const char* title[] = {"facility_name"};
@@ -76,11 +76,11 @@ unsigned short MsgDumperSyslog::parse_config_param(const char* param_title, cons
 				memset(param_member_variable, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 				memcpy(param_member_variable, param_content, param_content_len);
 				found = true;
-				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Update parameter: %s=%s", param_title, param_content);
+				WRITE_DEBUG("Update parameter: %s=%s", param_title, param_content);
 			}
 			else
 			{
-				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter: %s=%s", param_title, param_content);
+				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter: %s=%s", param_title, param_content);
 				ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 			}
 			break;
@@ -89,26 +89,20 @@ unsigned short MsgDumperSyslog::parse_config_param(const char* param_title, cons
 // If the title is NOT found...
 	if (!found)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
+		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
 		ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 
 	return ret;
 }
 
-unsigned short MsgDumperSyslog::open_device()
-{
-	return MSG_DUMPER_SUCCESS;
-}
+unsigned short MsgDumperSyslog::open_device(){return MSG_DUMPER_SUCCESS;}
 
-unsigned short MsgDumperSyslog::close_device()
-{
-	return MSG_DUMPER_SUCCESS;
-}
+unsigned short MsgDumperSyslog::close_device(){return MSG_DUMPER_SUCCESS;}
 
 unsigned short MsgDumperSyslog::initialize(const char* current_working_directory, void* config)
 {
-	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperSyslog object......");
+	WRITE_DEBUG("Initialize the MsgDumperSyslog object......");
 
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "syslog");
@@ -125,7 +119,7 @@ unsigned short MsgDumperSyslog::initialize(const char* current_working_directory
 
 unsigned short MsgDumperSyslog::deinitialize()
 {
-	WRITE_DEBUG_SYSLOG("DeInitialize the MsgDumperSyslog object......");
+	WRITE_DEBUG("DeInitialize the MsgDumperSyslog object......");
 
 	return MSG_DUMPER_SUCCESS;
 }

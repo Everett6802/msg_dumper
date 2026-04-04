@@ -25,13 +25,13 @@ MsgDumperCom::~MsgDumperCom()
 
 unsigned short MsgDumperCom::try_open_comport()
 {
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Open the COM port file: %s", port_name);
+	WRITE_DEBUG("Open the COM port file: %s", port_name);
 	int fd_comport = open(port_name, O_RDWR | O_NOCTTY);
 
 /* Error Handling */
 	if (tcgetattr(fd_comport, &tty_new) != 0)
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to get COM port attribute, due to %s", strerror(errno));
+		WRITE_DEBUG("Fail to get COM port attribute, due to %s", strerror(errno));
 		return MSG_DUMPER_FAILURE_COM_PORT;
 	}
 
@@ -59,7 +59,7 @@ unsigned short MsgDumperCom::try_open_comport()
 	tcflush(fd_comport, TCIFLUSH);
 	if(tcsetattr(fd_comport, TCSANOW, &tty_new) != 0)
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to set COM port attribute, due to %s", strerror(errno));
+		WRITE_DEBUG("Fail to set COM port attribute, due to %s", strerror(errno));
 		return MSG_DUMPER_FAILURE_COM_PORT;
 	}
 	close(fd_comport);
@@ -82,7 +82,7 @@ unsigned short MsgDumperCom::transform_com_port_speed(speed_t& com_port_speed)co
 		}
 	}
 
-	WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Un-support COM port speed: %s", port_speed);
+	WRITE_ERROR("Un-support COM port speed: %s", port_speed);
 	return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 }
 
@@ -90,7 +90,7 @@ unsigned short MsgDumperCom::parse_config_param(const char* param_title, const c
 {
 	if (param_title == NULL || param_content == NULL)
 	{
-		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
+		WRITE_ERROR("Invalid argument: param_title/param_content");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 	static const char* title[] = {"port_name", "port_speed"};
@@ -119,11 +119,11 @@ unsigned short MsgDumperCom::parse_config_param(const char* param_title, const c
 				memset(param_member_variable, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 				memcpy(param_member_variable, param_content, param_content_len);
 				found = true;
-				WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Update parameter: %s=%s", param_title, param_content);
+				WRITE_DEBUG("Update parameter: %s=%s", param_title, param_content);
 			}
 			else
 			{
-				WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter: %s=%s", param_title, param_content);
+				WRITE_ERROR("Incorrect parameter: %s=%s", param_title, param_content);
 				ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 			}
 			break;
@@ -132,7 +132,7 @@ unsigned short MsgDumperCom::parse_config_param(const char* param_title, const c
 // If the title is NOT found...
 	if (!found)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
+		WRITE_ERROR("Incorrect parameter, fail to find the title: %s", param_title);
 		ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 
@@ -145,14 +145,14 @@ unsigned short MsgDumperCom::open_device()
 	fd_com = open(port_name, O_RDWR | O_NOCTTY);
 	if (fd_com == -1)
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to open COM port, due to %s", strerror(errno));
+		WRITE_DEBUG("Fail to open COM port, due to %s", strerror(errno));
 		return MSG_DUMPER_FAILURE_COM_PORT;
 	}
 
 // Set the configuration
 	if(tcsetattr(fd_com, TCSANOW, &tty_new) != 0)
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to set COM port attribute, due to %s", strerror(errno));
+		WRITE_DEBUG("Fail to set COM port attribute, due to %s", strerror(errno));
 		return MSG_DUMPER_FAILURE_COM_PORT;
 	}
 
@@ -173,7 +173,7 @@ unsigned short MsgDumperCom::close_device()
 
 unsigned short MsgDumperCom::initialize(const char* current_working_directory, void* config)
 {
-	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperCom object......");
+	WRITE_DEBUG("Initialize the MsgDumperCom object......");
 
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "com");
@@ -190,7 +190,7 @@ unsigned short MsgDumperCom::initialize(const char* current_working_directory, v
 
 unsigned short MsgDumperCom::deinitialize()
 {
-	WRITE_DEBUG_SYSLOG("DeInitialize the MsgDumperCom object......");
+	WRITE_DEBUG("DeInitialize the MsgDumperCom object......");
 
 	return close_device();
 }
@@ -199,17 +199,17 @@ unsigned short MsgDumperCom::write_msg(PMSG_CFG msg_cfg)
 {
 	if (fd_com == 0)
 	{
-		WRITE_ERR_SYSLOG("The file handle does NOT connect to serial port");
+		WRITE_ERROR("The file handle does NOT connect to serial port");
 		return MSG_DUMPER_FAILURE_INCORRECT_OPERATION;
 	}
 
 // Write the message into the log file
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to COM port", msg_cfg->to_string());
+	WRITE_DEBUG("Write the message[%s] to COM port", msg_cfg->to_string());
 	const char* msg_cfg_string = msg_cfg->to_string();
 	int acutal_len = write(fd_com, msg_cfg_string, strlen(msg_cfg_string));
 	if (acutal_len == -1)
 	{
-		WRITE_ERR_SYSLOG("Fail to write the data to the serial port...");
+		WRITE_ERROR("Fail to write the data to the serial port...");
 		return MSG_DUMPER_FAILURE_UNKNOWN ;
 	}
 

@@ -53,17 +53,17 @@ unsigned short MsgDumperLog::create_log_folder()
 // Check if the log folder exists or not
 	if (stat(log_folderpath, &st) == -1)
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Try to create a log folder: %s", log_folderpath);
+		WRITE_DEBUG("Try to create a log folder: %s", log_folderpath);
 // If not, create a new folder
 		if (mkdir(log_folderpath, 0744) != 0)
 		{
-			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to create a log folder[%s], due to %s", log_folderpath, strerror(errno));
+			WRITE_DEBUG("Fail to create a log folder[%s], due to %s", log_folderpath, strerror(errno));
 			return MSG_DUMPER_FAILURE_UNKNOWN;
 		}
 	}
 	else
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "The log folder[%s] has already existed", log_folderpath);
+		WRITE_DEBUG("The log folder[%s] has already existed", log_folderpath);
 	}
 
 	return MSG_DUMPER_SUCCESS;
@@ -73,7 +73,7 @@ unsigned short MsgDumperLog::parse_config_param(const char* param_title, const c
 {
 	if (param_title == NULL || param_content == NULL)
 	{
-		WRITE_ERR_SYSLOG("Invalid argument: param_title/param_content");
+		WRITE_ERROR("Invalid argument: param_title/param_content");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 	static const char* title[] = {"log_folder", "log_rotation"};
@@ -96,7 +96,7 @@ unsigned short MsgDumperLog::parse_config_param(const char* param_title, const c
 				log_rotation_type = (LogRotationType)atoi(param_content);
 				if (log_rotation_type < 0 || log_rotation_type >= LOG_ROTATION_SIZE)
 				{
-					WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, unknown log rotation type: %s", param_content);
+					WRITE_ERROR("Incorrect parameter, unknown log rotation type: %s", param_content);
 					return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 				}
 				break;
@@ -110,7 +110,7 @@ unsigned short MsgDumperLog::parse_config_param(const char* param_title, const c
 // If the title is NOT found...
 	if (!found)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
+		WRITE_ERROR("Incorrect parameter, fail to find the title: %s", param_title);
 		ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 
@@ -120,11 +120,11 @@ unsigned short MsgDumperLog::parse_config_param(const char* param_title, const c
 unsigned short MsgDumperLog::open_device()
 {
 // Open the file
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Open the log file: %s", log_filename);
+	WRITE_DEBUG("Open the log file: %s", log_filename);
 	fp_log = fopen(log_filepath, "a+");
 	if (fp_log == NULL)
 	{
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "open() fails, due to: %s", strerror(errno));
+		WRITE_DEBUG("open() fails, due to: %s", strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 
@@ -145,19 +145,19 @@ unsigned short MsgDumperLog::close_device()
 
 unsigned short MsgDumperLog::initialize(const char* current_working_directory, void* config)
 {
-	WRITE_DEBUG_SYSLOG("Initialize the MsgDumperLog object......");
+	WRITE_DEBUG("Initialize the MsgDumperLog object......");
 
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "log");
 	if (CHECK_FAILURE(ret))
 		return ret;
 // Modify the member variables after parsing the config
-	snprintf(log_folderpath, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", current_working_directory, log_foldername);
+	safe_snprintf(&log_folderpath, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", current_working_directory, log_foldername);
 	// printf("log_folderpath: %s, %d\n", log_folderpath, strlen(log_folderpath));
-	snprintf(log_filepath, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", log_folderpath, DEF_LOG_FILENAME);
+	safe_snprintf(&log_filepath, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", log_folderpath, DEF_LOG_FILENAME);
 	// printf("log_filepath: %s, %d\n", log_filepath, strlen(log_filepath));
-	snprintf(log_tar_filepath_format, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", log_folderpath, DEF_LOG_TAR_FILENAME_FORMAT);
-	snprintf(log_tar_file_count_cmd, MSG_DUMPER_LONG_STRING_SIZE, "ls -al %s | grep tar.gz | wc -l", log_folderpath);
+	safe_snprintf(&log_tar_filepath_format, MSG_DUMPER_LONG_STRING_SIZE, "%s/%s", log_folderpath, DEF_LOG_TAR_FILENAME_FORMAT);
+	safe_snprintf(&log_tar_file_count_cmd, MSG_DUMPER_LONG_STRING_SIZE, "ls -al %s | grep tar.gz | wc -l", log_folderpath);
 // Create the log folder
 	ret = create_log_folder();
 	if (CHECK_FAILURE(ret))
@@ -167,14 +167,14 @@ unsigned short MsgDumperLog::initialize(const char* current_working_directory, v
 #ifdef DEBUG_ROTATE
 	fprintf(stderr, "Rotation Count: %d\n", log_file_rotate_count);
 #endif
-	WRITE_DEBUG_FORMAT_SYSLOG("The log file rotation count: %d", log_file_rotate_count);
+	WRITE_DEBUG("The log file rotation count: %d", log_file_rotate_count);
 
 	return MSG_DUMPER_SUCCESS;
 }
 
 unsigned short MsgDumperLog::deinitialize()
 {
-	WRITE_DEBUG_SYSLOG("DeInitialize the MsgDumperLog object......");
+	WRITE_DEBUG("DeInitialize the MsgDumperLog object......");
 
 	return close_device();
 }
@@ -209,7 +209,7 @@ unsigned short MsgDumperLog::reset_log_file_content()
 #endif
     if (!check_log_file_exist())
     {
-    	WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "The log file[%s] does NOT exist", log_filepath);
+    	WRITE_ERROR(MSG_DUMPER_LONG_STRING_SIZE, "The log file[%s] does NOT exist", log_filepath);
     	return MSG_DUMPER_FAILURE_NOT_FOUND;
     }
     unsigned short ret = MSG_DUMPER_SUCCESS;
@@ -233,7 +233,7 @@ unsigned short MsgDumperLog::get_log_tar_filename(int index, string& log_tar_fil
 // log tar index range [1, log_file_rotate_amount]
 	if (index < 1 || index > log_file_rotate_amount)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log rotation index[%d] is Out of Range [0, %d)", index, log_file_rotate_amount);
+		WRITE_ERROR("The log rotation index[%d] is Out of Range [0, %d)", index, log_file_rotate_amount);
 		return MSG_DUMPER_FAILURE_OUT_OF_RANGE;
 	}
 	static char log_tar_filename_tmp[MSG_DUMPER_STRING_SIZE];
@@ -247,7 +247,7 @@ unsigned short MsgDumperLog::get_log_tar_filepath(int index, string& log_tar_fil
 // log tar index range [1, log_file_rotate_amount]
 	if (index < 1 || index > log_file_rotate_amount)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "The log rotation index[%d] is Out of Range [0, %d)", index, log_file_rotate_amount);
+		WRITE_ERROR("The log rotation index[%d] is Out of Range [0, %d)", index, log_file_rotate_amount);
 		return MSG_DUMPER_FAILURE_OUT_OF_RANGE;
 	}
 	static char log_tar_filepath_tmp[MSG_DUMPER_LONG_STRING_SIZE];
@@ -261,14 +261,14 @@ unsigned short MsgDumperLog::calculate_log_tar_file_count()const
 	FILE *fp = popen(log_tar_file_count_cmd, "r");
 	if (fp == NULL)
 	{
-		WRITE_ERR_FORMAT_SYSLOG("popen() fails, due to: %s", cmd, strerror(errno));
+		WRITE_ERROR("popen() fails, due to: %s", cmd, strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 // Caution: Nothing to read
 	static char buf[MSG_DUMPER_SHORT_STRING_SIZE];
 	if(fgets(buf, MSG_DUMPER_SHORT_STRING_SIZE, fp) == NULL) 
 	{
-		WRITE_ERR_FORMAT_SYSLOG("fgets() fails, due to: %s", cmd, strerror(errno));
+		WRITE_ERROR("fgets() fails, due to: %s", cmd, strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 	pclose(fp);
@@ -307,7 +307,7 @@ unsigned short MsgDumperLog::rotate_log_tar_file()
 #endif
 		if (rename(old_log_tar_filepath.c_str(), new_log_tar_filepath.c_str()) == -1)
 		{
-			WRITE_ERR_FORMAT_SYSLOG("rename() fails, due to: %s", cmd, strerror(errno));
+			WRITE_ERROR("rename() fails, due to: %s", cmd, strerror(errno));
 			return MSG_DUMPER_FAILURE_SYSTEM_API;
 		}
     }
@@ -348,7 +348,7 @@ unsigned short MsgDumperLog::compress_log_file(const char* filename, const char*
 #endif
 	if (chdir(log_folderpath) == -1)
 	{
-		WRITE_ERR_FORMAT_SYSLOG("chdir() fails, due to: %s", strerror(errno));
+		WRITE_ERROR("chdir() fails, due to: %s", strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;		
 	}
 	FILE* fp_cmd = NULL;
@@ -360,7 +360,7 @@ unsigned short MsgDumperLog::compress_log_file(const char* filename, const char*
 	fp_cmd = popen(cmd, "r");
 	if (fp_cmd == NULL)
 	{
-		WRITE_ERR_FORMAT_SYSLOG("The command[%s] fails, due, to: %s", cmd, strerror(errno));
+		WRITE_ERROR("The command[%s] fails, due, to: %s", cmd, strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 	pclose(fp_cmd);
@@ -373,20 +373,20 @@ unsigned short MsgDumperLog::compress_log_file(const char* filename, const char*
 	fp_cmd = popen(cmd, "r");
 	if (fp_cmd == NULL)
 	{
-		WRITE_ERR_FORMAT_SYSLOG("The command[%s] fails, due, to: %s", cmd, strerror(errno));
+		WRITE_ERROR("The command[%s] fails, due, to: %s", cmd, strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 	static char buf[BUF_SIZE];
 	if (fgets(buf, BUF_SIZE, fp_cmd) == NULL)
 	{
-		WRITE_ERR_FORMAT_SYSLOG("fgets() due, to: %s", strerror(errno));
+		WRITE_ERROR("fgets() due, to: %s", strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 	pclose(fp_cmd);
 	fp_cmd = NULL;
 	if (atoi(buf) != 1)
 	{
-		WRITE_ERR_FORMAT_SYSLOG("The result[%s] is incorrect from the cmd: %s", buf, cmd);
+		WRITE_ERROR("The result[%s] is incorrect from the cmd: %s", buf, cmd);
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 	return MSG_DUMPER_SUCCESS;
@@ -401,7 +401,7 @@ unsigned short MsgDumperLog::uncompress_log_tar_file(const char* tar_filename)co
 // Change the working folder
 	if (chdir(log_folderpath) == -1)
 	{
-		WRITE_ERR_FORMAT_SYSLOG("chdir() fails, due, to: %s", strerror(errno));
+		WRITE_ERROR("chdir() fails, due, to: %s", strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;		
 	}
 	FILE* fp_cmd = NULL;
@@ -410,7 +410,7 @@ unsigned short MsgDumperLog::uncompress_log_tar_file(const char* tar_filename)co
 	fp_cmd = popen(cmd, "r");
 	if (fp_cmd == NULL)
 	{
-		WRITE_ERR_FORMAT_SYSLOG("The command[%s] fails, due, to: %s", cmd, strerror(errno));
+		WRITE_ERROR("The command[%s] fails, due, to: %s", cmd, strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 	pclose(fp_cmd);
@@ -514,6 +514,6 @@ unsigned short MsgDumperLog::write_msg(PMSG_CFG msg_cfg)
 		&MsgDumperLog::write_msg_log_rotation_timestamp
 	};
 // Write the message into the log file
-	// WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Write the message[%s] to file [%s]", msg_cfg->to_string(), log_filename);
+	// WRITE_DEBUG("Write the message[%s] to file [%s]", msg_cfg->to_string(), log_filename);
 	return (this->*(write_msg_log_func_array[log_rotation_type]))(msg_cfg->to_string());
 }

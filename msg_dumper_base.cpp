@@ -8,7 +8,7 @@ using namespace std;
 const char* MsgDumperBase::CONF_FOLDER_NAME = "conf";
 
 MsgDumperBase::MsgDumperBase() :
-	severity(MSG_DUMPER_SEVIRITY_DEBUG)
+	severity(MSG_DUMPER_SEVERITY_DEBUG)
 {
 	memset(facility_name, 0x0, MSG_DUMPER_SHORT_STRING_SIZE);
 }
@@ -17,7 +17,7 @@ unsigned short MsgDumperBase::generate_current_time_string(char* current_time_st
 {
 	if (current_time_string ==  NULL)
 	{
-		WRITE_ERR_SYSLOG("Invalid argument: current_time_string");
+		WRITE_ERROR("Invalid argument: current_time_string");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 
@@ -35,17 +35,17 @@ unsigned short MsgDumperBase::parse_config(const char* current_working_directory
 {
 	if (current_working_directory == NULL || dev_name == NULL)
 	{
-		WRITE_ERR_SYSLOG("Invalid argument: current_working_directory/dev_name");
+		WRITE_ERROR("Invalid argument: current_working_directory/dev_name");
 		return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 // Open the file
 	char conf_filepath[MSG_DUMPER_STRING_SIZE];
 	snprintf(conf_filepath, MSG_DUMPER_STRING_SIZE, "%s/%s/dumper_param.conf", current_working_directory, CONF_FOLDER_NAME);
-	WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Try to parse the conf file: %s", conf_filepath);
+	WRITE_DEBUG("Try to parse the conf file: %s", conf_filepath);
 	FILE* fp = fopen(conf_filepath, "r");
 	if (fp == NULL)
 	{
-		WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Fail to open the conf file: %s", conf_filepath);
+		WRITE_ERROR("Fail to open the conf file: %s", conf_filepath);
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 
@@ -71,7 +71,7 @@ unsigned short MsgDumperBase::parse_config(const char* current_working_directory
 			if (strncmp(buf, stop_flag, stop_flag_len) == 0)
 				break;
 		}
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Param content: %s", buf);
+		WRITE_DEBUG("Param content: %s", buf);
 		int new_line_pos = -1;
 		int split_pos = -1;
 // Get the config for each line
@@ -93,7 +93,7 @@ unsigned short MsgDumperBase::parse_config(const char* current_working_directory
 		else if (new_line_pos < 0 || split_pos < 0)
 		{
 // Incorrect config! Fail to find the 'new line' character in a specific line
-			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Incorrect config: %s", buf);
+			WRITE_ERROR("Incorrect config: %s", buf);
 			ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 			break;
 		}

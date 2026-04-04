@@ -81,7 +81,7 @@ int main()
 			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "accept() fail, due to: %s", strerror(errno));
 			exit(EXIT_FAILURE);
 		}
-		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "Got a connection request from the remote[%s]......", inet_ntoa(client_address.sin_addr));
+		WRITE_DEBUG("Got a connection request from the remote[%s]......", inet_ntoa(client_address.sin_addr));
 
 // Create a worker thread to receive the data from the remote site
 		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_LONG_STRING_SIZE, "Create another thread to receive the data from the remote[%s]", inet_ntoa(client_address.sin_addr));
@@ -184,7 +184,7 @@ void* client_socket_thread_handler(void* void_param)
 //		pfd.revents = 0;
 
 		int ret = poll(&pfd, 1, 3000); // call poll with a timeout of 3000 ms
-//		WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "poll() return value: %d", ret);
+//		WRITE_DEBUG("poll() return value: %d", ret);
 		if (ret < 0)
 		{
 			WRITE_ERR_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "poll() fail, due to %s", strerror(errno));
@@ -195,7 +195,7 @@ void* client_socket_thread_handler(void* void_param)
 // Read the data from the remote
 			memset(buf, 0x0, sizeof(char) * BUF_SIZE);
 			ret = recv(client_socket, buf, sizeof(char) * BUF_SIZE, /*MSG_PEEK |*/ MSG_DONTWAIT);
-//			WRITE_DEBUG_FORMAT_SYSLOG(MSG_DUMPER_STRING_SIZE, "recv() return value: %d", ret);
+//			WRITE_DEBUG("recv() return value: %d", ret);
 // if result > 0, this means that there is either data available on the socket, or the socket has been closed
 			if (ret == 0)
 			{

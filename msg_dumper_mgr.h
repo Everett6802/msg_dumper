@@ -20,13 +20,13 @@ private:
 	facility_map_type facility_mapping_table;
 
 //	static int facility_name_size;
-	static short facility_flag[];
-	static int facility_flag_size;
+	static short FACILITY_FLAGS[];
+	static int FACILITY_FLAG_SIZE;
 
 	char current_working_directory[MSG_DUMPER_STRING_SIZE];
 	bool is_init;
 	unsigned short dumper_severity_arr[FACILITY_SIZE];
-	unsigned short dumper_facility;
+	unsigned short dumper_facility_flag;
 
 	MsgDumperTimerThread* msg_dumper_thread[FACILITY_SIZE];
 
@@ -38,12 +38,14 @@ public:
 
 	bool can_ignore(unsigned short msg_dumper_severity)const;
 
+	// unsigned short set_severity(unsigned short msg_dumper_severity, unsigned short facility);
+	// unsigned short set_severity_all(unsigned short msg_dumper_severity);
+	// unsigned short set_facility(unsigned short facility);
+	// unsigned short get_severity(unsigned short facility)const;
+	// unsigned short get_facility()const;
+	unsigned short set_severity(unsigned short facility_index, unsigned short severity_index);
+	unsigned short get_severity(unsigned short facility_index, unsigned short& severity_index)const;
 	unsigned short initialize();
-	unsigned short set_severity(unsigned short msg_dumper_severity, unsigned short facility);
-	unsigned short set_severity_all(unsigned short msg_dumper_severity);
-	unsigned short set_facility(unsigned short facility);
-	unsigned short get_severity(unsigned short facility)const;
-	unsigned short get_facility()const;
 	unsigned short write_msg(unsigned short msg_dumper_severity, const char* msg);
 	unsigned short deinitialize();
 };

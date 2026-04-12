@@ -54,11 +54,15 @@ unsigned short msg_dumper_initialize();
 // unsigned short msg_dumper_set_facility(unsigned short facility);
 // unsigned short msg_dumper_get_severity(unsigned short facility);
 // unsigned short msg_dumper_get_facility();
+unsigned short msg_dumper_set_severity_index(const char* facility, int severity_index);
 unsigned short msg_dumper_set_severity(const char* facility, const char* severity);
 // severity must be released outside the function
+unsigned short msg_dumper_get_severity_index(const char* facility, int* severity_index);
 unsigned short msg_dumper_get_severity(const char* facility, char** severity);
-unsigned short msg_dumper_write_msg(unsigned short linux_severity, const char* msg);
-unsigned short msg_dumper_write_format_msg(unsigned short linux_severity, const char* fmt, ...);
+// unsigned short msg_dumper_write_msg(unsigned short linux_severity, const char* msg);
+// unsigned short msg_dumper_write_format_msg(unsigned short linux_severity, const char* fmt, ...);
+unsigned short msg_dumper_write_msg(int severity_index, const char* msg);
+unsigned short msg_dumper_write_format_msg(int severity_index, const char* fmt, ...);
 unsigned short msg_dumper_deinitialize();
 const char* msg_dumper_get_error_description();
 
@@ -71,10 +75,14 @@ typedef unsigned short (*FP_msg_dumper_initialize)();
 // typedef unsigned short (*FP_msg_dumper_set_facility)(unsigned short facility);
 // typedef unsigned short (*FP_msg_dumper_get_severity)(unsigned short facility);
 // typedef unsigned short (*FP_msg_dumper_get_facility)();
+typedef unsigned short (*FP_msg_dumper_set_severity_index)(const char* facility, int severity_index);
 typedef unsigned short (*FP_msg_dumper_set_severity)(const char* facility, const char* severity);
+typedef unsigned short (*FP_msg_dumper_get_severity_index)(const char* facility, int* severity_index);
 typedef unsigned short (*FP_msg_dumper_get_severity)(const char* facility, char** severity);
-typedef unsigned short (*FP_msg_dumper_write_msg)(unsigned short severity, const char* msg);
-typedef unsigned short (*FP_msg_dumper_write_format_msg)(unsigned short severity, const char* fmt, ...);
+// typedef unsigned short (*FP_msg_dumper_write_msg)(unsigned short severity, const char* msg);
+// typedef unsigned short (*FP_msg_dumper_write_format_msg)(unsigned short severity, const char* fmt, ...);
+typedef unsigned short (*FP_msg_dumper_write_msg)(int severity_index, const char* msg);
+typedef unsigned short (*FP_msg_dumper_write_format_msg)(int severity_index, const char* fmt, ...);
 typedef unsigned short (*FP_msg_dumper_deinitialize)();
 typedef const char* (*FP_msg_dumper_get_error_description)();
 

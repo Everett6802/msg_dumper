@@ -31,11 +31,16 @@ private:
 	unsigned long log_file_rotate_filesize;
 	int rotate_check_count;
 
-	char log_folderpath[MSG_DUMPER_LONG_STRING_SIZE];
-	char log_filepath[MSG_DUMPER_LONG_STRING_SIZE];
-	char log_tar_filename_format[MSG_DUMPER_STRING_SIZE];
-	char log_tar_filepath_format[MSG_DUMPER_LONG_STRING_SIZE];
-	char log_tar_file_count_cmd[MSG_DUMPER_LONG_STRING_SIZE];
+	// char log_folderpath[MSG_DUMPER_LONG_STRING_SIZE];
+	// char log_filepath[MSG_DUMPER_LONG_STRING_SIZE];
+	// char log_tar_filename_format[MSG_DUMPER_STRING_SIZE];
+	// char log_tar_filepath_format[MSG_DUMPER_LONG_STRING_SIZE];
+	// char log_tar_file_count_cmd[MSG_DUMPER_LONG_STRING_SIZE];
+	char* log_folderpath;
+	char* log_filepath;
+	char* log_tar_filename_format;
+	char* log_tar_filepath_format;
+	char* log_tar_file_count_cmd;
 	FILE* fp_log;
 	int log_file_rotate_count;
 	bool init_log_file_rotate_timestamp;

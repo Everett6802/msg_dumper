@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <cstdarg>
 #include "common.h"
 
 
@@ -48,81 +49,81 @@ const char* error_description[] =
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Functions
-unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity)
-{
-#if 0
-# linux severity
-#define LOG_EMERG       0       /* system is unusable */
-#define LOG_ALERT       1       /* action must be taken immediately */
-#define LOG_CRIT        2       /* critical conditions */
-#define LOG_ERR         3       /* error conditions */
-#define LOG_WARNING     4       /* warning conditions */
-#define LOG_NOTICE      5       /* normal but significant condition */
-#define LOG_INFO        6       /* informational */
-#define LOG_DEBUG       7       /* debug-level messages */
-#endif
-	unsigned short msg_dumper_severity;
-	switch(linux_severity)
-	{
-	case LOG_DEBUG:
-		msg_dumper_severity = MSG_DUMPER_SEVERITY_DEBUG;
-		break;
-	case LOG_INFO:
-		msg_dumper_severity = MSG_DUMPER_SEVERITY_INFO;
-		break;
-	case LOG_WARNING:
-	case LOG_NOTICE:
-		msg_dumper_severity = MSG_DUMPER_SEVERITY_WARN;
-		break;
-	case LOG_EMERG:
-	case LOG_ALERT:
-	case LOG_CRIT:
-	case LOG_ERR:
-		msg_dumper_severity = MSG_DUMPER_SEVERITY_ERROR;
-		break;
-	default:
-		{
-			fprintf(stderr, "%sUnknown linux severity: %d\n", MSG_DUMPER_ERROR_COLOR, linux_severity);
-			throw invalid_argument("Incorrect linux severity");
-		}
-		break;
-	}
-	// fprintf(stderr, "transform_linux_severity_to_msg_dumper_severity linux_severity: %d, msg_dumper_severity: %d\n", linux_severity, msg_dumper_severity);
-	return msg_dumper_severity;
-}
+// unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity)
+// {
+// #if 0
+// # linux severity
+// #define LOG_EMERG       0       /* system is unusable */
+// #define LOG_ALERT       1       /* action must be taken immediately */
+// #define LOG_CRIT        2       /* critical conditions */
+// #define LOG_ERR         3       /* error conditions */
+// #define LOG_WARNING     4       /* warning conditions */
+// #define LOG_NOTICE      5       /* normal but significant condition */
+// #define LOG_INFO        6       /* informational */
+// #define LOG_DEBUG       7       /* debug-level messages */
+// #endif
+// 	unsigned short msg_dumper_severity;
+// 	switch(linux_severity)
+// 	{
+// 	case LOG_DEBUG:
+// 		msg_dumper_severity = MSG_DUMPER_SEVERITY_DEBUG;
+// 		break;
+// 	case LOG_INFO:
+// 		msg_dumper_severity = MSG_DUMPER_SEVERITY_INFO;
+// 		break;
+// 	case LOG_WARNING:
+// 	case LOG_NOTICE:
+// 		msg_dumper_severity = MSG_DUMPER_SEVERITY_WARN;
+// 		break;
+// 	case LOG_EMERG:
+// 	case LOG_ALERT:
+// 	case LOG_CRIT:
+// 	case LOG_ERR:
+// 		msg_dumper_severity = MSG_DUMPER_SEVERITY_ERROR;
+// 		break;
+// 	default:
+// 		{
+// 			fprintf(stderr, "%sUnknown linux severity: %d\n", MSG_DUMPER_ERROR_COLOR, linux_severity);
+// 			throw invalid_argument("Incorrect linux severity");
+// 		}
+// 		break;
+// 	}
+// 	// fprintf(stderr, "transform_linux_severity_to_msg_dumper_severity linux_severity: %d, msg_dumper_severity: %d\n", linux_severity, msg_dumper_severity);
+// 	return msg_dumper_severity;
+// }
 
-unsigned short transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity)
-{
-#if 0
-static const unsigned short MSG_DUMPER_SEVERITY_ERROR = 0;
-static const unsigned short MSG_DUMPER_SEVERITY_WARN = 1;
-static const unsigned short MSG_DUMPER_SEVERITY_INFO = 2;
-static const unsigned short MSG_DUMPER_SEVERITY_DEBUG = 3;
-#endif
-	unsigned short linux_severity;
-	switch(msg_dumper_severity)
-	{
-	case MSG_DUMPER_SEVERITY_DEBUG:
-		linux_severity = LOG_DEBUG;
-		break;
-	case MSG_DUMPER_SEVERITY_INFO:
-		linux_severity = LOG_INFO;
-		break;
-	case MSG_DUMPER_SEVERITY_WARN:
-		linux_severity = LOG_WARNING;
-		break;
-	case MSG_DUMPER_SEVERITY_ERROR:
-		linux_severity = LOG_ERR;
-		break;
-	default:
-		{
-			fprintf(stderr, "%sUnknown msg dumper severity: %d\n", MSG_DUMPER_ERROR_COLOR, msg_dumper_severity);
-			throw invalid_argument("Incorrect msg dumper severity");
-		}
-		break;
-	}
-	return linux_severity;
-}
+// unsigned short transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity)
+// {
+// #if 0
+// static const unsigned short MSG_DUMPER_SEVERITY_ERROR = 0;
+// static const unsigned short MSG_DUMPER_SEVERITY_WARN = 1;
+// static const unsigned short MSG_DUMPER_SEVERITY_INFO = 2;
+// static const unsigned short MSG_DUMPER_SEVERITY_DEBUG = 3;
+// #endif
+// 	unsigned short linux_severity;
+// 	switch(msg_dumper_severity)
+// 	{
+// 	case MSG_DUMPER_SEVERITY_DEBUG:
+// 		linux_severity = LOG_DEBUG;
+// 		break;
+// 	case MSG_DUMPER_SEVERITY_INFO:
+// 		linux_severity = LOG_INFO;
+// 		break;
+// 	case MSG_DUMPER_SEVERITY_WARN:
+// 		linux_severity = LOG_WARNING;
+// 		break;
+// 	case MSG_DUMPER_SEVERITY_ERROR:
+// 		linux_severity = LOG_ERR;
+// 		break;
+// 	default:
+// 		{
+// 			fprintf(stderr, "%sUnknown msg dumper severity: %d\n", MSG_DUMPER_ERROR_COLOR, msg_dumper_severity);
+// 			throw invalid_argument("Incorrect msg dumper severity");
+// 		}
+// 		break;
+// 	}
+// 	return linux_severity;
+// }
 
 void convert_str2upper(char *str)
 {
@@ -144,6 +145,32 @@ void convert_str2lower(char *str)
     }
 }
 
+int get_facility_index_from_string(const char* facility)
+{
+	if (facility == NULL)
+        throw invalid_argument("facility should NOT be NULL");
+    int facility_index;
+    for (; facility_index < MSG_DUMPER_FACILITY_DESC_LEN ; facility_index++)
+    {
+        if (strcasecmp(facility, MSG_DUMPER_FACILITY_DESC[facility_index]) == 0)
+            return facility_index;
+    }
+    return -1;    
+}
+
+int get_severity_index_from_string(const char* severity)
+{
+	if (severity == NULL)
+        throw invalid_argument("severity should NOT be NULL");
+    int severity_index;
+    for (; severity_index < MSG_DUMPER_SEVERITY_DESC_LEN ; severity_index++)
+    {
+        if (strcasecmp(severity, MSG_DUMPER_SEVERITY_DESC[severity_index]) == 0)
+            return severity_index;
+    }
+    return -1;
+}
+
 unsigned short safe_snprintf(char **out_buf, size_t init_size, const char *fmt, ...)
 {
 	if (out_buf == NULL || fmt == NULL || init_size == 0)
@@ -152,7 +179,7 @@ unsigned short safe_snprintf(char **out_buf, size_t init_size, const char *fmt, 
     va_start(args, fmt);
     char *buf = (char*)malloc(init_size);
     if (buf == NULL) 
-	{
+    {
         va_end(args);
         return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
     }
@@ -160,20 +187,21 @@ unsigned short safe_snprintf(char **out_buf, size_t init_size, const char *fmt, 
     va_end(args);
     if (ret < 0) 
 	{
+// 通常代表：格式化失敗（format error 或 encoding error）
+// 1. format string 和參數不匹配（最常見）--> 例: vsnprintf(buf, size, "%d", "hello"); %d 但給 char*
+// 2. format string 本身錯誤）--> 例: vsnprintf(buf, size, "%q", 123); 非法格式
+// * buffer 太小 不是 ret < 0 的原因 
         free(buf);
-        return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
+        return MSG_DUMPER_FAILURE_SYSTEM_API;
     }
 	else if ((size_t)ret >= init_size) 
 	{
-        size_t needed = ret + 1;
-        char *new_buf = (char*)realloc(buf, needed);
-        if (!new_buf) 
-		{
-            free(buf);
+        size_t new_size = ret + 1;
+        char *new_buf = (char*)realloc(buf, new_size);
+        if (new_buf == NULL) 
             return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
-        }
         va_start(args, fmt);
-        vsnprintf(new_buf, needed, fmt, args);
+        vsnprintf(new_buf, new_size, fmt, args);
         va_end(args);
         buf = new_buf;
     }
@@ -183,6 +211,93 @@ unsigned short safe_snprintf(char **out_buf, size_t init_size, const char *fmt, 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Class
+
+ScopedCStr::ScopedCStr() : 
+	cstr(NULL),
+    capacity(0)
+{
+
+}
+
+ScopedCStr::~ScopedCStr()
+{
+	if (cstr != NULL)
+	{
+        free(cstr);
+        cstr = NULL;
+    }
+    capacity = 0;
+}
+
+ScopedCStr::ScopedCStr(ScopedCStr&& other) noexcept
+    : cstr(other.cstr), capacity(other.capacity)
+{
+    other.cstr = NULL;
+    other.capacity = 0;
+}
+
+ScopedCStr& ScopedCStr::operator=(ScopedCStr&& other) noexcept
+{
+    if (this != &other)
+    {
+        free(cstr);
+        cstr = other.cstr;
+        capacity = strlen(cstr);
+        other.cstr = NULL;
+        other.capacity = 0;
+    }
+    return *this;
+}
+
+char* ScopedCStr::release()
+{
+    char* tmp = cstr;
+    cstr = NULL;
+    capacity = 0;
+    return tmp;
+}
+
+unsigned short ScopedCStr::format(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+// 如果還沒有 buffer，先配
+    if (cstr == NULL)
+    {
+        capacity = MSG_DUMPER_STRING_SIZE;
+        cstr = (char*)malloc(capacity);
+        if (!cstr)
+        {
+            va_end(args);
+            return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
+        }
+    }
+// 嘗試寫入
+    int ret = vsnprintf(cstr, capacity, fmt, args);
+    va_end(args);
+// 通常代表：格式化失敗（format error 或 encoding error）
+// 1. format string 和參數不匹配（最常見）--> 例: vsnprintf(buf, size, "%d", "hello"); %d 但給 char*
+// 2. format string 本身錯誤）--> 例: vsnprintf(buf, size, "%q", 123); 非法格式
+// * buffer 太小 不是 ret < 0 的原因 
+    if (ret < 0)
+        return MSG_DUMPER_FAILURE_SYSTEM_API;
+    else if ((size_t)ret >= capacity)
+    {
+// 如果不夠大 → realloc
+        size_t new_capacity = ret + 1;
+        char* new_buf = (char*)realloc(cstr, new_capacity);
+        if (!new_buf)
+            return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
+        cstr = new_buf;
+        capacity = new_capacity;
+        va_start(args, fmt);
+        vsnprintf(cstr, capacity, fmt, args);
+        va_end(args);
+    }
+    return MSG_DUMPER_SUCCESS;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 
 MsgCfg::MsgCfg(const time_t& new_timep, unsigned short new_msg_dumper_severity, const char* new_data)
 {
@@ -206,42 +321,14 @@ const char* MsgCfg::to_string()
 		int time_str_len = strlen(time_str);
 		int severity_desc_len = strlen(MSG_DUMPER_SEVERITY_DESC[msg_dumper_severity]);
 		int title_len = date_str_len + time_str_len + severity_desc_len + 6;
-		format_message = new char[title_len + MSG_DUMPER_LONG_STRING_SIZE];
-		if (format_message == NULL)
-		{
-			assert(0 && "Fail to allocate the format_message");
-			return NULL;
-		}
-		snprintf(format_message, MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %s] %s\n", date_str, time_str, MSG_DUMPER_SEVERITY_DESC[msg_dumper_severity], data);
+		// format_message = new char[title_len + MSG_DUMPER_LONG_STRING_SIZE];
+		// if (format_message == NULL)
+		// {
+		// 	assert(0 && "Fail to allocate the format_message");
+		// 	return NULL;
+		// }
+		// snprintf(format_message, MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %s] %s\n", date_str, time_str, MSG_DUMPER_SEVERITY_DESC[msg_dumper_severity], data);
+		safe_snprintf(&format_message, title_len + MSG_DUMPER_LONG_STRING_SIZE, "[%s %s %s] %s\n", date_str, time_str, MSG_DUMPER_SEVERITY_DESC[msg_dumper_severity], data);
 	}
 	return format_message;
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-ScopedCStr::ScopedCStr() : 
-	cstr(NULL) 
-{
-
-}
-
-ScopedCStr::~ScopedCStr()
-{
-	if (cstr != NULL)
-	{
-        free(cstr);
-        cstr = NULL;
-    }
-}
-
-char* ScopedCStr::release()
-{
-	char *tmp = NULL;
-	if (cstr != NULL)
-	{
-		tmp = cstr;
-		cstr = NULL;
-	}
-	return tmp;
-}
-

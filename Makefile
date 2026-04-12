@@ -31,7 +31,7 @@ endif
 OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SOURCES))
 # .o 依賴沒有 .d 檔案（include 變動不會 rebuild）
 DEPS := $(OBJS:.o=.d)
-TEST_SOURCES := test_msg_dumper.cpp
+TEST_SOURCES := common.cpp test_msg_dumper.cpp
 # OBJS := $(SOURCES:.cpp=.o)
 TEST_OBJS := $(patsubst %.cpp,$(TEST_DIR)/%.o,$(TEST_SOURCES))
 

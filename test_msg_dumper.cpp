@@ -5,10 +5,11 @@
 #include <errno.h>
 #include <dlfcn.h>
 #include <string>
+#include "common.h"
 #include "msg_dumper.h"
 
 
-#define CHECK_FAILURE(x) ((x != MSG_DUMPER_SUCCESS) ? true : false)
+// #define CHECK_FAILURE(x) ((x != MSG_DUMPER_SUCCESS) ? true : false)
 
 using namespace std;
 
@@ -148,13 +149,14 @@ unsigned short parse_config()
 	static const int BUF_SIZE = 256;
 	char current_working_directory[BUF_SIZE];
 	getcwd(current_working_directory, sizeof(current_working_directory));
-	char config_filename[BUF_SIZE];
-	snprintf(config_filename, BUF_SIZE, "%s/%s/%s", current_working_directory, CONF_FOLDER, CONF_FILENAME);
+	// char config_filename[BUF_SIZE];
+	// snprintf(config_filename, BUF_SIZE, "%s/%s/%s", current_working_directory, CONF_FOLDER, CONF_FILENAME);
+	ScopedCStr scoped_config_filename;
+	safe_snprintf(scoped_config_filename.out(), BUF_SIZE, "%s/%s/%s", current_working_directory, CONF_FOLDER, CONF_FILENAME);
 #ifdef DO_DEBUG
-	printf("Parse the config file: %s\n", config_filename);
+	printf("Parse the config file: %s\n", scoped_config_filename.get());
 #endif
-
-	FILE *fp = fopen(config_filename, "r");
+	FILE *fp = fopen(scoped_config_filename.get(), "r");
 	if (fp == NULL)
 	{
 		fprintf(stderr, "fopen() fails, reason: %s\n", strerror(errno));

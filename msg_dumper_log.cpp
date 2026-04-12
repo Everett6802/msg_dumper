@@ -24,6 +24,11 @@ MsgDumperLog::MsgDumperLog() :
 	log_file_rotate_amount(DEF_LOG_FILE_ROTATE_AMOUNT),
 	log_file_rotate_filesize(DEF_LOG_FILE_MAX_SIZE),
 	rotate_check_count(0),
+	log_folderpath(NULL),
+	log_filepath(NULL),
+	log_tar_filename_format(NULL),
+	log_tar_filepath_format(NULL),
+	log_tar_file_count_cmd(NULL),
 	fp_log(NULL),
 	log_file_rotate_count(0),
 	init_log_file_rotate_timestamp(false)
@@ -37,6 +42,31 @@ MsgDumperLog::MsgDumperLog() :
 
 MsgDumperLog::~MsgDumperLog()
 {
+	if (log_folderpath != NULL)
+	{
+		free(log_folderpath);
+		log_folderpath = NULL;
+	}
+	if (log_filepath != NULL)
+	{
+		free(log_filepath);
+		log_filepath = NULL;
+	}
+	if (log_tar_filename_format != NULL)
+	{
+		free(log_tar_filename_format);
+		log_tar_filename_format = NULL;
+	}
+	if (log_tar_filepath_format != NULL)
+	{
+		free(log_tar_filepath_format);
+		log_tar_filepath_format = NULL;
+	}
+	if (log_tar_file_count_cmd != NULL)
+	{
+		free(log_tar_file_count_cmd);
+		log_tar_file_count_cmd = NULL;
+	}
 	if (fp_log != NULL)
 	{
 		fclose(fp_log);

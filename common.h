@@ -109,18 +109,48 @@ enum MSG_DUMPER_FACILITY{FACILITY_LOG, FACILITY_COM, FACILITY_REMOTE, FACILITY_S
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Function
-unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity);
-unsigned short transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity);
+// unsigned short transform_linux_severity_to_msg_dumper_severity(unsigned short linux_severity);
+// unsigned short transform_msg_dumper_severity_to_linux_severity(unsigned short msg_dumper_severity);
 void convert_str2upper(char *str);
 void convert_str2lower(char *str);
 int get_facility_index_from_string(const char* facility);
 int get_severity_index_from_string(const char* severity);
-const char* get_facility_string_from_index(int facility_index);
-const char* get_severity_string_from_index(int facility_index);
+// const char* get_facility_string_from_index(int facility_index);
+// const char* get_severity_string_from_index(int facility_index);
 unsigned short safe_snprintf(char **out_buf, size_t init_size, const char *fmt, ...);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Class
+
+class ScopedCStr
+{
+private:
+    char *cstr;
+	size_t capacity;
+
+// 禁止 copy constructor and assignment operator
+// private → 外部不能呼叫; 沒有實作 → 就算內部誤用也會 link error
+// 禁止 copy constructor
+    ScopedCStr(const ScopedCStr&);
+// 禁止 assignment operator
+    ScopedCStr& operator=(const ScopedCStr&);
+
+public:
+    ScopedCStr();
+    ~ScopedCStr();
+
+// 允許 move copy constructor and move assignment operator
+    ScopedCStr(ScopedCStr&& other) noexcept;
+    ScopedCStr& operator=(ScopedCStr&& other) noexcept;
+
+    char** out(){return &cstr;}   // 給 safe_snprintf 用
+    const char* get()const{return cstr == NULL ? "" : cstr;}
+	char* release();
+	unsigned short format(const char* fmt, ...);
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
 class MsgCfg
 {
 private:
@@ -138,32 +168,5 @@ public:
 	const char* to_string();
 };
 typedef MsgCfg* PMSG_CFG;
-
-////////////////////////////////////////////////////////////////////////////////////////////
-
-class ScopedCStr
-{
-private:
-    char *cstr;
-
-// 禁止 copy constructor and assignment operator
-// private → 外部不能呼叫; 沒有實作 → 就算內部誤用也會 link error
-// 禁止 copy constructor
-    ScopedCStr(const ScopedCStr&);
-// 禁止 assignment operator
-    ScopedCStr& operator=(const ScopedCStr&);
-
-public:
-    ScopedCStr();
-    ~ScopedCStr();
-
-// 允許 move copy constructor and move assignment operator
-    ScopedCStr(ScopedCStr&& other);
-    ScopedCStr& operator=(ScopedCStr&& other);
-
-    char** out(){return &cstr;}   // 給 safe_snprintf 用
-    const char* get()const{return cstr == NULL ? "" : cstr;}
-	char* release();
-};
 
 #endif

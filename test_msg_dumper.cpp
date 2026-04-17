@@ -18,12 +18,15 @@ const char* CONF_FILENAME = "dumper_param.conf";
 
 void* api_handle;
 FP_msg_dumper_get_version fp_msg_dumper_get_version;
+FP_msg_dumper_set_severity_index fp_msg_dumper_set_severity_index;
 FP_msg_dumper_set_severity fp_msg_dumper_set_severity;
 // FP_msg_dumper_set_facility fp_msg_dumper_set_facility;
+FP_msg_dumper_get_severity_index fp_msg_dumper_get_severity_index;
 FP_msg_dumper_get_severity fp_msg_dumper_get_severity;
 // FP_msg_dumper_get_facility fp_msg_dumper_get_facility;
 FP_msg_dumper_initialize fp_msg_dumper_initialize;
 FP_msg_dumper_write_msg fp_msg_dumper_write_msg;
+FP_msg_dumper_write_format_msg fp_msg_dumper_write_format_msg;
 FP_msg_dumper_deinitialize fp_msg_dumper_deinitialize;
 FP_msg_dumper_get_error_description fp_msg_dumper_get_error_description;
 
@@ -36,6 +39,8 @@ int main()
 {
 // Load library
 	unsigned short ret = MSG_DUMPER_SUCCESS;
+	unsigned char major_version, minor_version, build_version;
+
 	api_handle = dlopen("libmsg_dumper.so", RTLD_NOW);
 	if (api_handle == NULL)
 	{
@@ -46,7 +51,39 @@ int main()
 	if (!export_api())
 		goto OUT;
 
+// Get API version
+	fp_msg_dumper_get_version(&major_version, &minor_version, &build_version);
+	printf("API version: (%d.%d.%d)\n", major_version, minor_version, build_version);
+// Parse the parameters from the config file
+//	printf("Parse the config file\n");
+	ret = parse_config();
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "parse_config() fails, due to %d\n", ret);
+		goto OUT;
+	}
 // Testing
+// Get the severity of the facility
+	int severity_index;
+	for (int i = 0; i < MSG_DUMPER_FACILITY_DESC_LEN; i++)
+	{
+		ret = fp_msg_dumper_get_severity_index(MSG_DUMPER_FACILITY_DESC[i], &severity_index);
+		if (CHECK_FAILURE(ret))
+		{	
+			fprintf(stderr, "fp_msg_dumper_get_severity(%s) fails, due to %d\n", MSG_DUMPER_FACILITY_DESC[i], ret);
+			goto OUT;
+		}
+		if (severity_index == MSG_DUMPER_SEVERITY_NOSET)
+			printf("Facility: %s, Severity: %s\n", MSG_DUMPER_FACILITY_DESC[i], MSG_DUMPER_SEVERITY_DESC_NOSET);
+		else
+			printf("Facility: %s, Severity: %s\n", MSG_DUMPER_FACILITY_DESC[i], MSG_DUMPER_SEVERITY_DESC[severity_index]);
+	}
+	// ret = fp_msg_dumper_get_severity();
+	// if (CHECK_FAILURE(ret))
+	// {	
+	// 	fprintf(stderr, "fp_msg_dumper_initialize() fails, due to %d\n", ret);
+	// 	goto OUT;
+	// }
 // Initialize the library
 	ret = fp_msg_dumper_initialize();
 	if (CHECK_FAILURE(ret))
@@ -54,22 +91,45 @@ int main()
 		fprintf(stderr, "fp_msg_dumper_initialize() fails, due to %d\n", ret);
 		goto OUT;
 	}
-
-	unsigned char major_version;
-	unsigned char minor_version;
-	unsigned char build_version;
-	fp_msg_dumper_get_version(&major_version, &minor_version, &build_version);
-	printf("API version: (%d.%d.%d)\n", major_version, minor_version, build_version);
-
-// Parse the parameters from the config file
-//	printf("Parse the config file\n");
-	ret = parse_config();
+// Dump strings
+	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVERITY_INFO, "This is a test info message");
 	if (CHECK_FAILURE(ret))
 	{
-		fprintf(stderr, "parse_config() fails, due to %d\n", ret);
-		return ret;
+		fprintf(stderr, "fp_msg_dumper_write_msg(MSG_DUMPER_SEVERITY_INFO) fails, due to %d\n", ret);
+		goto OUT1;
 	}
-
+	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVERITY_WARN, "This is a test warn message");
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg(MSG_DUMPER_SEVERITY_WARN) fails, due to %d\n", ret);
+		goto OUT1;
+	}
+	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVERITY_ERROR, "This is a test error message");
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_msg(MSG_DUMPER_SEVERITY_ERROR) fails, due to %d\n", ret);
+		goto OUT1;
+	}
+// Dump format strings
+	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVERITY_INFO, "This is a test info message with format: %d", 42);
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVERITY_INFO) fails, due to %d\n", ret);
+		goto OUT1;
+	}
+	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVERITY_WARN, "This is a test warn message with format: %s", "example");
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVERITY_WARN) fails, due to %d\n", ret);
+		goto OUT1;
+	}
+	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVERITY_ERROR, "This is a test error message with format: %f", 3.14);
+	if (CHECK_FAILURE(ret))
+	{
+		fprintf(stderr, "fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVERITY_ERROR) fails, due to %d\n", ret);
+		goto OUT1;
+	}
+OUT1:
 // De-initialize the library
 	fp_msg_dumper_deinitialize();
 OUT:
@@ -93,6 +153,12 @@ bool export_api()
 		fprintf(stderr, "dlsym() fails when exporting msg_dumper_get_version() due to %s\n", dlerror());
 		return false;
 	}
+	fp_msg_dumper_set_severity_index = (FP_msg_dumper_set_severity_index)dlsym(api_handle, "msg_dumper_set_severity_index");
+	if (fp_msg_dumper_set_severity_index == NULL)
+	{
+		fprintf(stderr, "dlsym() fails when exporting msg_dumper_set_severity_index() due to %s\n", dlerror());
+		return false;
+	}
 	fp_msg_dumper_set_severity = (FP_msg_dumper_set_severity)dlsym(api_handle, "msg_dumper_set_severity");
 	if (fp_msg_dumper_set_severity == NULL)
 	{
@@ -105,6 +171,12 @@ bool export_api()
 	// 	fprintf(stderr, "dlsym() fails when exporting msg_dumper_set_facility() due to %s\n", dlerror());
 	// 	return false;
 	// }
+	fp_msg_dumper_get_severity_index = (FP_msg_dumper_get_severity_index)dlsym(api_handle, "msg_dumper_get_severity_index");
+	if (fp_msg_dumper_get_severity_index == NULL)
+	{
+		fprintf(stderr, "dlsym() fails when exporting msg_dumper_get_severity() due to %s\n", dlerror());
+		return false;
+	}
 	fp_msg_dumper_get_severity = (FP_msg_dumper_get_severity)dlsym(api_handle, "msg_dumper_get_severity");
 	if (fp_msg_dumper_get_severity == NULL)
 	{
@@ -127,6 +199,12 @@ bool export_api()
 	if (fp_msg_dumper_write_msg == NULL)
 	{
 		fprintf(stderr, "dlsym() fails when exporting msg_dumper_write_msg() due to %s\n", dlerror());
+		return false;
+	}
+	fp_msg_dumper_write_format_msg = (FP_msg_dumper_write_format_msg)dlsym(api_handle, "msg_dumper_write_format_msg");
+	if (fp_msg_dumper_write_format_msg == NULL)
+	{
+		fprintf(stderr, "dlsym() fails when exporting msg_dumper_write_format_msg() due to %s\n", dlerror());
 		return false;
 	}
 	fp_msg_dumper_deinitialize = (FP_msg_dumper_deinitialize)dlsym(api_handle, "msg_dumper_deinitialize");
@@ -152,8 +230,9 @@ unsigned short parse_config()
 	// char config_filename[BUF_SIZE];
 	// snprintf(config_filename, BUF_SIZE, "%s/%s/%s", current_working_directory, CONF_FOLDER, CONF_FILENAME);
 	ScopedCStr scoped_config_filename;
-	safe_snprintf(scoped_config_filename.out(), BUF_SIZE, "%s/%s/%s", current_working_directory, CONF_FOLDER, CONF_FILENAME);
-#ifdef DO_DEBUG
+	// safe_snprintf(scoped_config_filename.out(), BUF_SIZE, "%s/%s/%s", current_working_directory, CONF_FOLDER, CONF_FILENAME);
+	scoped_config_filename.format("%s/%s/%s", current_working_directory, CONF_FOLDER, CONF_FILENAME);
+	#ifdef DO_DEBUG
 	printf("Parse the config file: %s\n", scoped_config_filename.get());
 #endif
 	FILE *fp = fopen(scoped_config_filename.get(), "r");
@@ -222,7 +301,6 @@ unsigned short parse_config()
 // 		fprintf(stderr, "fp_msg_dumper_set_facility() fails, reason: %s\n", fp_msg_dumper_get_error_description());
 // 		return ret;
 // 	}
-
 OUT:
 	fclose(fp);
 	fp = NULL;

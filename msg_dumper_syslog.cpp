@@ -42,7 +42,7 @@ unsigned short MsgDumperSyslog::get_facility_number()
 		}
 	}
 
-	WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the facility number: %s", syslog_facility_name);
+	WRITE_ERROR("Incorrect parameter, fail to find the facility number: %s", syslog_facility_name);
 	return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 }
 
@@ -80,7 +80,7 @@ unsigned short MsgDumperSyslog::parse_config_param(const char* param_title, cons
 			}
 			else
 			{
-				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter: %s=%s", param_title, param_content);
+				WRITE_ERROR("Incorrect parameter: %s=%s", param_title, param_content);
 				ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 			}
 			break;
@@ -89,7 +89,7 @@ unsigned short MsgDumperSyslog::parse_config_param(const char* param_title, cons
 // If the title is NOT found...
 	if (!found)
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
+		WRITE_ERROR("Incorrect parameter, fail to find the title: %s", param_title);
 		ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 

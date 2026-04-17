@@ -36,8 +36,8 @@ MsgDumperLog::MsgDumperLog() :
 	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_LOG], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_LOG]));
 	memset(log_foldername, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memcpy(log_foldername, DEF_LOG_CONFIG_FOLDERNAME, sizeof(char) * strlen(DEF_LOG_CONFIG_FOLDERNAME));
-	memset(log_folderpath, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
-	memset(log_filepath, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
+	// memset(log_folderpath, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
+	// memset(log_filepath, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
 }
 
 MsgDumperLog::~MsgDumperLog()
@@ -150,7 +150,7 @@ unsigned short MsgDumperLog::parse_config_param(const char* param_title, const c
 unsigned short MsgDumperLog::open_device()
 {
 // Open the file
-	WRITE_DEBUG("Open the log file: %s", log_filename);
+	WRITE_DEBUG("Open the log file: %s", log_filepath);
 	fp_log = fopen(log_filepath, "a+");
 	if (fp_log == NULL)
 	{
@@ -239,7 +239,7 @@ unsigned short MsgDumperLog::reset_log_file_content()
 #endif
     if (!check_log_file_exist())
     {
-    	WRITE_ERROR(MSG_DUMPER_LONG_STRING_SIZE, "The log file[%s] does NOT exist", log_filepath);
+    	WRITE_ERROR("The log file[%s] does NOT exist", log_filepath);
     	return MSG_DUMPER_FAILURE_NOT_FOUND;
     }
     unsigned short ret = MSG_DUMPER_SUCCESS;
@@ -291,14 +291,14 @@ unsigned short MsgDumperLog::calculate_log_tar_file_count()const
 	FILE *fp = popen(log_tar_file_count_cmd, "r");
 	if (fp == NULL)
 	{
-		WRITE_ERROR("popen() fails, due to: %s", cmd, strerror(errno));
+		WRITE_ERROR("popen()[%s] fails, due to: %s", log_tar_file_count_cmd, strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 // Caution: Nothing to read
 	static char buf[MSG_DUMPER_SHORT_STRING_SIZE];
 	if(fgets(buf, MSG_DUMPER_SHORT_STRING_SIZE, fp) == NULL) 
 	{
-		WRITE_ERROR("fgets() fails, due to: %s", cmd, strerror(errno));
+		WRITE_ERROR("fgets() fails, due to: %s", strerror(errno));
 		return MSG_DUMPER_FAILURE_SYSTEM_API;
 	}
 	pclose(fp);
@@ -337,7 +337,7 @@ unsigned short MsgDumperLog::rotate_log_tar_file()
 #endif
 		if (rename(old_log_tar_filepath.c_str(), new_log_tar_filepath.c_str()) == -1)
 		{
-			WRITE_ERROR("rename() fails, due to: %s", cmd, strerror(errno));
+			WRITE_ERROR("rename() fails, due to: %s", strerror(errno));
 			return MSG_DUMPER_FAILURE_SYSTEM_API;
 		}
     }

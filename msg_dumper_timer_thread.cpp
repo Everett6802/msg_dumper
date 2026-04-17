@@ -89,7 +89,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 				write_vector[i] = NULL;
 				if (CHECK_FAILURE(ret))
 				{
-					WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> Fail to write message, due to %d", worker_thread_name, ret);
+					WRITE_ERROR("Thread[%s]=> Fail to write message, due to %d", worker_thread_name, ret);
 					break;
 				}
 			}
@@ -111,7 +111,7 @@ unsigned short MsgDumperTimerThread::initialize(const char* current_working_dire
 	unsigned short ret = msg_dumper->initialize(current_working_directory, config);
 	if (CHECK_FAILURE(ret))
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Fail to initialize the MsgDumper%s object", msg_dumper->get_facility_name());
+		WRITE_ERROR("Fail to initialize the MsgDumper%s object", msg_dumper->get_facility_name());
 		return ret;
 	}
 
@@ -125,7 +125,7 @@ unsigned short MsgDumperTimerThread::initialize(const char* current_working_dire
 	api_ret = pthread_create(&pid, NULL, msg_dumper_thread_handler, this);
 	if (api_ret != 0)
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "pthread_create() failed, due to: %d", api_ret);
+		WRITE_ERROR("pthread_create() failed, due to: %d", api_ret);
 		return MSG_DUMPER_FAILURE_UNKNOWN;
 	}
 	else
@@ -177,7 +177,7 @@ unsigned short MsgDumperTimerThread::deinitialize()
 			api_ret = pthread_join(pid, (void**)&api_ret_desc);
 			if (api_ret != 0)
 			{
-				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "pthread_join() failed, due to: %s", api_ret_desc);
+				WRITE_ERROR("pthread_join() failed, due to: %s", api_ret_desc);
 				return MSG_DUMPER_FAILURE_UNKNOWN;
 			}
 			pid = 0;
@@ -191,15 +191,15 @@ unsigned short MsgDumperTimerThread::deinitialize()
 
 // Check if there are some messages left in the Queue
 	if (buffer_vector.size() > 0)
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "#####   ERROR buffer vector is NOT empty: %d   #####", buffer_vector.size());
+		WRITE_ERROR("#####   ERROR buffer vector is NOT empty: %ld   #####", buffer_vector.size());
 	if (write_vector.size() > 0)
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "#####   ERROR write vector is NOT empty: %d   #####", write_vector.size());
+		WRITE_ERROR("#####   ERROR write vector is NOT empty: %ld   #####", write_vector.size());
 
 // De-initialize the msg_dumper object
 	unsigned short ret = msg_dumper->deinitialize();
 	if (CHECK_FAILURE(ret))
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Fail to de-initialize the MsgDumper%s object", msg_dumper->get_facility_name());
+		WRITE_ERROR("Fail to de-initialize the MsgDumper%s object", msg_dumper->get_facility_name());
 		return ret;
 	}
 

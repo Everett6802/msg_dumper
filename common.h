@@ -13,9 +13,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Marcos
-#define MSG_DUMPER_SHORT_STRING_SIZE			32U
-#define MSG_DUMPER_STRING_SIZE 				64U
-#define MSG_DUMPER_LONG_STRING_SIZE 			256U
+#define MSG_DUMPER_SHORT_STRING_SIZE 32U
+#define MSG_DUMPER_STRING_SIZE 64U
+#define MSG_DUMPER_LONG_STRING_SIZE 256U
 #define MSG_DUMPER_EX_LONG_STRING_SIZE 		(MSG_DUMPER_LONG_STRING_SIZE * 2)
 
 #ifndef CHECK_SUCCESS

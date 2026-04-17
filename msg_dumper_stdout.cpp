@@ -48,7 +48,7 @@ unsigned short MsgDumperStdout::parse_config_param(const char* param_title, cons
 				normal_output_type = atoi(param_content);
 				if (normal_output_type < 0 || normal_output_type >= OUTPUT_TYPE_SIZE)
 				{
-					WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, unknown normal output type: %s", param_content);
+					WRITE_ERROR("Incorrect parameter, unknown normal output type: %s", param_content);
 					return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 				}
 			}
@@ -58,7 +58,7 @@ unsigned short MsgDumperStdout::parse_config_param(const char* param_title, cons
 				error_output_type = atoi(param_content);
 				if (error_output_type < 0 || error_output_type >= OUTPUT_TYPE_SIZE)
 				{
-					WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, unknown error output type: %s", param_content);
+					WRITE_ERROR("Incorrect parameter, unknown error output type: %s", param_content);
 					return MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 				}
 			}
@@ -77,7 +77,7 @@ unsigned short MsgDumperStdout::parse_config_param(const char* param_title, cons
 // If the title is NOT found...
 	if (!found)
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
+		WRITE_ERROR("Incorrect parameter, fail to find the title: %s", param_title);
 		ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 

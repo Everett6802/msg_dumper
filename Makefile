@@ -3,7 +3,7 @@ CC := g++
 # 0: 不需要 SQL dumper，1: 需要 SQL dumper
 NEED_SQL_DUMPER ?= 0
 # 0: None，1: syslog，2: console
-LOG_BACKEND ?= 0
+LOG_BACKEND ?= 2
 
 CXXFLAGS := -g -Wall -fPIC -std=c++0x
 CXXFLAGS += -DNEED_SQL_DUMPER=$(NEED_SQL_DUMPER)
@@ -56,7 +56,6 @@ TEST_OUTPUT := $(TEST_DIR)/$(TEST_MSG_DUMPER)
 # =========================
 # Build
 # =========================
-all: build
 build: prepare $(OUTPUT) copy_conf copy_so
 # 	cp $(OUTPUT) $(TEST_FOLDER)
 # 	cp $(LIB_MSG_DUMPER_HEADER) $(TEST_FOLDER)
@@ -67,6 +66,8 @@ build_test:  $(TEST_OUTPUT)
 	cp $(LIB_MSG_DUMPER_HEADER) $(TEST_DIR)
 # 	@mkdir -p $(TEST_DIR)/$(CONF_FOLDER)
 	cp -r $(CONF_FOLDER) $(TEST_DIR)/$(CONF_FOLDER)
+
+build_all: build build_test
 
 prepare:
 	@mkdir -p $(BIN_DIR)
@@ -113,3 +114,4 @@ clean:
 clean_test:
 	rm -rf $(TEST_DIR) 2> /dev/null
 # 	rm -rf $(TEST_OUTPUT) 2> /dev/null
+clean_all: clean clean_test

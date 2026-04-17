@@ -16,9 +16,9 @@ const char* MSG_DUMPER_SEVERITY_DESC[] = {"ERROR", "WARN", "INFO", "DEBUG"};
 const int MSG_DUMPER_SEVERITY_DESC_LEN = sizeof(MSG_DUMPER_SEVERITY_DESC) / sizeof(MSG_DUMPER_SEVERITY_DESC[0]);
 const char* MSG_DUMPER_SEVERITY_DESC_NOSET = "NOSET";
 #if NEED_SQL_DUMPER == NEED_SQL_DUMPER_YES
-const char* MSG_DUMPER_FACILITY_DESC[] = {"LOG", "COM", "SQL", "REMOTE", "SYSLOG", "STDOUT"};
+const char* MSG_DUMPER_FACILITY_DESC[] = {"Log", "Com", "Sql", "Remote", "Syslog", "Stdout"};
 #else
-const char* MSG_DUMPER_FACILITY_DESC[] = {"LOG", "COM", "REMOTE", "SYSLOG", "STDOUT"};
+const char* MSG_DUMPER_FACILITY_DESC[] = {"Log", "Com", "Remote", "Syslog", "Stdout"};
 #endif
 const int MSG_DUMPER_FACILITY_DESC_LEN = sizeof(MSG_DUMPER_FACILITY_DESC) / sizeof(MSG_DUMPER_FACILITY_DESC[0]);
 
@@ -149,7 +149,7 @@ int get_facility_index_from_string(const char* facility)
 {
 	if (facility == NULL)
         throw invalid_argument("facility should NOT be NULL");
-    int facility_index;
+    int facility_index = 0;
     for (; facility_index < MSG_DUMPER_FACILITY_DESC_LEN ; facility_index++)
     {
         if (strcasecmp(facility, MSG_DUMPER_FACILITY_DESC[facility_index]) == 0)
@@ -162,7 +162,7 @@ int get_severity_index_from_string(const char* severity)
 {
 	if (severity == NULL)
         throw invalid_argument("severity should NOT be NULL");
-    int severity_index;
+    int severity_index = 0;
     for (; severity_index < MSG_DUMPER_SEVERITY_DESC_LEN ; severity_index++)
     {
         if (strcasecmp(severity, MSG_DUMPER_SEVERITY_DESC[severity_index]) == 0)

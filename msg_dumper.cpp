@@ -89,7 +89,7 @@ unsigned short msg_dumper_set_severity_index(const char* facility, int severity_
 		last_error = MSG_DUMPER_FAILURE_INCORRECT_CONFIG;
 		goto OUT;
 	}
-	last_error = msg_dumper_mgr.set_severity(severity_index, facility_index);
+	last_error = msg_dumper_mgr.set_severity(facility_index, severity_index);
 OUT:
 	return last_error;
 

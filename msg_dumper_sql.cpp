@@ -42,7 +42,7 @@ unsigned short MsgDumperSql::try_connect_mysql()
 	connection = mysql_init(NULL); // 初始化数据库连接变量
 	if(connection == NULL)
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "mysql_init() fails, due to: %s", mysql_error(connection));
+		WRITE_ERROR("mysql_init() fails, due to: %s", mysql_error(connection));
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 
@@ -57,7 +57,7 @@ unsigned short MsgDumperSql::try_connect_mysql()
 //		if(mysql_create_db(connection, database) != 0)
 		if(mysql_real_connect(connection, server, username, password, NULL, 0, NULL, 0) == NULL)
 		{
-			WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "mysql_real_connect() fails, due to: %s", mysql_error(connection));
+			WRITE_ERROR("mysql_real_connect() fails, due to: %s", mysql_error(connection));
 			return MSG_DUMPER_FAILURE_MYSQL;
 		}
 
@@ -65,7 +65,7 @@ unsigned short MsgDumperSql::try_connect_mysql()
 		WRITE_DEBUG(MSG_DUMPER_LONG_STRING_SIZE, "Try to create database[%s] by command: %s", database, cmd_buf);
 		if(mysql_query(connection, cmd_buf) != 0)
 		{
-			WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "mysql_query() fails, due to: %s", mysql_error(connection));
+			WRITE_ERROR("mysql_query() fails, due to: %s", mysql_error(connection));
 			return MSG_DUMPER_FAILURE_MYSQL;
 		}
 		WRITE_DEBUG("The %s database is created", database);
@@ -75,7 +75,7 @@ unsigned short MsgDumperSql::try_connect_mysql()
 // Select the database
 	if (mysql_select_db(connection, database))
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "mysql_select_db() fails, due to: %s", mysql_error(connection));
+		WRITE_ERROR("mysql_select_db() fails, due to: %s", mysql_error(connection));
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 
@@ -125,7 +125,7 @@ unsigned short MsgDumperSql::parse_config_param(const char* param_title, const c
 			}
 			else
 			{
-				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter: %s=%s", param_title, param_content);
+				WRITE_ERROR("Incorrect parameter: %s=%s", param_title, param_content);
 				ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 			}
 			break;
@@ -134,7 +134,7 @@ unsigned short MsgDumperSql::parse_config_param(const char* param_title, const c
 // If the title is NOT found...
 	if (!found)
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect parameter, fail to find the title: %s", param_title);
+		WRITE_ERROR("Incorrect parameter, fail to find the title: %s", param_title);
 		ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 	}
 
@@ -146,7 +146,7 @@ unsigned short MsgDumperSql::open_device()
 // Check if the connection is established
 	if (connection == NULL)
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> The connection is NOT established", facility_name);
+		WRITE_ERROR("Thread[%s]=> The connection is NOT established", facility_name);
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 
@@ -158,7 +158,7 @@ unsigned short MsgDumperSql::open_device()
 // Select the database
 		if (mysql_select_db(connection, database))
 		{
-			WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_select_db() fails, due to: %s", facility_name, mysql_error(connection));
+			WRITE_ERROR("Thread[%s]=> mysql_select_db() fails, due to: %s", facility_name, mysql_error(connection));
 			return MSG_DUMPER_FAILURE_MYSQL;
 		}
 	}
@@ -176,7 +176,7 @@ unsigned short MsgDumperSql::open_device()
 			int error = mysql_errno(connection);
 			if (error != ER_TABLE_EXISTS_ERROR)
 			{
-				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %d, %s", facility_name, error, mysql_error(connection));
+				WRITE_ERROR("Thread[%s]=> mysql_query() fails, due to: %d, %s", facility_name, error, mysql_error(connection));
 				return MSG_DUMPER_FAILURE_MYSQL;
 			}
 			else
@@ -238,7 +238,7 @@ unsigned short MsgDumperSql::write_msg(PMSG_CFG msg_cfg)
 	WRITE_DEBUG(MSG_DUMPER_LONG_STRING_SIZE, "Thread[%s]=> Try to Write the message[%s] to MySQL by command: %s", facility_name, msg_cfg->to_string(), cmd_buf);
 	if(mysql_query(connection, cmd_buf) != 0)
 	{
-		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Thread[%s]=> mysql_query() fails, due to: %s", facility_name, mysql_error(connection));
+		WRITE_ERROR("Thread[%s]=> mysql_query() fails, due to: %s", facility_name, mysql_error(connection));
 		return MSG_DUMPER_FAILURE_MYSQL;
 	}
 

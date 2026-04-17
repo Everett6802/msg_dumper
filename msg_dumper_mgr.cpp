@@ -35,10 +35,17 @@ struct MsgDumperMgr::MsgDumperFacilityFactory
 
 	MsgDumperBase* construct(std::string const& n)
 	{
+		// fprintf(stderr, "MsgDumperFacilityFactory::construct() called, n: %s\n", n.c_str());
+		// map_type::iterator iter = m_classes.begin();
+		// while (iter != m_classes.end())
+		// {
+		// 	fprintf(stderr, "Registered class: %s\n", iter->first.c_str());
+		// 	iter++;
+		// }
 		map_type::iterator i = m_classes.find(n);
 		if (i == m_classes.end())
 		{
-			WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Fail to find the MsgDumper%s class", n.c_str());
+			WRITE_ERROR("Fail to find the %s class", n.c_str());
 			throw invalid_argument("Unknown class");
 			return NULL; // or throw or whatever you want
 		}
@@ -46,7 +53,7 @@ struct MsgDumperMgr::MsgDumperFacilityFactory
 		MsgDumperBase* msg_dumper = (MsgDumperBase*)i->second();  // Allocate the memory of a specific type
 		if (msg_dumper == NULL)
 		{
-			WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Fail to allocate the MsgDumper%s object", n.c_str());
+			WRITE_ERROR("Fail to allocate the MsgDumper%s object", n.c_str());
 			throw bad_alloc();
 		}
 		return msg_dumper;
@@ -108,7 +115,7 @@ bool MsgDumperMgr::can_ignore(unsigned short msg_dumper_severity)const
 // {
 // 	if (!(MSG_DUMPER_FACILITY_ALL & facility_flag))
 // 	{
-// 		WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Incorrect facility flag: %d", facility_flag);
+// 		WRITE_ERROR("Incorrect facility flag: %d", facility_flag);
 // 		throw invalid_argument("Incorrect facility flag");
 // 	}
 // 	return (int)facility_mapping_table.find(facility_flag)->second;
@@ -232,14 +239,14 @@ unsigned short MsgDumperMgr::initialize()
 			msg_dumper_thread[i] = new MsgDumperTimerThread(facility_factory->construct(facility_class_name));
 			if (msg_dumper_thread[i] == NULL)
 			{
-				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Fail to allocate the %s object", facility_class_name);
+				WRITE_ERROR("Fail to allocate the %s object", facility_class_name);
 				return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
 			}
 			WRITE_DEBUG("Initialize the %s object", facility_class_name);
 			ret = msg_dumper_thread[i]->initialize(current_working_directory);
 			if (CHECK_FAILURE(ret))
 			{
-				WRITE_ERROR(MSG_DUMPER_STRING_SIZE, "Fail to initialize the %s object", facility_class_name);
+				WRITE_ERROR("Fail to initialize the %s object", facility_class_name);
 				goto EXIT;
 			}
 		}

@@ -33,7 +33,8 @@ MsgDumperLog::MsgDumperLog() :
 	log_file_rotate_count(0),
 	init_log_file_rotate_timestamp(false)
 {
-	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_LOG], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_LOG]));
+	// memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_LOG], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_LOG]));
+	strcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_LOG]);
 	memset(log_foldername, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memcpy(log_foldername, DEF_LOG_CONFIG_FOLDERNAME, sizeof(char) * strlen(DEF_LOG_CONFIG_FOLDERNAME));
 	// memset(log_folderpath, 0x0, sizeof(char) * MSG_DUMPER_LONG_STRING_SIZE);
@@ -176,7 +177,6 @@ unsigned short MsgDumperLog::close_device()
 unsigned short MsgDumperLog::initialize(const char* current_working_directory, void* config)
 {
 	WRITE_DEBUG("Initialize the MsgDumperLog object......");
-
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "log");
 	if (CHECK_FAILURE(ret))

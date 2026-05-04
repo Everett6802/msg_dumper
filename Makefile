@@ -3,7 +3,7 @@ CC := g++
 # 0: 不需要 SQL dumper，1: 需要 SQL dumper
 NEED_SQL_DUMPER ?= 0
 # 0: None，1: syslog，2: console
-LOG_BACKEND ?= 2
+LOG_BACKEND ?= 0
 
 CXXFLAGS := -g -Wall -fPIC -std=c++0x
 CXXFLAGS += -DNEED_SQL_DUMPER=$(NEED_SQL_DUMPER)

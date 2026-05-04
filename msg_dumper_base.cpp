@@ -60,6 +60,8 @@ unsigned short MsgDumperBase::parse_config(const char* current_working_directory
 	bool param_start = false;
 	while (fgets(buf, MSG_DUMPER_LONG_STRING_SIZE, fp) != NULL)
 	{
+		if (buf[0] == '\n' || buf[0] == '#')
+			continue;
 		if (!param_start)
 		{
 			if (strncmp(buf, start_flag, start_flag_len) == 0)
@@ -71,7 +73,7 @@ unsigned short MsgDumperBase::parse_config(const char* current_working_directory
 			if (strncmp(buf, stop_flag, stop_flag_len) == 0)
 				break;
 		}
-		WRITE_DEBUG("Param content: %s", buf);
+		// WRITE_DEBUG("Param content(raw): %s", buf);
 		int new_line_pos = -1;
 		int split_pos = -1;
 // Get the config for each line
@@ -97,6 +99,7 @@ unsigned short MsgDumperBase::parse_config(const char* current_working_directory
 			ret = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 			break;
 		}
+		WRITE_DEBUG("Param content: %s", buf);
 // Update the parameter value
 		string new_param(buf);
 		ret = parse_config_param(new_param.substr(0, split_pos).c_str(), new_param.substr(split_pos + 1).c_str());

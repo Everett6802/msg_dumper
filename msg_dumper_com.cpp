@@ -9,7 +9,8 @@ const char* MsgDumperCom::DEF_COM_PORT_SPEED = "B115200";
 MsgDumperCom::MsgDumperCom() :
 	fd_com(0)
 {
-	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_COM], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_COM]));
+	// memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_COM], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_COM]));
+	strcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_COM]);
 	memset(port_name, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memcpy(port_name, DEF_COM_PORT_NAME, sizeof(char) * strlen(DEF_COM_PORT_NAME));
 	memset(port_speed, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
@@ -174,12 +175,10 @@ unsigned short MsgDumperCom::close_device()
 unsigned short MsgDumperCom::initialize(const char* current_working_directory, void* config)
 {
 	WRITE_DEBUG("Initialize the MsgDumperCom object......");
-
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "com");
 	if (CHECK_FAILURE(ret))
 		return ret;
-
 // Try to connect to the serial port
 	ret = try_open_comport();
 	if (CHECK_FAILURE(ret))

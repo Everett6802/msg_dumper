@@ -38,7 +38,8 @@ const char* MsgDumperRemote::DEF_SERVER_PORT = "6802";
 
 MsgDumperRemote::MsgDumperRemote()
 {
-	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_REMOTE], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_REMOTE]));
+	// memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_REMOTE], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_REMOTE]));
+	strcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_REMOTE]);
 	memset(server_list, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memset(server_port, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memcpy(server_port, DEF_SERVER_PORT, sizeof(char) * strlen(DEF_SERVER_PORT));
@@ -110,12 +111,10 @@ unsigned short MsgDumperRemote::close_device(){return MSG_DUMPER_SUCCESS;}
 unsigned short MsgDumperRemote::initialize(const char* current_working_directory, void* config)
 {
 	WRITE_DEBUG("Initialize the MsgDumperRemote object......");
-
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "remote");
 	if (CHECK_FAILURE(ret))
 		return ret;
-
 // Try to connect to the server
 	char* tok = strtok(server_list, ",");
 	int server_port_no = atoi(server_port);

@@ -302,7 +302,7 @@ unsigned short msg_dumper_write_format_msg(int severity_index, const char* fmt, 
 		static ScopedCStr scoped_fmtmsg;
 		va_list args;
 		va_start(args, fmt);
-		last_error = scoped_fmtmsg.format(fmt, args);
+		last_error = scoped_fmtmsg.vformat(fmt, args);
 		va_end(args);
 		if (CHECK_SUCCESS(last_error))
 			last_error = msg_dumper_mgr.write_msg(severity_index, scoped_fmtmsg.get());

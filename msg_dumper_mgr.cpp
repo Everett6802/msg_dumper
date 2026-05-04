@@ -315,10 +315,9 @@ unsigned short MsgDumperMgr::deinitialize()
 		if (msg_dumper_thread[i] != NULL)
 		{
 			WRITE_DEBUG("Release the Object: MsgDumper%s", MSG_DUMPER_FACILITY_DESC[i]);
-//			ret = msg_dumper_thread[i]->deinitialize();
+			ret = msg_dumper_thread[i]->deinitialize();
 			if (CHECK_FAILURE(ret))
 				return ret;
-
 			delete msg_dumper_thread[i];
 			msg_dumper_thread[i] = NULL;
 		}

@@ -11,8 +11,8 @@ const char* MsgDumperSyslog::DEF_SYSLOG_FACILITY_NAME = "daemon";
 
 MsgDumperSyslog::MsgDumperSyslog()
 {
-	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_SYSLOG], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_SYSLOG]));
-
+	// memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_SYSLOG], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_SYSLOG]));
+	strcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_SYSLOG]);
 	memset(syslog_facility_name, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memcpy(syslog_facility_name, DEF_SYSLOG_FACILITY_NAME, sizeof(char) * strlen(DEF_SYSLOG_FACILITY_NAME));
 }
@@ -103,12 +103,10 @@ unsigned short MsgDumperSyslog::close_device(){return MSG_DUMPER_SUCCESS;}
 unsigned short MsgDumperSyslog::initialize(const char* current_working_directory, void* config)
 {
 	WRITE_DEBUG("Initialize the MsgDumperSyslog object......");
-
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "syslog");
 	if (CHECK_FAILURE(ret))
 		return ret;
-
 // Get the facility number
 	ret = get_facility_number();
 	if (CHECK_FAILURE(ret))

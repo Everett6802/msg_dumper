@@ -20,7 +20,8 @@ MsgDumperSql::MsgDumperSql() :
 	connection(NULL),
 	table_created(false)
 {
-	memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_SQL], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_SQL]));
+	// memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_SQL], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_SQL]));
+	strcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_SQL]);
 	memset(server, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
 	memcpy(server, DEF_SERVER, sizeof(char) * strlen(DEF_SERVER));
 	memset(username, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
@@ -199,12 +200,10 @@ unsigned short MsgDumperSql::close_device()
 unsigned short MsgDumperSql::initialize(const char* current_working_directory, void* config)
 {
 	WRITE_DEBUG("Initialize the MsgDumperSql object......");
-
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "sql");
 	if (CHECK_FAILURE(ret))
 		return ret;
-
 // Create the connection to the MySQL server
 	ret = try_connect_mysql();
 	if (CHECK_FAILURE(ret))

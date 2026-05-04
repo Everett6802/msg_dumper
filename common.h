@@ -43,9 +43,7 @@
 #endif
 
 #define WRITE_SYSLOG_BEGIN()\
-char title[64];\
-snprintf(title, 64, "%s:%d", __FILE__, __LINE__);\
-openlog(title, LOG_PID | LOG_CONS, LOG_USER);
+openlog("MsgDumper", LOG_PID | LOG_CONS, LOG_USER);
 
 #define WRITE_SYSLOG_END()\
 closelog();
@@ -53,14 +51,14 @@ closelog();
 #define WRITE_SYSLOG(priority, fmt, ...)\
 do{\
 WRITE_SYSLOG_BEGIN()\
-syslog(priority, "[MsgDumper %s:%d:%s] " fmt, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
+syslog(priority, "[%s:%d:%s] " fmt, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
 WRITE_SYSLOG_END()\
 }while(0)
 
 #define WRITE_CONSOLE(priority, fmt, ...)\
 do{\
-if (priority == LOG_ERR) fprintf(stderr, "[MsgDumper %s:%d:%s] " fmt, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
-else printf("[MsgDumper %s:%d:%s] " fmt, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
+if (priority == LOG_ERR) fprintf(stderr, "[MsgDumper %s:%d:%s] " fmt "\n", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
+else printf("[MsgDumper %s:%d:%s] " fmt "\n", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
 }while(0)
 
 #if LOG_BACKEND == LOG_BACKEND_SYSLOG
@@ -71,9 +69,10 @@ else printf("[MsgDumper %s:%d:%s] " fmt, __FILE__, __LINE__, __FUNCTION__, ##__V
 #define WRITE_LOG_INTERNAL(priority, fmt, ...) do {} while(0)
 #endif
 
-#define WRITE_DEBUG(fmt, ...) WRITE_LOG_INTERNAL(LOG_DEBUG, fmt, ##__VA_ARGS__)
-#define WRITE_INFO(fmt, ...) WRITE_LOG_INTERNAL(LOG_INFO, fmt, ##__VA_ARGS__)
-#define WRITE_ERROR(fmt, ...) WRITE_LOG_INTERNAL(LOG_ERR, fmt, ##__VA_ARGS__)
+#define WRITE_DEBUG(fmt, ...) WRITE_LOG_INTERNAL(MSG_DUMPER_SEVERITY_DEBUG, fmt, ##__VA_ARGS__)
+#define WRITE_INFO(fmt, ...) WRITE_LOG_INTERNAL(MSG_DUMPER_SEVERITY_INFO, fmt, ##__VA_ARGS__)
+#define WRITE_WARN(fmt, ...) WRITE_LOG_INTERNAL(MSG_DUMPER_SEVERITY_WARN, fmt, ##__VA_ARGS__)
+#define WRITE_ERROR(fmt, ...) WRITE_LOG_INTERNAL(MSG_DUMPER_SEVERITY_ERROR, fmt, ##__VA_ARGS__)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,6 +145,7 @@ public:
     char** out(){return &cstr;}   // 給 safe_snprintf 用
     const char* get()const{return cstr == NULL ? "" : cstr;}
 	char* release();
+	unsigned short vformat(const char* fmt, va_list args);
 	unsigned short format(const char* fmt, ...);
 };
 

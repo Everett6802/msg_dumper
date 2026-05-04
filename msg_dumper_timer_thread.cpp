@@ -16,7 +16,10 @@ MsgDumperTimerThread::MsgDumperTimerThread(MsgDumperBase* msg_dumper_obj) :
 	msg_dumper(msg_dumper_obj)
 {
 	const char* facility_name = msg_dumper->get_facility_name();
-	memcpy(worker_thread_name, facility_name, strlen(facility_name));
+	memset(worker_thread_name, 0x0, sizeof(char) * MSG_DUMPER_SHORT_STRING_SIZE);
+	// memcpy(worker_thread_name, facility_name, strlen(facility_name));
+	strncpy(worker_thread_name, facility_name, MSG_DUMPER_SHORT_STRING_SIZE);
+	// fprintf(stderr, "worker_thread_name: %s, facility_name: %s\n", worker_thread_name, facility_name);
 }
 
 MsgDumperTimerThread::~MsgDumperTimerThread()
@@ -51,10 +54,12 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 	{
 		pthread_mutex_lock(&mut);
 //wait for the signal with cond as condition variable
-		if (!new_data_trigger)
+// 為什麼用 while？因為 pthread_cond_wait 可能「亂醒」，while 是必要防護
+		// if (!new_data_trigger)
+		// 	pthread_cond_wait(&cond, &mut);
+		while (!new_data_trigger && !exit)
 			pthread_cond_wait(&cond, &mut);
 //		WRITE_DEBUG("Thread[%s]=> The worker thread to write the data......", worker_thread_name);
-
 // Move the message
 		int buffer_vector_size = buffer_vector.size();
 //		WRITE_DEBUG("Thread[%s]=> There are totally %d data in the queue", worker_thread_name, buffer_vector_size);
@@ -70,7 +75,7 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 // Clean-up the container
 			buffer_vector.clear();
 		}
-		new_data_trigger = 0;
+		new_data_trigger = false;
 		pthread_mutex_unlock(&mut);
 
 		int write_vector_size = write_vector.size();
@@ -100,7 +105,6 @@ unsigned short MsgDumperTimerThread::msg_dumper_thread_handler_internal()
 				break;
 		}
 	}
-
 	WRITE_DEBUG("Thread[%s]=> The worker thread of writing message is going to die", worker_thread_name);
 	return ret;
 }

@@ -19,6 +19,8 @@ MsgDumperStdout::MsgDumperStdout() :
 	normal_output_type(OUTPUT_TYPE_IOLBF),
 	error_output_type(OUTPUT_TYPE_IONBF)
 {
+	// memcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_STDOUT], strlen(MSG_DUMPER_FACILITY_DESC[FACILITY_STDOUT]));
+	strcpy(facility_name, MSG_DUMPER_FACILITY_DESC[FACILITY_STDOUT]);
 }
 
 MsgDumperStdout::~MsgDumperStdout()
@@ -90,7 +92,7 @@ unsigned short MsgDumperStdout::close_device(){return MSG_DUMPER_SUCCESS;}
 
 unsigned short MsgDumperStdout::initialize(const char* current_working_directory, void* config)
 {
-	// WRITE_DEBUG("Initialize the MsgDumperStdout object......");
+	WRITE_DEBUG("Initialize the MsgDumperStdout object......");
 // Parse the config file first
 	unsigned short ret = parse_config(current_working_directory, "stdout");
 	if (CHECK_FAILURE(ret))

@@ -78,12 +78,6 @@ int main()
 		else
 			printf("Facility: %s, Severity: %s\n", MSG_DUMPER_FACILITY_DESC[i], MSG_DUMPER_SEVERITY_DESC[severity_index]);
 	}
-	// ret = fp_msg_dumper_get_severity();
-	// if (CHECK_FAILURE(ret))
-	// {	
-	// 	fprintf(stderr, "fp_msg_dumper_initialize() fails, due to %d\n", ret);
-	// 	goto OUT;
-	// }
 // Initialize the library
 	ret = fp_msg_dumper_initialize();
 	if (CHECK_FAILURE(ret))
@@ -92,6 +86,7 @@ int main()
 		goto OUT;
 	}
 // Dump strings
+	fprintf(stderr, "Start to dump strings...\n");
 	ret = fp_msg_dumper_write_msg(MSG_DUMPER_SEVERITY_INFO, "This is a test info message");
 	if (CHECK_FAILURE(ret))
 	{
@@ -111,6 +106,7 @@ int main()
 		goto OUT1;
 	}
 // Dump format strings
+	fprintf(stderr, "Start to dump format strings...\n");
 	ret = fp_msg_dumper_write_format_msg(MSG_DUMPER_SEVERITY_INFO, "This is a test info message with format: %d", 42);
 	if (CHECK_FAILURE(ret))
 	{
@@ -133,6 +129,8 @@ OUT1:
 // De-initialize the library
 	fp_msg_dumper_deinitialize();
 OUT:
+// 在還有 thread 在跑的情況下呼叫 dlclose()（或 deinitialize），導致 .so 被 unload，但 thread 還在執行裡面的 code
+// thread 還在跑 -> object memory 被 free -> 甚至 .so 被 dlclose -> SEGFAULT（random timing）
 	if (api_handle != NULL)
 	{
 		dlclose(api_handle);

@@ -257,10 +257,12 @@ char* ScopedCStr::release()
     return tmp;
 }
 
-unsigned short ScopedCStr::format(const char* fmt, ...)
+unsigned short ScopedCStr::vformat(const char* fmt, va_list args)
 {
-    va_list args;
-    va_start(args, fmt);
+    // va_list args;
+    // va_start(args, fmt);
+    va_list args_copy;
+    va_copy(args_copy, args);   // va_list: 只能用一次
 // 如果還沒有 buffer，先配
     if (cstr == NULL)
     {
@@ -268,13 +270,13 @@ unsigned short ScopedCStr::format(const char* fmt, ...)
         cstr = (char*)malloc(capacity);
         if (!cstr)
         {
-            va_end(args);
+            va_end(args_copy);
             return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
         }
     }
 // 嘗試寫入
-    int ret = vsnprintf(cstr, capacity, fmt, args);
-    va_end(args);
+    int ret = vsnprintf(cstr, capacity, fmt, args_copy);
+    va_end(args_copy);
 // 通常代表：格式化失敗（format error 或 encoding error）
 // 1. format string 和參數不匹配（最常見）--> 例: vsnprintf(buf, size, "%d", "hello"); %d 但給 char*
 // 2. format string 本身錯誤）--> 例: vsnprintf(buf, size, "%q", 123); 非法格式
@@ -290,11 +292,21 @@ unsigned short ScopedCStr::format(const char* fmt, ...)
             return MSG_DUMPER_FAILURE_INSUFFICIENT_MEMORY;
         cstr = new_buf;
         capacity = new_capacity;
-        va_start(args, fmt);
-        vsnprintf(cstr, capacity, fmt, args);
-        va_end(args);
+        // va_start(args, fmt);
+        va_copy(args_copy, args);   // ⭐ 再 copy 一次
+        vsnprintf(cstr, capacity, fmt, args_copy);
+        va_end(args_copy);
     }
     return MSG_DUMPER_SUCCESS;
+}
+
+unsigned short ScopedCStr::format(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    unsigned short ret = vformat(fmt, args);
+    va_end(args);
+    return ret;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

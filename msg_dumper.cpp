@@ -199,6 +199,18 @@ unsigned short msg_dumper_initialize()
 unsigned short msg_dumper_write_msg(int severity_index, const char* msg)
 {
 //	WRITE_DEBUG("%s() called", __func__);
+	if (severity_index < 0 || severity_index >= MSG_DUMPER_SEVERITY_LIST_SIZE)
+	{
+		WRITE_ERROR("severity_index[%d] is out of range[0, %d)", severity_index, MSG_DUMPER_SEVERITY_LIST_SIZE);
+		last_error = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+		return last_error;
+	}
+	if (msg == NULL)
+	{
+		WRITE_ERROR("Invalid pointer: msg");
+		last_error = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
+		return last_error;
+	}
 	if (msg_dumper_mgr.can_ignore(severity_index))
 		last_error = MSG_DUMPER_SUCCESS;
 	else
@@ -293,8 +305,7 @@ unsigned short msg_dumper_write_format_msg(int severity_index, const char* fmt, 
 		WRITE_ERROR("Invalid pointer: format");
 		last_error = MSG_DUMPER_FAILURE_INVALID_ARGUMENT;
 		return last_error;
-	}
-
+	}	
 	if (msg_dumper_mgr.can_ignore(severity_index))
 		last_error = MSG_DUMPER_SUCCESS;
 	else

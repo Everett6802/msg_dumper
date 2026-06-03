@@ -80,12 +80,12 @@ MsgDumperMgr::MsgDumperMgr() :
 	REGISTER_CLASS(MsgDumperSyslog);
 	REGISTER_CLASS(MsgDumperStdout);
 // Check the parameter setting is correct
+	// fprintf(stderr, "MSG_DUMPER_FACILITY_DESC_LEN: %d, FACILITY_SIZE: %d, FACILITY_FLAG_SIZE: %d\n", MSG_DUMPER_FACILITY_DESC_LEN, FACILITY_SIZE, FACILITY_FLAG_SIZE);
 	assert((facility_factory->register_class_size() == FACILITY_SIZE) && "The facility size is NOT identical");
 	assert((MSG_DUMPER_FACILITY_DESC_LEN == FACILITY_SIZE) && "The facility name size is NOT identical");
 	assert((FACILITY_FLAG_SIZE == FACILITY_SIZE) && "The facility flag size is NOT identical");
 
 	memset(current_working_directory, 0x0, sizeof(char) * MSG_DUMPER_STRING_SIZE);
-
 	for (int i = 0 ; i < FACILITY_SIZE ; i++)
 		dumper_severity_arr[i] = MSG_DUMPER_SEVERITY_ERROR;
 

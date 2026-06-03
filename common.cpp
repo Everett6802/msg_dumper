@@ -293,7 +293,7 @@ unsigned short ScopedCStr::vformat(const char* fmt, va_list args)
         cstr = new_buf;
         capacity = new_capacity;
         // va_start(args, fmt);
-        va_copy(args_copy, args);   // ⭐ 再 copy 一次
+        va_copy(args_copy, args);   // 再 copy 一次
         vsnprintf(cstr, capacity, fmt, args_copy);
         va_end(args_copy);
     }
